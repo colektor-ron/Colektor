@@ -1,0 +1,13 @@
+{
+  "name": "ColeKtoR",
+  "short_name": "ColeKtoR",
+  "description": "Tu colección, siempre contigo",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#1B6DC0",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
