@@ -184,6 +184,14 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── EMPTY STATES ── */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;text-align:center;gap:16px;}
+.empty-state-icon{opacity:0.15;}
+.empty-state-title{font-size:17px;font-weight:700;color:#e2e8f0;}
+.empty-state-sub{font-size:13px;color:#555;line-height:1.6;max-width:240px;}
+.empty-state-btn{margin-top:8px;padding:11px 24px;background:#1B6DC0;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;}
+
+
 /* ── PRICE COMPARISON ── */
 .price-compare{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
 .price-box{background:#1e1e1e;border-radius:8px;padding:10px 12px;}
@@ -1086,7 +1094,21 @@ function renderPendientes(){
     return sOk&&cOk;
   });
   var list=document.getElementById("pItemList");list.innerHTML="";
-  if(!displayed.length)list.innerHTML='<div class="empty">No hay ítems aquí</div>';
+  if(!displayed.length){
+    var emptyDiv=document.createElement('div');
+    emptyDiv.className='empty-state';
+    if(pendientes.length===0){
+      emptyDiv.innerHTML='<div class="empty-state-icon"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>'
+        +'<div class="empty-state-title">Sin ítems pendientes</div>'
+        +'<div class="empty-state-sub">Agrega los ítems que quieres conseguir para tu colección</div>'
+        +'<button class="empty-state-btn" onclick="showAddP=true;renderPendientes()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar ítem</button>';
+    } else {
+      emptyDiv.innerHTML='<div class="empty-state-icon"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>'
+        +'<div class="empty-state-title">Sin resultados</div>'
+        +'<div class="empty-state-sub">Prueba con otro filtro o búsqueda</div>';
+    }
+    list.appendChild(emptyDiv);
+  }
 
   displayed.forEach(function(item){
     var dc=dotColor(item.category);
@@ -1229,7 +1251,15 @@ function renderCollection(){
 
   var content=document.getElementById("colContent");content.innerHTML="";
   var hint=document.getElementById("colHint");
-  if(!collection.length){hint.textContent="Mueve ítems adquiridos aquí";return;}
+  if(!collection.length){
+    hint.textContent='';
+    var es=document.createElement('div');es.className='empty-state';
+    es.innerHTML='<div class="empty-state-icon"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></div>'
+      +'<div class="empty-state-title">Tu colección te espera</div>'
+      +'<div class="empty-state-sub">Marca ítems como adquiridos en Pendientes y muévelos aquí</div>'
+      +'<button class="empty-state-btn" onclick="switchTab('pendientes')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Ir a Pendientes</button>';
+    content.appendChild(es);return;
+  }
   hint.textContent="";
 
   renderEstadoFilters();
@@ -1241,7 +1271,14 @@ function renderCollection(){
     return true;
   });
   displayed=sortCollection(displayed);
-  if(!displayed.length){hint.textContent="No hay ítems aquí";return;}
+  if(!displayed.length){
+    hint.textContent='';
+    var es2=document.createElement('div');es2.className='empty-state';
+    es2.innerHTML='<div class="empty-state-icon"><svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>'
+      +'<div class="empty-state-title">Sin resultados</div>'
+      +'<div class="empty-state-sub">No hay ítems con este filtro</div>';
+    content.appendChild(es2);return;
+  }
 
   var showFavSection=colCatFilter==="all"&&hasFavs&&colViewMode==="grid"&&colEstadoFilter==="all";
   if(showFavSection){
@@ -1287,7 +1324,15 @@ function renderTrades(){
   // Stats row
   var tl=document.getElementById("tradeList");tl.innerHTML="";
   var hint=document.getElementById("tradeHint");
-  if(!trades.length){hint.textContent="Marca ítems de tu colección para vender o canjear";return;}
+  if(!trades.length){
+    hint.textContent='';
+    var esTr=document.createElement('div');esTr.className='empty-state';
+    esTr.innerHTML='<div class="empty-state-icon"><svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="0.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>'
+      +'<div class="empty-state-title">Sin intercambios</div>'
+      +'<div class="empty-state-sub">Abre el detalle de cualquier ítem de tu colección y toca Vender o Canjear</div>'
+      +'<button class="empty-state-btn" onclick="switchTab('coleccion')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg> Ir a Colección</button>';
+    tl.appendChild(esTr);return;
+  }
   hint.textContent="";
 
   // Summary cards
