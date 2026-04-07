@@ -514,6 +514,16 @@ input[type="file"]{display:none;}
     <div class="theme-panel" id="themePanelIntercambios">
       <div id="themeContentIntercambios"></div>
     </div>
+
+    <!-- Estadísticas theme -->
+    <button class="theme-btn" onclick="toggleThemePanel('estadisticas')">
+      <div class="set-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+      <div class="set-text"><div class="set-label">Estadísticas</div><div class="set-sub" id="themeLabelEstadisticas">Fondo por defecto</div></div>
+      <div class="set-arrow" id="themeArrowEstadisticas">›</div>
+    </button>
+    <div class="theme-panel" id="themePanelEstadisticas">
+      <div id="themeContentEstadisticas"></div>
+    </div>
   </div>
 
   <div class="set-section">
@@ -1371,7 +1381,7 @@ const SOLID_COLORS = [
   "#0a0a2a","#2a0a0a","#121212","#1e1012","#101e12"
 ];
 
-let themes = {pendientes:{type:"default",color:"",image:"",opacity:0.3}, coleccion:{type:"default",color:"",image:"",opacity:0.3}, intercambios:{type:"default",color:"",image:"",opacity:0.3}};
+let themes = {pendientes:{type:"default",color:"",image:"",opacity:0.3}, coleccion:{type:"default",color:"",image:"",opacity:0.3}, intercambios:{type:"default",color:"",image:"",opacity:0.3}, estadisticas:{type:"default",color:"",image:"",opacity:0.3}};
 let activeBgTarget = null;
 
 async function loadThemes(){
@@ -1380,7 +1390,7 @@ async function loadThemes(){
 function saveThemes(){IDB.set('themes',themes).catch(()=>{});}
 
 function applyThemes(){
-  ['pendientes','coleccion','intercambios'].forEach(function(tab){
+  ['pendientes','coleccion','intercambios','estadisticas'].forEach(function(tab){
     var page=document.getElementById('page-'+tab);
     if(!page)return;
     var t=themes[tab];
@@ -1415,7 +1425,7 @@ function updateThemeLabel(tab){
 function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 
 function toggleThemePanel(tab){
-  ['pendientes','coleccion','intercambios'].forEach(function(t){
+  ['pendientes','coleccion','intercambios','estadisticas'].forEach(function(t){
     if(t===tab)return;
     document.getElementById('themePanel'+cap(t)).classList.remove('open');
     document.getElementById('themeArrow'+cap(t)).textContent='›';
