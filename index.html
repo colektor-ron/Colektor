@@ -1337,34 +1337,96 @@ function toggleThemePanel(tab){
 function renderThemePanel(tab){
   var t=themes[tab];
   var container=document.getElementById('themeContent'+cap(tab));
+  container.innerHTML='';
 
-  var colorsHTML='<div class="theme-section-label">Color sólido</div><div class="color-grid">';
+  // -- Color section label
+  var lbl1=document.createElement('div');
+  lbl1.className='theme-section-label';
+  lbl1.textContent='Color solido';
+  container.appendChild(lbl1);
+
+  // -- Color grid
+  var grid=document.createElement('div');
+  grid.className='color-grid';
   SOLID_COLORS.forEach(function(c){
-    colorsHTML+='<div class="color-swatch'+(t.type==="color"&&t.color===c?" active":"")+'" style="background:'+c+';" onclick="setThemeColor(''+tab+'',''+c+'')"></div>';
+    var sw=document.createElement('div');
+    sw.className='color-swatch'+(t.type==='color'&&t.color===c?' active':'');
+    sw.style.background=c;
+    sw.onclick=function(){setThemeColor(tab,c);};
+    grid.appendChild(sw);
   });
-  // Custom color picker
-  colorsHTML+='<label class="color-swatch custom" title="Color personalizado" style="cursor:pointer;">'
-    +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="#94a3b8"/><circle cx="17.5" cy="10.5" r=".5" fill="#94a3b8"/><circle cx="8.5" cy="7.5" r=".5" fill="#94a3b8"/><circle cx="6.5" cy="12.5" r=".5" fill="#94a3b8"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>'
-    +'<input type="color" value="'+(t.color||"#181818")+'" style="position:absolute;opacity:0;width:0;height:0;" onchange="setThemeColor(''+tab+'',this.value)"/></label>';
-  colorsHTML+='</div>';
+  // Custom color picker swatch
+  var customSw=document.createElement('label');
+  customSw.className='color-swatch custom';
+  customSw.title='Color personalizado';
+  customSw.style.cursor='pointer';
+  customSw.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><circle cx="13.5" cy="6.5" r=".5" fill="#94a3b8"/><circle cx="17.5" cy="10.5" r=".5" fill="#94a3b8"/><circle cx="8.5" cy="7.5" r=".5" fill="#94a3b8"/><circle cx="6.5" cy="12.5" r=".5" fill="#94a3b8"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>';
+  var colorInput=document.createElement('input');
+  colorInput.type='color';
+  colorInput.value=t.color||'#181818';
+  colorInput.style.cssText='position:absolute;opacity:0;width:0;height:0;';
+  colorInput.onchange=function(){setThemeColor(tab,this.value);};
+  customSw.appendChild(colorInput);
+  grid.appendChild(customSw);
+  container.appendChild(grid);
 
-  var previewStyle=t.type==="image"&&t.image
-    ?'background-image:url(''+t.image+'');background-size:cover;background-position:center;'
-    :(t.type==="color"&&t.color?'background:'+t.color+';':'background:#181818;');
+  // -- Image section label
+  var lbl2=document.createElement('div');
+  lbl2.className='theme-section-label';
+  lbl2.style.marginTop='12px';
+  lbl2.textContent='Imagen de fondo';
+  container.appendChild(lbl2);
 
-  var imageHTML='<div class="theme-section-label">Imagen de fondo</div>'
-    +'<div class="bg-preview" style="'+previewStyle+'">'
-    +(t.type==="image"&&t.image?'':'<span>Sin imagen</span>')
-    +'</div>'
-    +(t.type==="image"&&t.image
-      ?'<div class="opacity-row"><label>Opacidad</label><input type="range" min="0.05" max="1" step="0.05" value="'+t.opacity+'" oninput="setThemeOpacity(''+tab+'',this.value);document.getElementById('opVal'+tab+'').textContent=Math.round(this.value*100)+'%'"/><span class="opacity-val" id="opVal'+tab+'">'+Math.round(t.opacity*100)+'%</span></div>':''
-    )
-    +'<button class="btn-upload-bg" onclick="triggerBgUpload(''+tab+'')">'
-    +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'
-    +(t.type==="image"&&t.image?" Cambiar imagen":" Subir imagen")+'</button>'
-    +(t.type!=="default"?'<button class="btn-clear-bg" onclick="clearTheme(''+tab+'')">Restaurar fondo por defecto</button>':'');
+  // -- Preview
+  var preview=document.createElement('div');
+  preview.className='bg-preview';
+  if(t.type==='image'&&t.image){
+    preview.style.backgroundImage='url('+t.image+')';
+    preview.style.backgroundSize='cover';
+    preview.style.backgroundPosition='center';
+  } else if(t.type==='color'&&t.color){
+    preview.style.background=t.color;
+  } else {
+    preview.style.background='#181818';
+    preview.textContent='Sin imagen';
+  }
+  container.appendChild(preview);
 
-  container.innerHTML=colorsHTML+imageHTML;
+  // -- Opacity slider (only if image)
+  if(t.type==='image'&&t.image){
+    var opRow=document.createElement('div');
+    opRow.className='opacity-row';
+    var opLbl=document.createElement('label');
+    opLbl.textContent='Opacidad';
+    var opSlider=document.createElement('input');
+    opSlider.type='range';opSlider.min='0.05';opSlider.max='1';opSlider.step='0.05';
+    opSlider.value=t.opacity||0.3;
+    var opVal=document.createElement('span');
+    opVal.className='opacity-val';
+    opVal.textContent=Math.round((t.opacity||0.3)*100)+'%';
+    opSlider.oninput=function(){
+      setThemeOpacity(tab,parseFloat(this.value));
+      opVal.textContent=Math.round(this.value*100)+'%';
+    };
+    opRow.appendChild(opLbl);opRow.appendChild(opSlider);opRow.appendChild(opVal);
+    container.appendChild(opRow);
+  }
+
+  // -- Upload button
+  var uploadBtn=document.createElement('button');
+  uploadBtn.className='btn-upload-bg';
+  uploadBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> '+(t.type==='image'&&t.image?'Cambiar imagen':'Subir imagen');
+  uploadBtn.onclick=function(){triggerBgUpload(tab);};
+  container.appendChild(uploadBtn);
+
+  // -- Clear button
+  if(t.type!=='default'){
+    var clearBtn=document.createElement('button');
+    clearBtn.className='btn-clear-bg';
+    clearBtn.textContent='Restaurar fondo por defecto';
+    clearBtn.onclick=function(){clearTheme(tab);};
+    container.appendChild(clearBtn);
+  }
 }
 
 function setThemeColor(tab,color){
