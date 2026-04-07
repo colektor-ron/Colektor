@@ -184,6 +184,43 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── UX IMPROVEMENTS ── */
+.col-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;position:relative;z-index:1;}
+.col-toolbar-left{display:flex;gap:6px;flex:1;flex-wrap:wrap;}
+.btn-sort{padding:5px 10px;font-size:11px;background:#2a2a2a;border:1px solid #3a3a3a;color:#94a3b8;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;}
+.btn-sort.active{background:#1B6DC0;border-color:#1B6DC0;color:#fff;}
+.btn-view{width:32px;height:32px;background:#2a2a2a;border:1px solid #3a3a3a;color:#94a3b8;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.btn-view.active{background:#1B6DC0;border-color:#1B6DC0;color:#fff;}
+
+/* Sort dropdown */
+.sort-dropdown{position:absolute;top:38px;left:0;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:10px;z-index:50;min-width:180px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+.sort-dropdown.hidden{display:none;}
+.sort-option{padding:11px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1e1e1e;}
+.sort-option:last-child{border-bottom:none;}
+.sort-option:active{background:#333;}
+.sort-option.active{color:#1B6DC0;}
+
+/* Estado filter pills */
+.estado-filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;position:relative;z-index:1;}
+.btn-estado{padding:4px 10px;font-size:11px;background:transparent;border:1px solid #3a3a3a;color:#555;border-radius:99px;cursor:pointer;white-space:nowrap;}
+.btn-estado.active{color:#e2e8f0;border-color:#e2e8f0;background:#2a2a2a;}
+
+/* List view */
+.col-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;position:relative;z-index:1;}
+.col-list-item{background:#2a2a2a;border-radius:12px;border:1px solid #333;display:flex;align-items:center;gap:12px;padding:10px 12px;cursor:pointer;position:relative;}
+.col-list-item.fav{border-color:#f59e0b;}
+.col-list-item:active{opacity:0.85;}
+.col-list-thumb{width:52px;height:52px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid #3a3a3a;background:#1e1e1e;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.col-list-thumb img{width:100%;height:100%;object-fit:cover;}
+.col-list-info{flex:1;min-width:0;}
+.col-list-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.col-list-meta{font-size:11px;color:#64748b;margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.col-list-stars{display:flex;gap:1px;}
+.col-list-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.col-list-val{font-size:13px;font-weight:700;color:#22c55e;}
+.col-list-estado{font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px;background:#1e1e1e;color:#555;}
+
+
 /* ── SHARE ── */
 .share-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:flex-end;justify-content:center;}
 .share-modal.open{display:flex;}
@@ -450,6 +487,35 @@ input[type="file"]{display:none;}
     <button class="search-clear" id="colSearchClear" onclick="clearColSearch()">✕</button>
   </div>
   <div class="search-results" id="colSearchResults"></div>
+  <!-- Toolbar: sort + view toggle -->
+  <div class="col-toolbar" id="colToolbar">
+    <div class="col-toolbar-left">
+      <button class="btn-sort active" id="btnSort" onclick="toggleSortDropdown()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+        <span id="sortLabel">Ordenar</span>
+      </button>
+      <div class="sort-dropdown hidden" id="sortDropdown">
+        <div class="sort-option active" id="sortOpt-name" onclick="setSortBy('name')">Nombre A-Z <span>↑</span></div>
+        <div class="sort-option" id="sortOpt-name-desc" onclick="setSortBy('name-desc')">Nombre Z-A <span></span></div>
+        <div class="sort-option" id="sortOpt-value" onclick="setSortBy('value')">Mayor valor <span></span></div>
+        <div class="sort-option" id="sortOpt-value-asc" onclick="setSortBy('value-asc')">Menor valor <span></span></div>
+        <div class="sort-option" id="sortOpt-rating" onclick="setSortBy('rating')">Puntuación <span></span></div>
+        <div class="sort-option" id="sortOpt-date" onclick="setSortBy('date')">Más reciente <span></span></div>
+        <div class="sort-option" id="sortOpt-date-asc" onclick="setSortBy('date-asc')">Más antiguo <span></span></div>
+      </div>
+    </div>
+    <!-- View toggle -->
+    <button class="btn-view active" id="btnViewGrid" onclick="setViewMode('grid')" title="Cuadrícula">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+    </button>
+    <button class="btn-view" id="btnViewList" onclick="setViewMode('list')" title="Lista">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Estado filter pills -->
+  <div class="estado-filters" id="estadoFilters"></div>
+
   <div class="col-filters" id="colFilters"></div>
   <div id="colContent"></div>
   <div class="hint" id="colHint"></div>
@@ -1137,28 +1203,40 @@ function renderCollection(){
   if(!collection.length){hint.textContent="Mueve ítems adquiridos aquí";return;}
   hint.textContent="";
 
+  renderEstadoFilters();
   var displayed=collection.filter(function(c){
-    if(colCatFilter==="all")return true;
-    if(colCatFilter==="favs")return !!c.favorite;
-    return c.category===colCatFilter;
+    if(colCatFilter==="all");
+    else if(colCatFilter==="favs"){if(!c.favorite)return false;}
+    else if(c.category!==colCatFilter)return false;
+    if(colEstadoFilter!=='all'&&(c.estado||'Nuevo')!==colEstadoFilter)return false;
+    return true;
   });
+  displayed=sortCollection(displayed);
   if(!displayed.length){hint.textContent="No hay ítems aquí";return;}
 
-  if(colCatFilter==="all"&&hasFavs){
-    var favs=collection.filter(function(c){return c.favorite;});
-    var rest=collection.filter(function(c){return !c.favorite;});
-    var favLbl=document.createElement("div");favLbl.className="section-label gold";
-    favLbl.innerHTML=IC.star(13,"#f59e0b","#f59e0b")+" Favoritos";content.appendChild(favLbl);
-    var fg=document.createElement("div");fg.className="col-grid";
-    favs.forEach(function(i){fg.appendChild(makeColCard(i));});content.appendChild(fg);
+  var showFavSection=colCatFilter==="all"&&hasFavs&&colViewMode==="grid"&&colEstadoFilter==="all";
+  if(showFavSection){
+    var favs=displayed.filter(function(c){return c.favorite;});
+    var rest=displayed.filter(function(c){return !c.favorite;});
+    if(favs.length){
+      var favLbl=document.createElement("div");favLbl.className="section-label gold";
+      favLbl.innerHTML=IC.star(13,"#f59e0b","#f59e0b")+" Favoritos";content.appendChild(favLbl);
+      var fg=document.createElement("div");fg.className="col-grid";
+      favs.forEach(function(i){fg.appendChild(makeColCard(i));});content.appendChild(fg);
+    }
     if(rest.length){
       var rl=document.createElement("div");rl.className="section-label muted";rl.textContent="Colección completa";content.appendChild(rl);
       var rg=document.createElement("div");rg.className="col-grid";
       rest.forEach(function(i){rg.appendChild(makeColCard(i));});content.appendChild(rg);
     }
   }else{
-    var g=document.createElement("div");g.className="col-grid";
-    displayed.forEach(function(i){g.appendChild(makeColCard(i));});content.appendChild(g);
+    if(colViewMode==="list"){
+      var lv=document.createElement("div");lv.className="col-list";
+      displayed.forEach(function(i){lv.appendChild(makeListCard(i));});content.appendChild(lv);
+    }else{
+      var g=document.createElement("div");g.className="col-grid";
+      displayed.forEach(function(i){g.appendChild(makeColCard(i));});content.appendChild(g);
+    }
   }
 }
 
@@ -2128,9 +2206,112 @@ function shareAsLink(){
   closeShareModal();
 }
 
+
+// ── VIEW MODE ──────────────────────────────────────────
+function setViewMode(mode){
+  colViewMode=mode;
+  document.getElementById('btnViewGrid').classList.toggle('active',mode==='grid');
+  document.getElementById('btnViewList').classList.toggle('active',mode==='list');
+  renderCollection();
+}
+
+// ── SORT ───────────────────────────────────────────────
+function toggleSortDropdown(){
+  sortDropdownOpen=!sortDropdownOpen;
+  var dd=document.getElementById('sortDropdown');
+  if(dd)dd.classList.toggle('hidden',!sortDropdownOpen);
+}
+
+function setSortBy(val){
+  colSortBy=val;
+  var labels={
+    'name':'Nombre A-Z','name-desc':'Nombre Z-A',
+    'value':'Mayor valor','value-asc':'Menor valor',
+    'rating':'Puntuación','date':'Más reciente','date-asc':'Más antiguo'
+  };
+  var el=document.getElementById('sortLabel');
+  if(el)el.textContent=labels[val]||'Ordenar';
+  document.querySelectorAll('.sort-option').forEach(function(o){o.classList.remove('active');});
+  var active=document.getElementById('sortOpt-'+val);
+  if(active)active.classList.add('active');
+  sortDropdownOpen=false;
+  var dd=document.getElementById('sortDropdown');
+  if(dd)dd.classList.add('hidden');
+  renderCollection();
+}
+
+function sortCollection(arr){
+  var sorted=arr.slice();
+  switch(colSortBy){
+    case 'name': sorted.sort(function(a,b){return a.name.localeCompare(b.name);});break;
+    case 'name-desc': sorted.sort(function(a,b){return b.name.localeCompare(a.name);});break;
+    case 'value': sorted.sort(function(a,b){return (b.valorActual||0)-(a.valorActual||0);});break;
+    case 'value-asc': sorted.sort(function(a,b){return (a.valorActual||0)-(b.valorActual||0);});break;
+    case 'rating': sorted.sort(function(a,b){return (b.rating||0)-(a.rating||0);});break;
+    case 'date': sorted.sort(function(a,b){return (b.addedAt||0)-(a.addedAt||0);});break;
+    case 'date-asc': sorted.sort(function(a,b){return (a.addedAt||0)-(b.addedAt||0);});break;
+  }
+  return sorted;
+}
+
+// ── ESTADO FILTER ──────────────────────────────────────
+function renderEstadoFilters(){
+  var ef=document.getElementById('estadoFilters');
+  if(!ef)return;
+  var estados=['all','Nuevo','Abierto','En vitrina','Dañado'];
+  var counts={};
+  collection.forEach(function(c){
+    var e=c.estado||'Nuevo';
+    counts[e]=(counts[e]||0)+1;
+  });
+  ef.innerHTML='';
+  estados.forEach(function(e){
+    if(e!=='all'&&!counts[e])return;
+    var b=document.createElement('button');
+    b.className='btn-estado'+(colEstadoFilter===e?' active':'');
+    b.textContent=e==='all'?'Todos':e+(counts[e]?' ('+counts[e]+')':'');
+    b.onclick=function(){colEstadoFilter=e;renderCollection();};
+    ef.appendChild(b);
+  });
+}
+
+// ── LIST VIEW CARD ─────────────────────────────────────
+function makeListCard(item){
+  var card=document.createElement('div');
+  card.className='col-list-item'+(item.favorite?' fav':'');
+  var photo=item.photos&&item.photos.length?item.photos[0]:null;
+  var rating=item.rating||0;
+  var starsHTML=[1,2,3,4,5].map(function(n){
+    return IC.star(9,n<=rating?'#f59e0b':'none',n<=rating?'#f59e0b':'#3a3a3a');
+  }).join('');
+  var thumbInner=photo?'<img src="'+photo+'"/>':IC.grid(22);
+  var estadoColors={'Nuevo':'#22c55e','Abierto':'#1B6DC0','En vitrina':'#818cf8','Dañado':'#ef4444'};
+  var estadoColor=estadoColors[item.estado||'Nuevo']||'#555';
+
+  card.innerHTML=
+    '<div class="col-list-thumb">'+thumbInner+'</div>'
+    +'<div class="col-list-info">'
+    +'<div class="col-list-name">'+item.name+'</div>'
+    +'<div class="col-list-meta">'
+    +'<span style="color:'+dotColor(item.category)+'">●</span>'
+    +(item.category||'Sin cat.')
+    +(item.year?' · '+item.year:'')
+    +'<div class="col-list-stars">'+starsHTML+'</div>'
+    +'</div>'
+    +'</div>'
+    +'<div class="col-list-right">'
+    +(item.valorActual?'<div class="col-list-val">'+fmt(item.valorActual)+'</div>':'')
+    +'<div class="col-list-estado" style="color:'+estadoColor+';">'+(item.estado||'Nuevo')+'</div>'
+    +(item.favorite?IC.star(11,'#f59e0b','#f59e0b'):'')
+    +'</div>';
+  card.onclick=function(){openDetail(item.id);};
+  return card;
+}
+
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
 async function init(){await load();await loadProfile();await loadThemes();applyProfile();applyThemes();renderPendientes();updateBadges();checkOnboarding();}
 init();
 </script>
+<script>document.addEventListener("click",function(e){if(sortDropdownOpen&&!e.target.closest("#colToolbar")){sortDropdownOpen=false;var dd=document.getElementById("sortDropdown");if(dd)dd.classList.add("hidden");}});</script>
 </body>
 </html>
