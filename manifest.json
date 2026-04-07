@@ -4,10 +4,11 @@
   "description": "Tu colección, siempre contigo",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0f0f1a",
-  "theme_color": "#1B6DC0",
+  "background_color": "#0d7ee8",
+  "theme_color": "#0d7ee8",
   "orientation": "portrait-primary",
   "icons": [
-    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "icon.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" },
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
