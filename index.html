@@ -408,8 +408,14 @@ input[type="file"]{display:none;}
 <!-- ══ COLECCIÓN ══ -->
 <div class="page" id="page-coleccion">
   <div class="page-header">
-    <h1>Mi Colección</h1>
-    <p id="colSubtitle">0 ítems</p>
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;position:relative;z-index:1;">
+      <h1>Mi Colección</h1>
+      <button onclick="openShareModal()" style="position:absolute;right:0;background:#2a2a2a;border:1px solid #3a3a3a;color:#94a3b8;border-radius:8px;padding:6px 10px;cursor:pointer;display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Compartir
+      </button>
+    </div>
+    <p id="colSubtitle" style="color:#64748b;font-size:12px;margin-top:3px;0 ítems"></p>
   </div>
 
   <!-- Stats colección -->
