@@ -184,6 +184,33 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── SEARCH ── */
+.search-bar{position:relative;margin-bottom:16px;z-index:1;}
+.search-bar input{width:100%;background:#2a2a2a;border:1px solid #3a3a3a;border-radius:12px;color:#e2e8f0;padding:11px 16px 11px 42px;font-size:14px;outline:none;font-family:inherit;transition:border 0.2s;}
+.search-bar input:focus{border-color:#1B6DC0;}
+.search-bar input::placeholder{color:#444;}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);pointer-events:none;}
+.search-clear{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#555;cursor:pointer;font-size:16px;padding:2px 4px;display:none;}
+.search-clear.show{display:block;}
+
+/* Search results overlay */
+.search-results{background:#2a2a2a;border-radius:12px;margin-bottom:16px;overflow:hidden;display:none;z-index:1;position:relative;}
+.search-results.show{display:block;}
+.search-result-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #1e1e1e;cursor:pointer;}
+.search-result-item:last-child{border-bottom:none;}
+.search-result-item:active{background:#333;}
+.search-result-thumb{width:40px;height:40px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid #3a3a3a;}
+.search-result-thumb-empty{width:40px;height:40px;border-radius:8px;flex-shrink:0;background:#1e1e1e;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;}
+.search-result-info{flex:1;min-width:0;}
+.search-result-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.search-result-meta{font-size:11px;color:#64748b;margin-top:2px;}
+.search-result-source{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.search-result-source.col{background:rgba(27,109,192,0.15);color:#1B6DC0;}
+.search-result-source.pen{background:rgba(34,197,94,0.12);color:#22c55e;}
+.search-empty{text-align:center;padding:24px;color:#555;font-size:13px;}
+.search-count{font-size:11px;color:#555;padding:8px 14px;border-bottom:1px solid #1e1e1e;}
+
+
 /* ── THEME CUSTOMIZATION ── */
 .theme-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;border-top:1px solid #1e1e1e;cursor:pointer;width:100%;background:none;border-left:none;border-right:none;border-bottom:none;text-align:left;}
 .theme-btn:first-of-type{border-top:none;}
@@ -285,6 +312,12 @@ input[type="file"]{display:none;}
     <div class="progress-info"><span id="pProgressTxt"></span><span class="progress-pct" id="pProgressPct"></span></div>
     <div class="progress-track"><div class="progress-fill" id="pProgressFill" style="width:0%"></div></div>
   </div>
+  <div class="search-bar" id="penSearchBar">
+    <div class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    <input id="penSearchInput" placeholder="Buscar en pendientes..." oninput="handlePenSearch(this.value)" onkeydown="if(event.key==='Escape'){clearPenSearch();}"/>
+    <button class="search-clear" id="penSearchClear" onclick="clearPenSearch()">✕</button>
+  </div>
+  <div class="search-results" id="penSearchResults"></div>
   <div class="filter-row" id="pStatusFilters"></div>
   <div class="filter-row2" id="pCatFilters"></div>
   <div id="pNewCatForm"></div>
@@ -326,6 +359,12 @@ input[type="file"]{display:none;}
     </div>
   </div>
 
+  <div class="search-bar" id="colSearchBar">
+    <div class="search-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    <input id="colSearchInput" placeholder="Buscar en mi colección..." oninput="handleColSearch(this.value)" onkeydown="if(event.key==='Escape'){clearColSearch();}"/>
+    <button class="search-clear" id="colSearchClear" onclick="clearColSearch()">✕</button>
+  </div>
+  <div class="search-results" id="colSearchResults"></div>
   <div class="col-filters" id="colFilters"></div>
   <div id="colContent"></div>
   <div class="hint" id="colHint"></div>
@@ -1458,6 +1497,135 @@ function handleBgImage(e){
     saveThemes();applyThemes();renderThemePanel(activeBgTarget);toast("Imagen aplicada!");
   };
   r.readAsDataURL(file);
+}
+
+
+// ── SEARCH ─────────────────────────────────────────────
+function highlight(text, query){
+  if(!query)return text;
+  var re=new RegExp('('+query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return text.replace(re,'<mark style="background:rgba(27,109,192,0.3);color:#e2e8f0;border-radius:2px;">$1</mark>');
+}
+
+function handleColSearch(q){
+  var clear=document.getElementById('colSearchClear');
+  var results=document.getElementById('colSearchResults');
+  q=q.trim();
+  if(clear)clear.classList.toggle('show',q.length>0);
+  if(!q){results.classList.remove('show');results.innerHTML='';return;}
+
+  var matches=collection.filter(function(c){
+    var searchStr=(c.name+' '+(c.category||'')+' '+(c.note||'')+' '+(c.review||'')+' '+(c.tags||[]).join(' ')+(c.edicion||'')).toLowerCase();
+    return searchStr.includes(q.toLowerCase());
+  });
+
+  results.innerHTML='';
+  results.classList.add('show');
+
+  if(!matches.length){
+    results.innerHTML='<div class="search-empty">Sin resultados para "'+q+'"</div>';
+    return;
+  }
+
+  var countDiv=document.createElement('div');
+  countDiv.className='search-count';
+  countDiv.textContent=matches.length+' resultado'+(matches.length!==1?'s':'');
+  results.appendChild(countDiv);
+
+  matches.slice(0,8).forEach(function(item){
+    var row=document.createElement('div');
+    row.className='search-result-item';
+    var photo=item.photos&&item.photos.length?item.photos[0]:null;
+    var thumbHTML=photo
+      ?'<img class="search-result-thumb" src="'+photo+'"/>'
+      :'<div class="search-result-thumb-empty"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></div>';
+    var stars=item.rating?'⭐'.repeat(item.rating):'';
+    row.innerHTML=thumbHTML
+      +'<div class="search-result-info">'
+      +'<div class="search-result-name">'+highlight(item.name,q)+'</div>'
+      +'<div class="search-result-meta"><span style="color:'+dotColor(item.category)+'">●</span> '+(item.category||'Sin cat.')+(item.year?' · '+item.year:'')+(stars?' · '+stars:'')+'</div>'
+      +'</div>'
+      +(item.favorite?'<svg width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b" stroke="none" style="margin-right:4px;flex-shrink:0;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>':'')
+      +'<span class="search-result-source col">Colección</span>';
+    row.onclick=function(){clearColSearch();openDetail(item.id);};
+    results.appendChild(row);
+  });
+  if(matches.length>8){
+    var more=document.createElement('div');
+    more.className='search-empty';
+    more.style.borderTop='1px solid #1e1e1e';
+    more.textContent='+'+(matches.length-8)+' más — sé más específico';
+    results.appendChild(more);
+  }
+}
+
+function clearColSearch(){
+  var input=document.getElementById('colSearchInput');
+  var clear=document.getElementById('colSearchClear');
+  var results=document.getElementById('colSearchResults');
+  if(input)input.value='';
+  if(clear)clear.classList.remove('show');
+  if(results){results.classList.remove('show');results.innerHTML='';}
+}
+
+function handlePenSearch(q){
+  var clear=document.getElementById('penSearchClear');
+  var results=document.getElementById('penSearchResults');
+  q=q.trim();
+  if(clear)clear.classList.toggle('show',q.length>0);
+  if(!q){results.classList.remove('show');results.innerHTML='';return;}
+
+  var matches=pendientes.filter(function(f){
+    var searchStr=(f.name+' '+(f.category||'')+' '+(f.note||'')).toLowerCase();
+    return searchStr.includes(q.toLowerCase());
+  });
+
+  results.innerHTML='';
+  results.classList.add('show');
+
+  if(!matches.length){
+    results.innerHTML='<div class="search-empty">Sin resultados para "'+q+'"</div>';
+    return;
+  }
+
+  var countDiv=document.createElement('div');
+  countDiv.className='search-count';
+  countDiv.textContent=matches.length+' resultado'+(matches.length!==1?'s':'');
+  results.appendChild(countDiv);
+
+  matches.slice(0,8).forEach(function(item){
+    var row=document.createElement('div');
+    row.className='search-result-item';
+    var thumbHTML=item.photo
+      ?'<img class="search-result-thumb" src="'+item.photo+'"/>'
+      :'<div class="search-result-thumb-empty"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3a3a3a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></div>';
+    row.innerHTML=thumbHTML
+      +'<div class="search-result-info">'
+      +'<div class="search-result-name">'+highlight(item.name,q)+'</div>'
+      +'<div class="search-result-meta"><span style="color:'+dotColor(item.category)+'">●</span> '+(item.category||'Sin cat.')+(item.price?' · '+fmt(item.price):'')+'</div>'
+      +'</div>'
+      +'<span class="search-result-source pen">'+(item.acquired?'Adquirido':'Pendiente')+'</span>';
+    row.onclick=function(){
+      clearPenSearch();
+      pStatusFilter='all';pCatFilter='all';
+      renderPendientes();
+      setTimeout(function(){
+        expandedId=item.id;renderPendientes();
+        var el=document.querySelector('[data-id="'+item.id+'"]');
+        if(el)el.scrollIntoView({behavior:'smooth',block:'center'});
+      },100);
+    };
+    results.appendChild(row);
+  });
+}
+
+function clearPenSearch(){
+  var input=document.getElementById('penSearchInput');
+  var clear=document.getElementById('penSearchClear');
+  var results=document.getElementById('penSearchResults');
+  if(input)input.value='';
+  if(clear)clear.classList.remove('show');
+  if(results){results.classList.remove('show');results.innerHTML='';}
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
