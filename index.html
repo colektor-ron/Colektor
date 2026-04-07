@@ -1111,8 +1111,8 @@ function renderPendientes(){
         +'<div style="display:flex;gap:8px;">'
         +'<div style="flex:1;"><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Foto</div>'
         +'<div style="display:flex;flex-direction:column;gap:6px;">'
-        +'<button class="btn-photo" onclick="triggerUploadP('+item.id+')" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px;">'+(item.photo?"🔄 Cambiar foto":"📷 Agregar foto")+'</button>'
-        +(item.photo?'<button class="btn-photo-del" onclick="removePhotoP('+item.id+')" style="width:100%;">Quitar foto</button>':'')
+        +'<button onclick="triggerUploadP('+item.id+')" style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:13px;font-weight:500;cursor:pointer;">'+(item.photo?"Cambiar foto":"Agregar foto")+'</button>'
+        +(item.photo?'<button onclick="removePhotoP('+item.id+')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;color:#ef4444;padding:8px 12px;font-size:13px;font-weight:500;cursor:pointer;">Quitar foto</button>':'')
         +'</div></div>'
         +'<div style="flex:1;"><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Categoría</div>'
         +'<select onchange="changeCatP('+item.id+',this.value)" style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:7px 8px;font-size:12px;outline:none;cursor:pointer;">'+catOpts+'</select></div></div>'
@@ -2139,6 +2139,10 @@ function makeStatsCard(title, iconSVG){
 
 // ── SHARE ──────────────────────────────────────────────
 var shareOpts = {favsOnly:false, showValues:true, showStats:true};
+var colViewMode="grid";
+var colSortBy="name";
+var colEstadoFilter="all";
+var sortDropdownOpen=false;
 
 function openShareModal(){
   renderSharePreview();
