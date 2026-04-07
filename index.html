@@ -15,7 +15,7 @@
 body{background:#181818;color:#e2e8f0;font-family:-apple-system,'Inter',sans-serif;min-height:100vh;padding-bottom:76px;}
 
 /* TAB BAR */
-.tabbar{position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:grid;grid-template-columns:repeat(4,1fr);z-index:100;}
+.tabbar{position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:grid;grid-template-columns:repeat(5,1fr);z-index:100;}
 .tab-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 12px;gap:3px;border:none;background:none;color:#555;font-size:9px;font-weight:600;cursor:pointer;transition:color 0.2s;}
 .tab-btn.active{color:#1B6DC0;}
 .tab-btn svg{width:20px;height:20px;}
@@ -183,6 +183,47 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;pointer-events:none;z-index:9999;white-space:nowrap;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
+
+/* ── STATS PAGE ── */
+.stats-page-grid{display:flex;flex-direction:column;gap:12px;padding-bottom:20px;}
+.stats-big-card{background:#2a2a2a;border-radius:14px;padding:16px;position:relative;z-index:1;}
+.stats-big-card h3{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.stats-row-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e1e1e;}
+.stats-row-item:last-child{border-bottom:none;}
+.stats-row-label{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:8px;}
+.stats-row-value{font-size:13px;font-weight:700;}
+.bar-chart{display:flex;flex-direction:column;gap:8px;}
+.bar-row{display:flex;align-items:center;gap:10px;}
+.bar-label{font-size:11px;color:#94a3b8;width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+.bar-track{flex:1;background:#1e1e1e;border-radius:99px;height:8px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:99px;transition:width 0.6s ease;}
+.bar-val{font-size:11px;font-weight:600;width:40px;text-align:right;flex-shrink:0;}
+.donut-row{display:flex;align-items:center;gap:16px;}
+.donut-wrap{position:relative;width:90px;height:90px;flex-shrink:0;}
+.donut-wrap svg{width:90px;height:90px;}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.donut-center-val{font-size:18px;font-weight:800;}
+.donut-center-lbl{font-size:9px;color:#64748b;text-transform:uppercase;}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:6px;}
+.donut-legend-item{display:flex;align-items:center;gap:6px;font-size:12px;}
+.donut-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.donut-legend-label{color:#94a3b8;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.donut-legend-val{font-size:11px;font-weight:600;color:#e2e8f0;}
+.top-item-card{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #1e1e1e;}
+.top-item-card:last-child{border-bottom:none;}
+.top-item-rank{font-size:16px;font-weight:800;width:24px;text-align:center;flex-shrink:0;}
+.top-item-thumb{width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid #3a3a3a;}
+.top-item-thumb-empty{width:44px;height:44px;border-radius:8px;flex-shrink:0;background:#1e1e1e;border:1px solid #3a3a3a;display:flex;align-items:center;justify-content:center;}
+.top-item-info{flex:1;min-width:0;}
+.top-item-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.top-item-meta{font-size:11px;color:#64748b;margin-top:2px;}
+.top-item-val{font-size:13px;font-weight:700;color:#22c55e;flex-shrink:0;}
+.month-bars{display:flex;align-items:flex-end;gap:6px;height:80px;margin-top:8px;}
+.month-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.month-bar{width:100%;border-radius:4px 4px 0 0;transition:height 0.5s ease;min-height:2px;}
+.month-bar-lbl{font-size:9px;color:#555;text-align:center;}
+.month-bar-val{font-size:9px;color:#94a3b8;text-align:center;}
+
 
 /* ── SEARCH ── */
 .search-bar{position:relative;margin-bottom:16px;z-index:1;}
@@ -381,6 +422,15 @@ input[type="file"]{display:none;}
   <div class="hint" id="tradeHint">Marca ítems de tu colección para vender o canjear</div>
 </div>
 
+<!-- ══ ESTADÍSTICAS ══ -->
+<div class="page" id="page-estadisticas">
+  <div class="page-header">
+    <h1>Estadísticas</h1>
+    <p id="statsSubtitle" style="color:#64748b;font-size:12px;margin-top:3px;"></p>
+  </div>
+  <div class="stats-page-grid" id="statsContent"></div>
+</div>
+
 <!-- ══ AJUSTES ══ -->
 <div class="page" id="page-ajustes">
   <div class="page-header"><h1>Ajustes</h1></div>
@@ -507,6 +557,10 @@ input[type="file"]{display:none;}
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
     Intercambios<span class="badge" id="tradeBadge" style="display:none;background:#818cf8;"></span>
   </button>
+  <button class="tab-btn" id="tab-estadisticas" onclick="switchTab('estadisticas')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Stats
+  </button>
   <button class="tab-btn" id="tab-ajustes" onclick="switchTab('ajustes')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
     Ajustes
@@ -629,6 +683,7 @@ function switchTab(tab){
   if(tab==='coleccion')renderCollection();
   if(tab==='intercambios')renderTrades();
   if(tab==='ajustes'){applyProfile();}
+  if(tab==='estadisticas')renderStats();
 }
 
 // ── EXPORT / IMPORT ────────────────────────────────────
@@ -1626,6 +1681,220 @@ function clearPenSearch(){
   if(input)input.value='';
   if(clear)clear.classList.remove('show');
   if(results){results.classList.remove('show');results.innerHTML='';}
+}
+
+
+// ── RENDER STATS ───────────────────────────────────────
+function renderStats(){
+  var container=document.getElementById('statsContent');
+  if(!container)return;
+  container.innerHTML='';
+
+  var total=collection.length;
+  var totalVal=collection.reduce(function(s,c){return s+(c.valorActual||0);},0);
+  var favCount=collection.filter(function(c){return c.favorite;}).length;
+  var avgRating=total?collection.reduce(function(s,c){return s+(c.rating||0);},0)/total:0;
+
+  document.getElementById('statsSubtitle').textContent=
+    total+' ítem'+(total!==1?'s':'')+' · '+fmt(totalVal)+' en valor';
+
+  // ── Card 1: Resumen general
+  var c1=makeStatsCard('Resumen general',
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>'
+  );
+  var rows=[
+    ['Total en colección', total+' ítems', '#e2e8f0'],
+    ['Valor total', fmt(totalVal), '#22c55e'],
+    ['Favoritos', favCount, '#f59e0b'],
+    ['Puntuación promedio', avgRating.toFixed(1)+' / 5', '#818cf8'],
+    ['Pendientes de adquirir', pendientes.filter(function(f){return !f.acquired;}).length+' ítems', '#1B6DC0'],
+    ['Adquiridos', pendientes.filter(function(f){return f.acquired;}).length+' ítems', '#22c55e'],
+    ['En venta/canje', trades.filter(function(t){return t.status!=='sold';}).length+' ítems', '#818cf8'],
+    ['Vendidos', trades.filter(function(t){return t.status==='sold';}).length+' ítems', '#555'],
+  ];
+  rows.forEach(function(r){
+    var row=document.createElement('div');row.className='stats-row-item';
+    row.innerHTML='<span class="stats-row-label">'+r[0]+'</span>'
+      +'<span class="stats-row-value" style="color:'+r[2]+';">'+r[1]+'</span>';
+    c1.body.appendChild(row);
+  });
+  container.appendChild(c1.card);
+
+  // ── Card 2: Por categoría (donut + bar)
+  if(collection.length){
+    var catMap={};
+    collection.forEach(function(c){
+      var cat=c.category||'Sin categoría';
+      if(!catMap[cat])catMap[cat]={count:0,val:0};
+      catMap[cat].count++;
+      catMap[cat].val+=(c.valorActual||0);
+    });
+    var catArr=Object.keys(catMap).map(function(k){return{name:k,count:catMap[k].count,val:catMap[k].val};});
+    catArr.sort(function(a,b){return b.count-a.count;});
+    var maxCount=catArr[0].count;
+
+    var c2=makeStatsCard('Por categoría',
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>'
+    );
+
+    // Donut chart
+    var donutWrap=document.createElement('div');donutWrap.className='donut-row';
+    var svgSize=90,radius=32,cx=45,cy=45,circumference=2*Math.PI*radius;
+    var svgEl=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svgEl.setAttribute('viewBox','0 0 90 90');
+    // Background circle
+    var bgCircle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    bgCircle.setAttribute('cx',cx);bgCircle.setAttribute('cy',cy);bgCircle.setAttribute('r',radius);
+    bgCircle.setAttribute('fill','none');bgCircle.setAttribute('stroke','#1e1e1e');bgCircle.setAttribute('stroke-width','10');
+    svgEl.appendChild(bgCircle);
+    var offset=0;
+    catArr.slice(0,5).forEach(function(cat,i){
+      var pct=cat.count/total;
+      var dash=pct*circumference;
+      var circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      circle.setAttribute('cx',cx);circle.setAttribute('cy',cy);circle.setAttribute('r',radius);
+      circle.setAttribute('fill','none');circle.setAttribute('stroke',DOT[i%DOT.length]);
+      circle.setAttribute('stroke-width','10');
+      circle.setAttribute('stroke-dasharray',dash+' '+(circumference-dash));
+      circle.setAttribute('stroke-dashoffset',-offset);
+      circle.setAttribute('transform','rotate(-90 '+cx+' '+cy+')');
+      svgEl.appendChild(circle);
+      offset+=dash;
+    });
+    var donutSvgWrap=document.createElement('div');donutSvgWrap.className='donut-wrap';
+    donutSvgWrap.appendChild(svgEl);
+    var centerDiv=document.createElement('div');centerDiv.className='donut-center';
+    centerDiv.innerHTML='<span class="donut-center-val">'+total+'</span><span class="donut-center-lbl">ítems</span>';
+    donutSvgWrap.appendChild(centerDiv);
+    var legend=document.createElement('div');legend.className='donut-legend';
+    catArr.slice(0,5).forEach(function(cat,i){
+      var li=document.createElement('div');li.className='donut-legend-item';
+      li.innerHTML='<div class="donut-dot" style="background:'+DOT[i%DOT.length]+';"></div>'
+        +'<span class="donut-legend-label">'+cat.name+'</span>'
+        +'<span class="donut-legend-val">'+cat.count+'</span>';
+      legend.appendChild(li);
+    });
+    donutWrap.appendChild(donutSvgWrap);donutWrap.appendChild(legend);
+    c2.body.appendChild(donutWrap);
+
+    // Bar chart by value
+    if(catArr.some(function(c){return c.val>0;})){
+      var barTitle=document.createElement('div');
+      barTitle.style.cssText='font-size:10px;color:#555;text-transform:uppercase;letter-spacing:0.8px;margin:14px 0 8px;';
+      barTitle.textContent='Valor por categoría';
+      c2.body.appendChild(barTitle);
+      var maxVal=Math.max.apply(null,catArr.map(function(c){return c.val;}));
+      var barChart=document.createElement('div');barChart.className='bar-chart';
+      catArr.slice(0,6).forEach(function(cat,i){
+        var pct=maxVal>0?(cat.val/maxVal*100):0;
+        var row=document.createElement('div');row.className='bar-row';
+        row.innerHTML='<span class="bar-label">'+cat.name+'</span>'
+          +'<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+DOT[i%DOT.length]+';"></div></div>'
+          +'<span class="bar-val" style="color:'+DOT[i%DOT.length]+';">'+cat.count+'</span>';
+        barChart.appendChild(row);
+      });
+      c2.body.appendChild(barChart);
+    }
+    container.appendChild(c2.card);
+  }
+
+  // ── Card 3: Top 5 más valiosos
+  if(collection.some(function(c){return c.valorActual>0;})){
+    var c3=makeStatsCard('Top 5 más valiosos',
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+    );
+    var top5=collection.filter(function(c){return c.valorActual>0;})
+      .sort(function(a,b){return b.valorActual-a.valorActual;}).slice(0,5);
+    var medals=['🥇','🥈','🥉','4','5'];
+    top5.forEach(function(item,i){
+      var row=document.createElement('div');row.className='top-item-card';
+      var photo=item.photos&&item.photos.length?item.photos[0]:null;
+      var thumbHTML=photo
+        ?'<img class="top-item-thumb" src="'+photo+'"/>'
+        :'<div class="top-item-thumb-empty"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3a3a3a" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg></div>';
+      row.innerHTML='<span class="top-item-rank">'+medals[i]+'</span>'
+        +thumbHTML
+        +'<div class="top-item-info">'
+        +'<div class="top-item-name">'+item.name+'</div>'
+        +'<div class="top-item-meta"><span style="color:'+dotColor(item.category)+'">●</span> '+(item.category||'Sin cat.')+'</div>'
+        +'</div>'
+        +'<span class="top-item-val">'+fmt(item.valorActual)+'</span>';
+      row.style.cursor='pointer';
+      row.onclick=function(){switchTab('coleccion');setTimeout(function(){openDetail(item.id);},100);};
+      c3.body.appendChild(row);
+    });
+    container.appendChild(c3.card);
+  }
+
+  // ── Card 4: Crecimiento mensual (últimos 6 meses)
+  var c4=makeStatsCard('Crecimiento mensual',
+    '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>'
+  );
+  var now=new Date();
+  var months=[];
+  for(var m=5;m>=0;m--){
+    var d=new Date(now.getFullYear(),now.getMonth()-m,1);
+    months.push({year:d.getFullYear(),month:d.getMonth(),label:d.toLocaleDateString('es-CL',{month:'short'})});
+  }
+  var allItems=collection.concat(pendientes.filter(function(f){return f.acquired;}));
+  var monthCounts=months.map(function(mo){
+    return allItems.filter(function(c){
+      var d=new Date(c.addedAt||0);
+      return d.getMonth()===mo.month&&d.getFullYear()===mo.year;
+    }).length;
+  });
+  var maxMo=Math.max.apply(null,monthCounts)||1;
+  var barsDiv=document.createElement('div');barsDiv.className='month-bars';
+  months.forEach(function(mo,i){
+    var pct=monthCounts[i]/maxMo*100;
+    var wrap=document.createElement('div');wrap.className='month-bar-wrap';
+    var bar=document.createElement('div');bar.className='month-bar';
+    bar.style.height=pct+'%';
+    bar.style.background=monthCounts[i]>0?'#1B6DC0':'#2a2a2a';
+    var lbl=document.createElement('div');lbl.className='month-bar-lbl';lbl.textContent=mo.label;
+    var val=document.createElement('div');val.className='month-bar-val';
+    val.textContent=monthCounts[i]>0?monthCounts[i]:'';
+    wrap.appendChild(val);wrap.appendChild(bar);wrap.appendChild(lbl);
+    barsDiv.appendChild(wrap);
+  });
+  c4.body.appendChild(barsDiv);
+  container.appendChild(c4.card);
+
+  // ── Card 5: Estado de la colección
+  var estadoMap={};
+  collection.forEach(function(c){
+    var e=c.estado||'Nuevo';
+    estadoMap[e]=(estadoMap[e]||0)+1;
+  });
+  if(Object.keys(estadoMap).length>0){
+    var c5=makeStatsCard('Estado de la colección',
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>'
+    );
+    var estadoColors={'Nuevo':'#22c55e','Abierto':'#1B6DC0','En vitrina':'#818cf8','Dañado':'#ef4444','Vendido':'#555'};
+    var estadoBar=document.createElement('div');estadoBar.className='bar-chart';
+    var maxEst=Math.max.apply(null,Object.values(estadoMap));
+    Object.keys(estadoMap).forEach(function(e){
+      var pct=estadoMap[e]/maxEst*100;
+      var color=estadoColors[e]||'#555';
+      var row=document.createElement('div');row.className='bar-row';
+      row.innerHTML='<span class="bar-label">'+e+'</span>'
+        +'<div class="bar-track"><div class="bar-fill" style="width:'+pct+'%;background:'+color+';"></div></div>'
+        +'<span class="bar-val" style="color:'+color+';">'+estadoMap[e]+'</span>';
+      estadoBar.appendChild(row);
+    });
+    c5.body.appendChild(estadoBar);
+    container.appendChild(c5.card);
+  }
+}
+
+function makeStatsCard(title, iconSVG){
+  var card=document.createElement('div');card.className='stats-big-card';
+  var h3=document.createElement('h3');
+  h3.innerHTML=iconSVG+' '+title;
+  card.appendChild(h3);
+  var body=document.createElement('div');
+  card.appendChild(body);
+  return{card,body};
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
