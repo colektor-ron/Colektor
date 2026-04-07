@@ -184,6 +184,24 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── PRICE COMPARISON ── */
+.price-compare{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px;}
+.price-box{background:#1e1e1e;border-radius:8px;padding:10px 12px;}
+.price-box-label{font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;display:flex;align-items:center;gap:4px;}
+.price-box-value{font-size:15px;font-weight:700;}
+.price-diff{display:flex;align-items:center;gap:6px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;}
+.price-diff.up{background:rgba(34,197,94,0.1);color:#22c55e;}
+.price-diff.down{background:rgba(239,68,68,0.1);color:#ef4444;}
+.price-diff.same{background:#1e1e1e;color:#555;}
+
+/* In collection card - price indicator dot */
+.col-card-price-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+
+/* In stats - price summary */
+.price-summary-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #1e1e1e;}
+.price-summary-row:last-child{border-bottom:none;}
+
+
 /* ── UX IMPROVEMENTS ── */
 .col-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;position:relative;z-index:1;}
 .col-toolbar-left{display:flex;gap:6px;flex:1;flex-wrap:wrap;}
@@ -465,6 +483,18 @@ input[type="file"]{display:none;}
       <div class="stat-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Más valioso</div>
       <div class="stat-value" id="colTopItem" style="color:#f59e0b;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">—</div>
     </div>
+  </div>
+  <div class="stats-grid" style="margin-bottom:16px;">
+    <div class="stat-card green">
+      <div class="stat-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Ganancia</div>
+      <div class="stat-value" id="colGainValue" style="font-size:12px;">$0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Total pagado</div>
+      <div class="stat-value" id="colPaidValue" style="color:#94a3b8;font-size:12px;">$0</div>
+    </div>
+  </div>
+  <div class="stats-grid three" style="display:none;">
   </div>
   <div class="stats-grid three" style="margin-bottom:20px;">
     <div class="stat-card">
@@ -920,6 +950,7 @@ function moveToCollection(id){
       photos:item.photo?[item.photo]:[],note:item.note||"",
       year:new Date().getFullYear().toString(),rating:0,review:"",
       favorite:false,estado:"Nuevo",valorActual:item.price||0,
+      precioPagado:item.price||0,
       edicion:"",tags:[],addedAt:Date.now()
     });
   }
@@ -1411,6 +1442,7 @@ function setRating(id,n){
 function saveDetail(id){
   var n=document.getElementById("dn"),dc=document.getElementById("dc"),dest=document.getElementById("dest");
   var dy=document.getElementById("dy"),ded=document.getElementById("ded"),dval=document.getElementById("dval");
+  var dpp=document.getElementById("dppagado");
   var dr=document.getElementById("dr"),dnt=document.getElementById("dnt");
   if(!n||!n.value.trim())return;
   collection=collection.map(function(c){
@@ -1419,6 +1451,7 @@ function saveDetail(id){
       name:n.value.trim(),category:dc?dc.value:"",estado:dest?dest.value:"Nuevo",
       year:dy?dy.value.trim():"",edicion:ded?ded.value.trim():"",
       valorActual:dval?parseInt(dval.value)||0:0,
+      precioPagado:dpp?parseInt(dpp.value)||0:c.precioPagado||0,
       review:dr?dr.value.trim():"",note:dnt?dnt.value.trim():""
     });
   });
@@ -1876,9 +1909,13 @@ function renderStats(){
   var c1=makeStatsCard('Resumen general',
     '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>'
   );
+  var totalPagado=collection.reduce(function(s,c){return s+(c.precioPagado||0);},0);
+  var ganancia=totalVal-totalPagado;
   var rows=[
     ['Total en colección', total+' ítems', '#e2e8f0'],
     ['Valor total', fmt(totalVal), '#22c55e'],
+    ['Total pagado', fmt(totalPagado), '#94a3b8'],
+    ['Ganancia / Pérdida', (ganancia>=0?'+':'')+fmt(ganancia), ganancia>=0?'#22c55e':'#ef4444'],
     ['Favoritos', favCount, '#f59e0b'],
     ['Puntuación promedio', avgRating.toFixed(1)+' / 5', '#818cf8'],
     ['Pendientes de adquirir', pendientes.filter(function(f){return !f.acquired;}).length+' ítems', '#1B6DC0'],
@@ -2059,6 +2096,20 @@ function renderStats(){
     c5.body.appendChild(estadoBar);
     container.appendChild(c5.card);
   }
+}
+
+
+function priceDiffHTML(item){
+  var pagado=item.precioPagado||0;
+  var actual=item.valorActual||0;
+  if(!pagado&&!actual)return '';
+  if(!pagado||!actual)return '';
+  var diff=actual-pagado;
+  var pct=pagado>0?Math.round((diff/pagado)*100):0;
+  var cls=diff>0?'up':diff<0?'down':'same';
+  var arrow=diff>0?'↑':diff<0?'↓':'→';
+  var label=diff>0?'Ganancia':diff<0?'Pérdida':'Sin cambio';
+  return '<div class="price-diff '+cls+'">'+arrow+' '+label+': '+fmt(Math.abs(diff))+' ('+( pct>0?'+':'')+pct+'%)</div>';
 }
 
 function makeStatsCard(title, iconSVG){
