@@ -184,6 +184,44 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── SHARE ── */
+.share-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:flex-end;justify-content:center;}
+.share-modal.open{display:flex;}
+.share-sheet{background:#1e1e1e;border-radius:20px 20px 0 0;width:100%;max-width:500px;padding:20px 20px 40px;max-height:90vh;overflow-y:auto;}
+.share-handle{width:36px;height:4px;background:#3a3a3a;border-radius:99px;margin:0 auto 20px;}
+.share-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.share-sub{font-size:12px;color:#64748b;margin-bottom:20px;}
+.share-preview{background:#0f0f0f;border-radius:14px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden;}
+.share-preview-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.share-preview-avatar{width:44px;height:44px;border-radius:50%;border:2px solid #1B6DC0;background:#2a2a2a;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.share-preview-avatar img{width:100%;height:100%;object-fit:cover;}
+.share-preview-name{font-size:15px;font-weight:700;}
+.share-preview-handle{font-size:12px;color:#1B6DC0;}
+.share-preview-bio{font-size:11px;color:#64748b;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.share-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;}
+.share-grid-item{aspect-ratio:1;border-radius:8px;overflow:hidden;background:#2a2a2a;display:flex;align-items:center;justify-content:center;position:relative;}
+.share-grid-item img{width:100%;height:100%;object-fit:cover;}
+.share-grid-more{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;}
+.share-preview-stats{display:flex;gap:16px;padding-top:12px;border-top:1px solid #2a2a2a;}
+.share-preview-stat{display:flex;flex-direction:column;gap:2px;}
+.share-preview-stat-val{font-size:16px;font-weight:800;}
+.share-preview-stat-lbl{font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.5px;}
+.share-preview-watermark{position:absolute;bottom:10px;right:12px;font-size:9px;color:#333;font-weight:700;letter-spacing:1px;}
+.share-options{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.share-option-row{display:flex;align-items:center;justify-content:space-between;background:#2a2a2a;border-radius:10px;padding:12px 14px;}
+.share-option-label{font-size:13px;font-weight:600;}
+.share-option-sub{font-size:11px;color:#64748b;margin-top:2px;}
+.toggle-switch{width:44px;height:24px;background:#3a3a3a;border-radius:99px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.toggle-switch.on{background:#1B6DC0;}
+.toggle-knob{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform 0.2s;}
+.toggle-switch.on .toggle-knob{transform:translateX(20px);}
+.share-actions{display:flex;flex-direction:column;gap:8px;}
+.btn-share-img{width:100%;padding:13px;background:#1B6DC0;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-share-link{width:100%;padding:12px;background:rgba(129,140,248,0.1);color:#818cf8;border:1px solid rgba(129,140,248,0.3);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-share-close{width:100%;padding:10px;background:transparent;color:#555;border:none;font-size:13px;cursor:pointer;}
+.link-copied-toast{background:#818cf8;}
+
+
 /* ── STATS PAGE ── */
 .stats-page-grid{display:flex;flex-direction:column;gap:12px;padding-bottom:20px;}
 .stats-big-card{background:#2a2a2a;border-radius:14px;padding:16px;position:relative;z-index:1;}
@@ -577,6 +615,48 @@ input[type="file"]{display:none;}
   </button>
 </nav>
 
+
+
+<!-- SHARE MODAL -->
+<div class="share-modal" id="shareModal" onclick="handleShareModalClick(event)">
+  <div class="share-sheet" id="shareSheet">
+    <div class="share-handle"></div>
+    <div class="share-title">Compartir Colección</div>
+    <div class="share-sub">Elige qué mostrar y cómo compartir</div>
+
+    <!-- Options -->
+    <div class="share-options">
+      <div class="share-option-row">
+        <div><div class="share-option-label">Solo favoritos</div><div class="share-option-sub">Mostrar únicamente tus ítems favoritos</div></div>
+        <div class="toggle-switch" id="toggleFavsOnly" onclick="toggleShareOpt('favsOnly')"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="share-option-row">
+        <div><div class="share-option-label">Mostrar valores</div><div class="share-option-sub">Incluir el valor de cada ítem</div></div>
+        <div class="toggle-switch on" id="toggleShowValues" onclick="toggleShareOpt('showValues')"><div class="toggle-knob"></div></div>
+      </div>
+      <div class="share-option-row">
+        <div><div class="share-option-label">Mostrar estadísticas</div><div class="share-option-sub">Total de ítems y valor de la colección</div></div>
+        <div class="toggle-switch on" id="toggleShowStats" onclick="toggleShareOpt('showStats')"><div class="toggle-knob"></div></div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="share-preview" id="sharePreview"></div>
+
+    <!-- Actions -->
+    <div class="share-actions">
+      <button class="btn-share-img" onclick="shareAsImage()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Guardar como imagen
+      </button>
+      <button class="btn-share-link" onclick="shareAsLink()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Copiar link de la app
+      </button>
+      <button class="btn-share-close" onclick="closeShareModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <!-- ONBOARDING -->
 <div class="onboarding" id="onboarding">
@@ -1905,6 +1985,141 @@ function makeStatsCard(title, iconSVG){
   var body=document.createElement('div');
   card.appendChild(body);
   return{card,body};
+}
+
+
+// ── SHARE ──────────────────────────────────────────────
+var shareOpts = {favsOnly:false, showValues:true, showStats:true};
+
+function openShareModal(){
+  renderSharePreview();
+  document.getElementById('shareModal').classList.add('open');
+}
+function closeShareModal(){
+  document.getElementById('shareModal').classList.remove('open');
+}
+function handleShareModalClick(e){
+  if(e.target===document.getElementById('shareModal'))closeShareModal();
+}
+
+function toggleShareOpt(key){
+  shareOpts[key]=!shareOpts[key];
+  var el=document.getElementById('toggleFavsOnly'.replace('favsOnly',key).replace('showValues',key).replace('showStats',key));
+  // find correct toggle
+  var map={favsOnly:'toggleFavsOnly',showValues:'toggleShowValues',showStats:'toggleShowStats'};
+  var toggle=document.getElementById(map[key]);
+  if(toggle)toggle.classList.toggle('on',shareOpts[key]);
+  renderSharePreview();
+}
+
+function renderSharePreview(){
+  var items=shareOpts.favsOnly
+    ?collection.filter(function(c){return c.favorite;})
+    :collection;
+
+  var preview=document.getElementById('sharePreview');
+  if(!preview)return;
+
+  // Avatar
+  var avatarHTML='';
+  if(profile.avatar){
+    avatarHTML='<img src="'+profile.avatar+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;"/>';
+  } else {
+    avatarHTML='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3a3a3a" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  }
+
+  // Grid items (max 9)
+  var gridItems=items.slice(0,9);
+  var gridHTML='<div class="share-grid">';
+  gridItems.forEach(function(item,i){
+    var photo=item.photos&&item.photos.length?item.photos[0]:null;
+    gridHTML+='<div class="share-grid-item">';
+    if(photo){
+      gridHTML+='<img src="'+photo+'"/>';
+    } else {
+      gridHTML+='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>';
+    }
+    if(i===8&&items.length>9){
+      gridHTML+='<div class="share-grid-more">+'+( items.length-9)+'</div>';
+    }
+    gridHTML+='</div>';
+  });
+  if(gridItems.length===0){
+    for(var x=0;x<6;x++) gridHTML+='<div class="share-grid-item"></div>';
+  }
+  gridHTML+='</div>';
+
+  // Stats
+  var statsHTML='';
+  if(shareOpts.showStats){
+    var totalVal=items.reduce(function(s,c){return s+(c.valorActual||0);},0);
+    statsHTML='<div class="share-preview-stats">'
+      +'<div class="share-preview-stat"><div class="share-preview-stat-val">'+items.length+'</div><div class="share-preview-stat-lbl">'+(shareOpts.favsOnly?'Favoritos':'Ítems')+'</div></div>'
+      +(totalVal&&shareOpts.showValues?'<div class="share-preview-stat"><div class="share-preview-stat-val" style="color:#22c55e;">'+fmt(totalVal)+'</div><div class="share-preview-stat-lbl">Valor</div></div>':'')
+      +'<div class="share-preview-stat"><div class="share-preview-stat-val" style="color:#f59e0b;">'+collection.filter(function(c){return c.favorite;}).length+'</div><div class="share-preview-stat-lbl">Favoritos</div></div>'
+      +'</div>';
+  }
+
+  preview.innerHTML=
+    '<div class="share-preview-header">'
+    +'<div class="share-preview-avatar">'+avatarHTML+'</div>'
+    +'<div style="min-width:0;flex:1;">'
+    +'<div class="share-preview-name">'+(profile.name||'Mi Colección')+'</div>'
+    +(profile.handle?'<div class="share-preview-handle">@'+profile.handle+'</div>':'')
+    +(profile.bio?'<div class="share-preview-bio">'+profile.bio+'</div>':'')
+    +'</div>'
+    +(shareOpts.favsOnly?'<svg width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>':'')
+    +'</div>'
+    +gridHTML
+    +statsHTML
+    +'<div class="share-preview-watermark">ColeKtoR</div>';
+}
+
+function shareAsImage(){
+  // Use html2canvas if available, else fallback to native share
+  toast("Guardando imagen...");
+  var preview=document.getElementById('sharePreview');
+  if(!preview)return;
+
+  // Try native share API with a canvas snapshot
+  try{
+    if(typeof html2canvas !== 'undefined'){
+      html2canvas(preview,{backgroundColor:'#0f0f0f',scale:2}).then(function(canvas){
+        canvas.toBlob(function(blob){
+          var file=new File([blob],'colektor-collection.png',{type:'image/png'});
+          if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+            navigator.share({files:[file],title:'Mi Colección · ColeKtoR'}).catch(function(){});
+          } else {
+            var a=document.createElement('a');
+            a.href=URL.createObjectURL(blob);
+            a.download='colektor-collection.png';
+            a.click();
+            toast("Imagen guardada!");
+          }
+        });
+      });
+    } else {
+      // Fallback: open share sheet with text
+      shareAsLink();
+      toast("Comparte el link de tu colección");
+    }
+  }catch(e){shareAsLink();}
+}
+
+function shareAsLink(){
+  var appUrl=window.location.href.split('?')[0];
+  var name=profile.name||'Mi Colección';
+  var text=name+' tiene '+collection.length+' ítems en su colección ColeKtoR. ¡Échale un vistazo! '+appUrl;
+  if(navigator.share){
+    navigator.share({title:'Mi Colección · ColeKtoR',text:text,url:appUrl}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(appUrl).then(function(){
+      toast("Link copiado al portapapeles!","#818cf8");
+    }).catch(function(){
+      toast("URL: "+appUrl,"#818cf8");
+    });
+  }
+  closeShareModal();
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
