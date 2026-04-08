@@ -188,6 +188,8 @@ input[type="file"]{display:none;}
 .folder-inner-view{display:none;position:fixed;inset:0;background:#181818;z-index:350;flex-direction:column;}
 .folder-inner-view.open{display:flex;}
 .folder-inner-header{padding:54px 16px 14px;display:flex;align-items:center;gap:12px;background:#181818;border-bottom:1px solid #1e1e1e;}
+.folder-inner-top{display:flex;align-items:center;justify-content:space-between;padding:54px 16px 6px;background:#181818;}
+.folder-inner-bottom{padding:2px 16px 12px;background:#181818;border-bottom:1px solid #1e1e1e;}
 .folder-inner-back{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;border-radius:99px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .folder-inner-title{font-size:17px;font-weight:800;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .folder-inner-subtitle{font-size:11px;color:#555;margin-top:1px;}
@@ -1349,16 +1351,16 @@ input[type="file"]{display:none;}
 
 <!-- FOLDER INNER VIEW -->
 <div class="folder-inner-view" id="folderInnerView">
-  <div class="folder-inner-header">
+  <div class="folder-inner-top">
     <button class="folder-inner-back" onclick="closeFolderInner()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
       Volver
     </button>
-    <div>
-      <div class="folder-inner-title" id="folderInnerTitle"></div>
-      <div class="folder-inner-subtitle" id="folderInnerSub"></div>
-    </div>
     <button class="btn-folder-edit-inner" id="folderInnerEditBtn">Editar</button>
+  </div>
+  <div class="folder-inner-bottom">
+    <div class="folder-inner-title" id="folderInnerTitle"></div>
+    <div class="folder-inner-subtitle" id="folderInnerSub"></div>
   </div>
   <div class="folder-inner-body" id="folderInnerBody"></div>
   <div class="folder-inner-actions">
