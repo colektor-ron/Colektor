@@ -333,7 +333,8 @@ input[type="file"]{display:none;}
 .empty-state-icon{opacity:0.15;}
 .empty-state-title{font-size:17px;font-weight:700;color:#e2e8f0;}
 .empty-state-sub{font-size:13px;color:#555;line-height:1.6;max-width:240px;}
-.empty-state-btn{margin-top:8px;padding:11px 24px;background:#1B6DC0;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;}
+.empty-state-btn{margin-top:8px;padding:14px 32px;background:#1B6DC0;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;transition:transform 0.12s,background 0.12s,opacity 0.12s;min-width:200px;justify-content:center;}
+.empty-state-btn:active{transform:scale(0.95);background:#1558a0;opacity:0.9;}
 
 
 /* ── PRICE COMPARISON ── */
@@ -1335,6 +1336,8 @@ function renderPendientes(){
         +'<div class="empty-state-sub">Prueba con otro filtro o búsqueda</div>';
     }
     list.appendChild(emptyDiv);
+    var btnEmpty=document.getElementById('btnEmptyAddP');
+    if(btnEmpty){btnEmpty.addEventListener('click',function(){showAddP=true;renderPendientes();});}
   }
 
   displayed.forEach(function(item){
