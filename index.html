@@ -1766,35 +1766,87 @@ function renderCollection(){
     // Sort cards
     var sortedCards=cardItems.slice().sort(function(a,b){
       if(cardColSort==='name')return a.name.localeCompare(b.name);
-      if(cardColSort==='set')return(a.set||'').localeCompare(b.set||'');
+      if(cardColSort==='set')return(a.set||a.category||'').localeCompare(b.set||b.category||'');
       if(cardColSort==='rarity')return(a.tags&&a.tags[0]||'').localeCompare(b.tags&&b.tags[0]||'');
       if(cardColSort==='value')return(b.valorActual||0)-(a.valorActual||0);
       if(cardColSort==='date')return(b.addedAt||0)-(a.addedAt||0);
       return 0;
     });
-    // Render cards
-    if(cardColView==='grid'){
-      var cGrid=document.createElement('div');cGrid.className='cards-grid';
-      sortedCards.forEach(function(item){
-        var div=document.createElement('div');div.className='card-col-item'+(item.favorite?' fav':'');
-        var photo=item.photos&&item.photos.length?item.photos[0]:null;
-        if(photo){div.innerHTML='<img src="'+photo+'" loading="lazy"/>';}
-        else{div.innerHTML='<div class="card-col-item-empty">'+IC.grid(20)+'</div>';}
-        div.innerHTML+='<div class="card-col-name">'+item.name+'</div>';
-        if(item.favorite){var fb=document.createElement('div');fb.className='card-col-fav';fb.innerHTML=IC.star(10,'#f59e0b','#f59e0b');div.appendChild(fb);}
-        if(item.tags&&item.tags[0]){
-          var rb=document.createElement('div');rb.className='card-col-rarity '+getRarityClass(item.tags[0]);
-          rb.textContent=item.tags[0].substring(0,3).toUpperCase();div.appendChild(rb);
+
+    // Group by set
+    var setGroups={};
+    sortedCards.forEach(function(item){
+      var setKey=item.set||item.category||'Sin set';
+      if(!setGroups[setKey])setGroups[setKey]=[];
+      setGroups[setKey].push(item);
+    });
+
+    // Sort set groups
+    var setKeys=Object.keys(setGroups);
+    if(cardColSort==='set'||cardColSort==='date'){
+      setKeys.sort(function(a,b){
+        if(cardColSort==='date'){
+          var aDate=setGroups[a][0].addedAt||0;
+          var bDate=setGroups[b][0].addedAt||0;
+          return bDate-aDate;
         }
-        div.onclick=function(){openDetail(item.id);};
-        cGrid.appendChild(div);
+        return a.localeCompare(b);
       });
-      cardsSection.appendChild(cGrid);
-    } else {
-      var cList=document.createElement('div');cList.className='col-list';
-      sortedCards.forEach(function(item){cList.appendChild(makeListCard(item));});
-      cardsSection.appendChild(cList);
     }
+
+    // Render each set group
+    setKeys.forEach(function(setKey){
+      var setCards=setGroups[setKey];
+      var setWrap=document.createElement('div');setWrap.style.cssText='margin-bottom:16px;';
+
+      // Set header
+      var setHeader=document.createElement('div');
+      setHeader.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;';
+      var setLbl=document.createElement('div');
+      setLbl.style.cssText='font-size:11px;font-weight:700;color:#818cf8;display:flex;align-items:center;gap:6px;flex:1;';
+      setLbl.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>'+setKey;
+      setLbl.innerHTML+='<span style="display:inline-block;width:1px;flex:1;height:1px;background:rgba(129,140,248,0.2);margin-left:6px;"></span>';
+      var setCnt=document.createElement('div');
+      setCnt.style.cssText='font-size:10px;color:#555;font-weight:600;margin-left:8px;flex-shrink:0;';
+      setCnt.textContent=setCards.length+' carta'+(setCards.length!==1?'s':'');
+      setHeader.appendChild(setLbl);setHeader.appendChild(setCnt);
+
+      // Toggle collapse
+      var setBody=document.createElement('div');
+      var collapsed=false;
+      setHeader.onclick=function(){
+        collapsed=!collapsed;
+        setBody.style.display=collapsed?'none':'block';
+        setCnt.textContent=collapsed?'▶ '+setCards.length:setCards.length+' carta'+(setCards.length!==1?'s':'');
+      };
+      setWrap.appendChild(setHeader);
+
+      // Cards grid or list
+      if(cardColView==='grid'){
+        var cGrid=document.createElement('div');cGrid.className='cards-grid';
+        setCards.forEach(function(item){
+          var div=document.createElement('div');div.className='card-col-item'+(item.favorite?' fav':'');
+          var photo=item.photos&&item.photos.length?item.photos[0]:null;
+          if(photo){div.innerHTML='<img src="'+photo+'" loading="lazy"/>';}
+          else{div.innerHTML='<div class="card-col-item-empty">'+IC.grid(20)+'</div>';}
+          div.innerHTML+='<div class="card-col-name">'+item.name+'</div>';
+          if(item.favorite){var fb=document.createElement('div');fb.className='card-col-fav';fb.innerHTML=IC.star(10,'#f59e0b','#f59e0b');div.appendChild(fb);}
+          if(item.tags&&item.tags[0]){
+            var rb=document.createElement('div');rb.className='card-col-rarity '+getRarityClass(item.tags[0]);
+            rb.textContent=item.tags[0].substring(0,3).toUpperCase();div.appendChild(rb);
+          }
+          div.onclick=function(){openDetail(item.id);};
+          cGrid.appendChild(div);
+        });
+        setBody.appendChild(cGrid);
+      } else {
+        var cList=document.createElement('div');cList.className='col-list';
+        setCards.forEach(function(item){cList.appendChild(makeListCard(item));});
+        setBody.appendChild(cList);
+      }
+      setWrap.appendChild(setBody);
+      cardsSection.appendChild(setWrap);
+    });
     content.appendChild(cardsSection);
     // Update displayed to only non-card items
     displayed=nonCardItems;
