@@ -184,6 +184,38 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── BUTTON INTERACTIONS ── */
+.btn-save:active,.btn-primary:active,.btn-add-confirm:active{transform:scale(0.97);opacity:0.88;background:#1558a0;}
+.btn-fav:active{transform:scale(0.97);opacity:0.88;}
+.btn-trade:active{transform:scale(0.97);opacity:0.88;}
+.btn-acquire:active{transform:scale(0.97);opacity:0.88;}
+.btn-move-col:active{transform:scale(0.97);opacity:0.88;}
+.btn-presentacion:active{transform:scale(0.97);opacity:0.88;}
+.btn-danger:active{transform:scale(0.97);background:rgba(239,68,68,0.2);}
+.btn-card-share:active{transform:scale(0.97);opacity:0.88;}
+.btn-share-img:active{transform:scale(0.97);opacity:0.88;}
+.btn-share-link:active{transform:scale(0.97);opacity:0.88;}
+.btn-ob-start:active{transform:scale(0.97);opacity:0.88;}
+.btn-ok:active{transform:scale(0.97);opacity:0.88;}
+.btn-sort.active:active{transform:scale(0.97);}
+.set-row:active{background:#2a2a2a;}
+.col-card:active{transform:scale(0.97);}
+.trade-card:active{opacity:0.85;}
+.item-del-dia:active{opacity:0.85;}
+.recuerdo-card:active{opacity:0.85;}
+.vitrina-close:active{opacity:0.75;}
+.pres-close:active{opacity:0.75;}
+.tab-btn:active{opacity:0.7;}
+
+/* Transitions for smooth feel */
+.btn-save,.btn-primary,.btn-add-confirm,.btn-fav,.btn-trade,
+.btn-acquire,.btn-move-col,.btn-presentacion,.btn-danger,
+.btn-card-share,.btn-share-img,.btn-share-link,.btn-ob-start,
+.btn-ok,.col-card,.trade-card,.item-del-dia,.recuerdo-card{
+  transition:transform 0.12s ease, opacity 0.12s ease, background 0.12s ease;
+}
+
+
 /* ── BACKUP SAFETY ── */
 .update-banner{position:fixed;bottom:80px;left:12px;right:12px;background:#1e1e1e;border:1px solid #f59e0b;border-radius:14px;padding:14px 16px;z-index:9990;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,0.6);transform:translateY(120px);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);visibility:hidden;}
 .update-banner.show{transform:translateY(0);visibility:visible;}
