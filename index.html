@@ -3594,7 +3594,7 @@ function filterSets(query){
 // loadSets replaced by renderSetsTab + loadSetsData
 
 async function loadPokemonSets(){
-  var r = await fetch('https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=30');
+  var r = await fetch('https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=250');
   var d = await r.json();
   return (d.data||[]).map(function(s){
     return{id:s.id,name:s.name,logo:s.images&&s.images.logo?s.images.logo:null,
@@ -3605,8 +3605,8 @@ async function loadPokemonSets(){
 async function loadMagicSets(){
   var r = await fetch('https://api.scryfall.com/sets?order=released');
   var d = await r.json();
-  return ((d.data||[]).filter(function(s){return s.set_type!=='memorabilia'&&s.card_count>0;})
-    .slice(0,30)).map(function(s){
+  return ((d.data||[]).filter(function(s){return s.set_type!=='memorabilia'&&s.card_count>0&&s.set_type!=='token'&&s.set_type!=='minigame';})
+    .sort(function(a,b){return b.released_at>a.released_at?1:-1;})).map(function(s){
     return{id:s.code,name:s.name,logo:s.icon_svg_uri||null,
       count:s.card_count||0,released:s.released_at||'',game:'magic'};
   });
@@ -3615,7 +3615,7 @@ async function loadMagicSets(){
 async function loadYugiohSets(){
   var r = await fetch('https://db.ygoprodeck.com/api/v7/cardsets.php');
   var d = await r.json();
-  return ((Array.isArray(d)?d:[]).slice(0,30)).map(function(s){
+  return (Array.isArray(d)?d:[]).sort(function(a,b){return (b.tcg_date||'')>(a.tcg_date||'')?1:-1;}).map(function(s){
     return{id:s.set_code,name:s.set_name,logo:null,
       count:s.num_of_cards||0,released:s.tcg_date||'',game:'yugioh'};
   });
