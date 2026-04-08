@@ -1313,6 +1313,7 @@ const IDB={
 
 const DOT=["#1B6DC0","#ef4444","#818cf8","#22c55e","#eab308","#06b6d4","#ec4899","#a78bfa"];
 const ESTADOS=["Nuevo","Abierto","En vitrina","Dañado"];
+const FIXED_CATS=["Cartas","Figuras","Gaming","Otros"];
 
 let pendientes=[],categories=[],collection=[],trades=[];
 let pStatusFilter="all",pCatFilter="all",colCatFilter="all",tradeFilter="all";
@@ -1336,8 +1337,7 @@ async function load(){
       categories=oldCats;await IDB.set('categories',categories);
     }
   }catch(e){}
-  pendientes.forEach(f=>{if(f.category&&!categories.includes(f.category))categories.push(f.category);});
-  collection.forEach(c=>{if(c.category&&!categories.includes(c.category))categories.push(c.category);});
+  categories=FIXED_CATS.slice(); // Always use fixed categories
 }
 function save(){
   IDB.set('pendientes',pendientes).catch(()=>{});
@@ -1553,25 +1553,18 @@ function renderPendientes(){
     b.onclick=function(){pStatusFilter=item[0];renderPendientes();};sf.appendChild(b);
   });
 
-  // Cat filters
+  // Cat filters - fixed categories only
   var cf=document.getElementById("pCatFilters");cf.innerHTML="";
+  var catColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Otros":"#94a3b8"};
   var ab=document.createElement("button");ab.className="btn-cat"+(pCatFilter==="all"?" active":"");
   ab.textContent="Todo";ab.onclick=function(){pCatFilter="all";renderPendientes();};cf.appendChild(ab);
-  categories.forEach(function(c,i){
-    var w=document.createElement("div");w.style.cssText="display:flex;align-items:center;gap:2px;";
+  FIXED_CATS.forEach(function(c){
     var b=document.createElement("button");b.className="btn-cat"+(pCatFilter===c?" active":"");
-    b.innerHTML='<span style="color:'+DOT[i%DOT.length]+';margin-right:4px;">●</span>'+c;
+    b.innerHTML='<span style="color:'+(catColors[c]||"#555")+';margin-right:4px;">●</span>'+c;
     b.onclick=function(){pCatFilter=c;renderPendientes();};
-    var d=document.createElement("button");d.textContent="×";
-    d.style.cssText="background:none;border:none;color:#3a3a3a;font-size:15px;padding:2px 4px;cursor:pointer;font-weight:700;";
-    d.onclick=function(e){e.stopPropagation();deleteCategory(c);};
-    w.appendChild(b);w.appendChild(d);cf.appendChild(w);
+    cf.appendChild(b);
   });
-  var nc=document.createElement("button");nc.className="btn-new-cat";nc.textContent="+ Categoría";
-  nc.onclick=function(){showNewCat=!showNewCat;renderPendientes();setTimeout(function(){var i=document.getElementById("newCatInput");if(i)i.focus();},50);};
-  cf.appendChild(nc);
-  document.getElementById("pNewCatForm").innerHTML=showNewCat?
-    '<div class="new-cat-form"><input id="newCatInput" placeholder="Ej: Vinilos, Cartas..." onkeydown="if(event.key===\'Enter\')addCategory()"/><button class="btn-ok" onclick="addCategory()">OK</button><button class="btn-x" onclick="showNewCat=false;renderPendientes()">✕</button></div>':"";
+  document.getElementById("pNewCatForm").innerHTML="";
 
   // List
   var displayed=pendientes.filter(function(f){
@@ -1605,7 +1598,7 @@ function renderPendientes(){
     wrap.style.background=item.acquired?"rgba(34,197,94,0.08)":"#2a2a2a";
     wrap.style.border="1px solid "+(item.acquired?"#22c55e":"#333");
     wrap.style.opacity=item.acquired?"0.8":"1";
-    var catOpts=categories.map(function(c){return '<option value="'+c+'"'+(c===item.category?' selected':'')+'>'+c+'</option>';}).join("");
+    var catOpts=FIXED_CATS.map(function(c){return '<option value="'+c+'"'+(c===item.category?' selected':'')+'>'+c+'</option>';}).join("");
     var thumbHTML=item.photo
       ?'<img class="item-thumb" src="'+item.photo+'"/>'
       :'<div class="item-thumb-empty">'+IC.camera(20)+'</div>';
@@ -1658,7 +1651,7 @@ function renderPendientes(){
       +'<div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:12px">Nuevo ítem</div>'
       +'<label>Nombre</label><input id="newName" placeholder="Ej: Dark Side of the Moon, Charizard..."/>'
       +'<label>Precio / Valor</label><input id="newPrice" type="number" placeholder="Ej: 25000"/>'
-      +'<label>Categoría</label><select id="newCat"><option value="">Sin categoría</option>'+opts+'</select>'
+      +'<label>Categoría</label><select id="newCat">'+FIXED_CATS.map(function(c){return"<option>"+c+"</option>";}).join("")+'</select>'
       +'<div class="add-row"><button class="btn-primary" onclick="addItem()">Agregar</button>'
       +'<button class="btn-secondary" onclick="showAddP=false;renderPendientes()">Cancelar</button></div></div>';
   }else{
@@ -1728,15 +1721,20 @@ function renderCollection(){
   document.getElementById("colSubtitle").textContent=total+" ítem"+(total!==1?"s":"");
 
   // Filters
-  var allCats=Array.from(new Set(collection.map(function(c){return c.category;}).filter(Boolean)));
   var hasFavs=collection.some(function(c){return c.favorite;});
-  var filters=["all"];if(hasFavs)filters.push("favs");allCats.forEach(function(c){filters.push(c);});
+  var colCatColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Otros":"#94a3b8"};
   var cf=document.getElementById("colFilters");cf.innerHTML="";
-  filters.forEach(function(f){
+  // All + Favs + Fixed cats (only show if has items)
+  var filtersToShow=["all"];
+  if(hasFavs)filtersToShow.push("favs");
+  FIXED_CATS.forEach(function(cat){
+    if(collection.some(function(c){return c.category===cat;}))filtersToShow.push(cat);
+  });
+  filtersToShow.forEach(function(f){
     var b=document.createElement("button");b.className="btn-cat"+(colCatFilter===f?" active":"");
     if(f==="all")b.textContent="Todo";
     else if(f==="favs")b.innerHTML=IC.star(11,"#f59e0b","#f59e0b")+" Favoritos";
-    else b.textContent=f;
+    else{b.innerHTML='<span style="color:'+(colCatColors[f]||"#555")+';margin-right:4px;">●</span>'+f;}
     b.onclick=function(){colCatFilter=f;renderCollection();};cf.appendChild(b);
   });
 
@@ -2139,7 +2137,7 @@ function renderDetail(item){
       +'<img class="photo-thumb" src="'+p+'" onclick="openModal(\''+p+'\')"/>'
       +'<button onclick="removeColPhoto('+item.id+','+i+')" style="position:absolute;top:-4px;right:-4px;background:#ef4444;border:none;border-radius:99px;width:18px;height:18px;color:#fff;font-size:10px;cursor:pointer;">✕</button></div>';
   }).join("");
-  var catOpts=categories.map(function(c){return '<option '+(c===item.category?'selected':'')+'>'+c+'</option>';}).join("");
+  var catOpts=FIXED_CATS.map(function(c){return '<option '+(c===item.category?'selected':'')+'>'+c+'</option>';}).join("");
   var estadoOpts=ESTADOS.map(function(e){return '<option '+(e===(item.estado||"Nuevo")?'selected':'')+'>'+e+'</option>';}).join("");
   var isFav=!!item.favorite;
   var tagsHTML=(item.tags||[]).map(function(t){
@@ -3863,8 +3861,7 @@ function renderScannerResults(cards){
 
 function addCardFromScanner(card){
   var clp=clpFromUSD(card.priceUSD);
-  var gameLabel={pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[card.game]||card.game;
-  if(gameLabel&&!categories.includes(gameLabel)) categories.push(gameLabel);
+  var gameLabel='Cartas'; // All TCG cards go to Cartas category
   // Add directly to collection
   collection.push({
     id:Date.now(),
@@ -4162,8 +4159,7 @@ function renderSetCards(set, cards){
 function addCardsFromSet(cards){
   if(!cards.length)return;
   var game = cards[0].game;
-  var gameLabel = {pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[game]||game;
-  if(!categories.includes(gameLabel))categories.push(gameLabel);
+  var gameLabel = 'Cartas'; // All TCG cards go to Cartas category
   var added=0;
   var now=Date.now();
   cards.forEach(function(card){
