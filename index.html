@@ -334,11 +334,11 @@ input[type="file"]{display:none;}
 .scanner-header{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;}
 .scanner-title{font-size:17px;font-weight:800;}
 .scanner-close{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;border-radius:99px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;}
-.scanner-body{flex:1;padding:16px 16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
-.scanner-search-wrap{margin-top:0;}
+.scanner-body{flex:1;padding:16px 16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+.scanner-search-wrap{margin-top:8px;}
 
 /* Game selector */
-.game-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0;}
+.game-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .game-btn{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.15s;}
 .game-btn.active{border-color:#1B6DC0;background:rgba(27,109,192,0.12);}
 .game-btn:active{transform:scale(0.97);}
@@ -350,7 +350,7 @@ input[type="file"]{display:none;}
 /* Search box */
 .scanner-search-wrap{position:relative;}
 .scanner-search{width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:12px;color:#e2e8f0;padding:0 48px 0 16px;font-size:14px;outline:none;font-family:inherit;height:50px;box-sizing:border-box;line-height:50px;-webkit-appearance:none;}
-.scanner-search:focus{border-color:#1B6DC0;}
+.scanner-search:focus{border-color:#3a3a3a;outline:none;}
 .scanner-search-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#1B6DC0;border:none;border-radius:8px;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .scanner-results{display:flex;flex-direction:column;gap:8px;}
 .scanner-result{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.15s;}
