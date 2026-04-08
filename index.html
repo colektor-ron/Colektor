@@ -224,7 +224,8 @@ input[type="file"]{display:none;}
 .scanner-header{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;}
 .scanner-title{font-size:17px;font-weight:800;}
 .scanner-close{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;border-radius:99px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;}
-.scanner-body{flex:1;padding:16px 16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
+.scanner-body{flex:1;padding:16px 16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.scanner-search-wrap{margin-top:4px;}
 
 /* Game selector */
 .game-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
@@ -3502,31 +3503,95 @@ function setScannerTab(tab){
   var tabSets = document.getElementById('scanTab-sets');
   if(tabSearch) tabSearch.classList.toggle('active', tab==='search');
   if(tabSets) tabSets.classList.toggle('active', tab==='sets');
-  if(searchView){
-    searchView.style.display = tab==='search' ? 'block' : 'none';
-  }
+  if(searchView) searchView.style.display = tab==='search' ? 'block' : 'none';
   if(setsView){
     setsView.style.display = tab==='sets' ? 'flex' : 'none';
     setsView.style.flexDirection = 'column';
-    setsView.style.gap = '12px';
+    setsView.style.gap = '10px';
   }
-  if(tab==='sets') loadSets();
+  if(tab==='sets') renderSetsTab();
 }
 
-async function loadSets(){
+function renderSetsTab(){
   var view = document.getElementById('scannerSetsView');
   if(!view) return;
-  view.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando sets...</div>';
+  view.innerHTML = '';
+
+  // Game selector (reuse current game)
+  var gameRow = document.createElement('div');
+  gameRow.innerHTML = '<div class="scanner-game-label">Juego</div>'
+    +'<div class="game-selector">'
+    +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon</div></div>'
+    +'<div class="game-btn'+(currentGame==='magic'?' active':'')+'" id="sgBtn-magic" onclick="setSetsGame(&quot;magic&quot;)"><div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div><div class="game-btn-name">Magic</div></div>'
+    +'<div class="game-btn'+(currentGame==='yugioh'?' active':'')+'" id="sgBtn-yugioh" onclick="setSetsGame(&quot;yugioh&quot;)"><div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div><div class="game-btn-name">Yu-Gi-Oh</div></div>'
+    +'</div>';
+  view.appendChild(gameRow);
+
+  // Set search bar
+  var searchRow = document.createElement('div');
+  searchRow.className = 'scanner-search-wrap';
+  searchRow.innerHTML = '<input class="scanner-search" id="setsSearchInput" placeholder="Buscar set por nombre..."/>'
+    +'<button class="scanner-search-btn" id="setsSearchBtn">'
+    +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
+    +'</button>';
+  view.appendChild(searchRow);
+  var ssi=document.getElementById('setsSearchInput');
+  if(ssi){ssi.oninput=function(){filterSets(this.value);};}
+  var ssb=document.getElementById('setsSearchBtn');
+  if(ssb){ssb.onclick=function(){filterSets(document.getElementById('setsSearchInput').value||'');};}
+
+  // Sets list container
+  var listContainer = document.createElement('div');
+  listContainer.id = 'setsListContainer';
+  listContainer.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando sets...</div>';
+  view.appendChild(listContainer);
+
+  loadSetsData();
+}
+
+var allSetsData = [];
+
+async function loadSetsData(){
+  var container = document.getElementById('setsListContainer');
+  if(!container) return;
   try{
     var sets = [];
     if(currentGame==='pokemon') sets = await loadPokemonSets();
     else if(currentGame==='magic') sets = await loadMagicSets();
     else if(currentGame==='yugioh') sets = await loadYugiohSets();
+    allSetsData = sets;
     renderSetsList(sets);
   }catch(e){
-    view.innerHTML = '<div class="scanner-empty">Error cargando sets.</div>';
+    if(container) container.innerHTML = '<div class="scanner-empty">Error cargando sets. Verifica tu conexión.</div>';
   }
 }
+
+function setSetsGame(game){
+  currentGame = game;
+  ['pokemon','magic','yugioh'].forEach(function(g){
+    // Update both search tab and sets tab game buttons
+    var b1 = document.getElementById('gameBtn-'+g);
+    var b2 = document.getElementById('sgBtn-'+g);
+    if(b1) b1.classList.toggle('active', g===game);
+    if(b2) b2.classList.toggle('active', g===game);
+  });
+  allSetsData = [];
+  var container = document.getElementById('setsListContainer');
+  if(container) container.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando sets...</div>';
+  var searchInput = document.getElementById('setsSearchInput');
+  if(searchInput) searchInput.value = '';
+  loadSetsData();
+}
+
+function filterSets(query){
+  if(!allSetsData.length) return;
+  var filtered = query.trim()
+    ? allSetsData.filter(function(s){return s.name.toLowerCase().includes(query.toLowerCase());})
+    : allSetsData;
+  renderSetsList(filtered);
+}
+
+// loadSets replaced by renderSetsTab + loadSetsData
 
 async function loadPokemonSets(){
   var r = await fetch('https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=30');
@@ -3557,10 +3622,11 @@ async function loadYugiohSets(){
 }
 
 function renderSetsList(sets){
-  var view = document.getElementById('scannerSetsView');
+  var view = document.getElementById('setsListContainer');
+  if(!view) view = document.getElementById('scannerSetsView');
   if(!view) return;
   view.innerHTML = '';
-  if(!sets.length){view.innerHTML='<div class="scanner-empty">Sin sets disponibles.</div>';return;}
+  if(!sets.length){view.innerHTML='<div class="scanner-empty">Sin sets encontrados.</div>';return;}
   var list = document.createElement('div');list.className='set-list';
   sets.forEach(function(set){
     var item = document.createElement('div');item.className='set-item';
@@ -3579,7 +3645,8 @@ function renderSetsList(sets){
 }
 
 async function openSetCards(set){
-  var view = document.getElementById('scannerSetsView');
+  var view = document.getElementById('setsListContainer');
+  if(!view) view = document.getElementById('scannerSetsView');
   view.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando cartas...</div>';
   try{
     var cards = [];
@@ -3620,7 +3687,8 @@ async function openSetCards(set){
 }
 
 function renderSetCards(set, cards){
-  var view = document.getElementById('scannerSetsView');
+  var view = document.getElementById('setsListContainer');
+  if(!view) view = document.getElementById('scannerSetsView');
   view.innerHTML = '';
   selectedSetCards = {};
 
@@ -3628,7 +3696,7 @@ function renderSetCards(set, cards){
   var hRow = document.createElement('div');hRow.className='set-cards-header';
   var backBtn = document.createElement('button');backBtn.className='btn-back-sets';
   backBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Sets';
-  backBtn.onclick = function(){loadSets();};
+  backBtn.onclick = function(){var inp=document.getElementById('setsSearchInput');if(inp)inp.value='';renderSetsList(allSetsData);};
   var title = document.createElement('div');title.className='set-cards-title';title.textContent=set.name;
   hRow.appendChild(backBtn);hRow.appendChild(title);
 
