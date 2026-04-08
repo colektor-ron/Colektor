@@ -184,6 +184,69 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── TARJETA COLECCIONISTA ── */
+.card-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:400;align-items:center;justify-content:center;flex-direction:column;padding:20px;}
+.card-modal.open{display:flex;}
+.card-wrap{position:relative;width:100%;max-width:340px;}
+
+/* The card itself */
+.col-card-id{width:100%;border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(135deg,#0d1b2a 0%,#1a2744 40%,#0d2a1a 100%);box-shadow:0 20px 60px rgba(0,0,0,0.8),0 0 0 1px rgba(255,255,255,0.08);padding:24px;}
+
+/* Shine effect */
+.col-card-id::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.06) 0%,transparent 50%,rgba(255,255,255,0.02) 100%);pointer-events:none;}
+
+/* Decorative elements */
+.card-bg-k{position:absolute;bottom:-20px;right:-10px;font-size:140px;font-weight:900;color:rgba(82,184,72,0.05);line-height:1;pointer-events:none;font-family:sans-serif;}
+.card-top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.card-logo{font-size:13px;font-weight:800;letter-spacing:0.5px;}
+.card-logo span{color:#1B6DC0;}
+.card-logo em{color:#52B848;font-style:normal;}
+.card-badge{background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:99px;padding:3px 10px;font-size:9px;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:1px;}
+
+/* Profile section */
+.card-profile{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+.card-avatar{width:56px;height:56px;border-radius:50%;border:2px solid rgba(27,109,192,0.6);background:#1e1e1e;overflow:hidden;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;font-weight:800;color:#1B6DC0;}
+.card-avatar img{width:100%;height:100%;object-fit:cover;}
+.card-name{font-size:17px;font-weight:800;letter-spacing:-0.3px;}
+.card-handle{font-size:12px;color:#1B6DC0;margin-top:2px;font-weight:600;}
+.card-bio{font-size:10px;color:#64748b;margin-top:3px;line-height:1.4;}
+
+/* Stats row */
+.card-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,0.06);border-radius:12px;overflow:hidden;margin-bottom:18px;}
+.card-stat{background:#0d1b2a;padding:10px 8px;text-align:center;}
+.card-stat-val{font-size:16px;font-weight:800;}
+.card-stat-lbl{font-size:9px;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;}
+
+/* Favorites strip */
+.card-favs-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#555;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.card-favs-label::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.06);}
+.card-favs{display:flex;gap:8px;}
+.card-fav-item{flex:1;background:rgba(255,255,255,0.04);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);aspect-ratio:1;display:flex;align-items:center;justify-content:center;}
+.card-fav-item img{width:100%;height:100%;object-fit:cover;}
+
+/* Top categories */
+.card-cats{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px;}
+.card-cat{background:rgba(27,109,192,0.1);border:1px solid rgba(27,109,192,0.2);border-radius:99px;padding:3px 10px;font-size:9px;color:#1B6DC0;font-weight:600;}
+
+/* Bottom bar */
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.06);}
+.card-footer-level{font-size:10px;color:#64748b;}
+.card-footer-level strong{color:#f59e0b;}
+.card-footer-id{font-size:9px;color:#2a2a2a;font-weight:700;letter-spacing:1px;}
+
+/* Action buttons */
+.card-actions{display:flex;gap:10px;margin-top:16px;width:100%;max-width:340px;}
+.btn-card-share{flex:1;padding:12px;background:#1B6DC0;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-card-close{padding:12px 16px;background:#2a2a2a;color:#94a3b8;border:none;border-radius:10px;font-size:14px;cursor:pointer;}
+
+/* Level colors */
+.level-bronce{color:#cd7f32 !important;}
+.level-plata{color:#c0c0c0 !important;}
+.level-oro{color:#f59e0b !important;}
+.level-platino{color:#818cf8 !important;}
+.level-diamante{color:#06b6d4 !important;}
+
+
 /* ── CONFETTI ── */
 .confetti-container{position:fixed;top:50px;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;overflow:hidden;}
 .confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confettiFall 1.8s ease-in forwards;}
@@ -652,6 +715,7 @@ input[type="file"]{display:none;}
       <div class="profile-stat"><div class="profile-stat-val" id="psFavs">0</div><div class="profile-stat-lbl">Favoritos</div></div>
       <div class="profile-stat"><div class="profile-stat-val" id="psPending">0</div><div class="profile-stat-lbl">Pendientes</div></div>
     </div>
+    <button class="btn-edit-profile" onclick="openCard()" style="left:14px;right:auto;background:rgba(27,109,192,0.12);border-color:rgba(27,109,192,0.3);color:#1B6DC0;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Mi Tarjeta</button>
     <button class="btn-edit-profile" onclick="toggleEditProfile()">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       Editar
@@ -875,6 +939,47 @@ input[type="file"]{display:none;}
   </div>
   <div class="pres-slide" id="presSlide"></div>
   <div class="pres-nav" id="presNav"></div>
+</div>
+
+
+<!-- TARJETA COLECCIONISTA -->
+<div class="card-modal" id="cardModal" onclick="handleCardModalClick(event)">
+  <div class="card-wrap">
+    <div class="col-card-id" id="collectorCard">
+      <div class="card-bg-k">K</div>
+      <div class="card-top-bar">
+        <div class="card-logo"><span>Cole</span><em>K</em><span>toR</span></div>
+        <div class="card-badge" id="cardBadge">Coleccionista</div>
+      </div>
+      <div class="card-profile">
+        <div class="card-avatar" id="cardAvatar"></div>
+        <div>
+          <div class="card-name" id="cardName">—</div>
+          <div class="card-handle" id="cardHandle">@usuario</div>
+          <div class="card-bio" id="cardBio"></div>
+        </div>
+      </div>
+      <div class="card-stats">
+        <div class="card-stat"><div class="card-stat-val" id="cardItems">0</div><div class="card-stat-lbl">Ítems</div></div>
+        <div class="card-stat"><div class="card-stat-val" id="cardValue" style="color:#22c55e;font-size:12px;">$0</div><div class="card-stat-lbl">Valor</div></div>
+        <div class="card-stat"><div class="card-stat-val" id="cardFavs" style="color:#f59e0b;">0</div><div class="card-stat-lbl">Favoritos</div></div>
+      </div>
+      <div class="card-favs-label">Favoritos destacados</div>
+      <div class="card-favs" id="cardFavsStrip"></div>
+      <div class="card-cats" id="cardCats"></div>
+      <div class="card-footer">
+        <div class="card-footer-level">Nivel: <strong id="cardLevel">—</strong></div>
+        <div class="card-footer-id" id="cardFooterId">COLEKTOR · 2025</div>
+      </div>
+    </div>
+  </div>
+  <div class="card-actions">
+    <button class="btn-card-share" onclick="shareCard()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Compartir tarjeta
+    </button>
+    <button class="btn-card-close" onclick="closeCard()">✕</button>
+  </div>
 </div>
 
 <input type="file" id="fileInputP" accept="image/*" onchange="handleFileP(event)"/>
@@ -2658,6 +2763,103 @@ function renderPresSlide(){
     if(Math.abs(diff)>50){if(diff>0&&presIndex<presItems.length-1){presIndex++;renderPresSlide();}else if(diff<0&&presIndex>0){presIndex--;renderPresSlide();}}
   });
 })();
+
+
+// ── TARJETA COLECCIONISTA ──────────────────────────────
+function getCollectorLevel(){
+  var total=collection.length;
+  if(total>=100)return{name:'Diamante',cls:'level-diamante'};
+  if(total>=50)return{name:'Platino',cls:'level-platino'};
+  if(total>=25)return{name:'Oro',cls:'level-oro'};
+  if(total>=10)return{name:'Plata',cls:'level-plata'};
+  return{name:'Bronce',cls:'level-bronce'};
+}
+
+function openCard(){
+  var totalVal=collection.reduce(function(s,c){return s+(c.valorActual||0);},0);
+  var favCount=collection.filter(function(c){return c.favorite;}).length;
+  var level=getCollectorLevel();
+
+  // Avatar
+  var avatarEl=document.getElementById('cardAvatar');
+  if(profile.avatar){
+    avatarEl.innerHTML='<img src="'+profile.avatar+'"/>';
+  } else {
+    avatarEl.textContent=(profile.name||'C').charAt(0).toUpperCase();
+  }
+
+  // Profile info
+  document.getElementById('cardName').textContent=profile.name||'Coleccionista';
+  document.getElementById('cardHandle').textContent='@'+(profile.handle||'usuario');
+  document.getElementById('cardBio').textContent=profile.bio||'';
+
+  // Stats
+  document.getElementById('cardItems').textContent=collection.length;
+  document.getElementById('cardValue').textContent=fmt(totalVal);
+  document.getElementById('cardFavs').textContent=favCount;
+
+  // Level
+  var levelEl=document.getElementById('cardLevel');
+  levelEl.textContent=level.name;
+  levelEl.className=level.cls;
+
+  // Badge
+  document.getElementById('cardBadge').textContent=level.name+' · ColeKtoR';
+
+  // Footer ID
+  var now=new Date();
+  document.getElementById('cardFooterId').textContent='COLEKTOR · '+now.getFullYear();
+
+  // Favs strip - show top 4 favorites, or top 4 by value
+  var favs=collection.filter(function(c){return c.favorite;}).slice(0,4);
+  if(favs.length<4){
+    var extras=collection.filter(function(c){return !c.favorite;})
+      .sort(function(a,b){return (b.valorActual||0)-(a.valorActual||0);})
+      .slice(0,4-favs.length);
+    favs=favs.concat(extras);
+  }
+  var strip=document.getElementById('cardFavsStrip');
+  strip.innerHTML='';
+  for(var i=0;i<4;i++){
+    var div=document.createElement('div');div.className='card-fav-item';
+    if(favs[i]){
+      var photo=favs[i].photos&&favs[i].photos.length?favs[i].photos[0]:null;
+      if(photo){div.innerHTML='<img src="'+photo+'"/>';}
+      else{div.innerHTML=IC.grid(20);}
+    }
+    strip.appendChild(div);
+  }
+
+  // Top categories
+  var catMap={};
+  collection.forEach(function(c){var cat=c.category||'Sin cat.';catMap[cat]=(catMap[cat]||0)+1;});
+  var topCats=Object.keys(catMap).sort(function(a,b){return catMap[b]-catMap[a];}).slice(0,4);
+  var catsEl=document.getElementById('cardCats');catsEl.innerHTML='';
+  topCats.forEach(function(cat){
+    var span=document.createElement('span');span.className='card-cat';
+    span.textContent=cat+' ('+catMap[cat]+')';catsEl.appendChild(span);
+  });
+
+  document.getElementById('cardModal').classList.add('open');
+}
+
+function closeCard(){document.getElementById('cardModal').classList.remove('open');}
+function handleCardModalClick(e){if(e.target===document.getElementById('cardModal'))closeCard();}
+
+function shareCard(){
+  var name=profile.name||'Mi Colección';
+  var level=getCollectorLevel().name;
+  var totalVal=collection.reduce(function(s,c){return s+(c.valorActual||0);},0);
+  var text=name+' es coleccionista nivel '+level+' en ColeKtoR con '+collection.length+' ítems valorados en '+fmt(totalVal)+' 🏆 Descarga la app y crea tu colección!';
+  var url=window.location.href.split('?')[0];
+  if(navigator.share){
+    navigator.share({title:'Mi Tarjeta ColeKtoR',text:text,url:url}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(text+' '+url).then(function(){
+      toast('Tarjeta copiada al portapapeles!','#1B6DC0');
+    }).catch(function(){toast('Tarjeta lista para compartir','#1B6DC0');});
+  }
+}
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
 async function init(){await load();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();}
