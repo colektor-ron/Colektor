@@ -184,6 +184,22 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── SET SELECTION MODE ── */
+.folder-actions{display:flex;gap:8px;padding:0 0 10px;margin-top:-4px;}
+.btn-folder-select{flex:1;padding:8px;background:#2a2a2a;border:1px solid #3a3a3a;color:#94a3b8;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;}
+.btn-folder-select:active{transform:scale(0.97);}
+.btn-folder-delete{flex:1;padding:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#ef4444;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;}
+.btn-folder-delete:active{transform:scale(0.97);}
+.card-col-item.selecting{cursor:pointer;}
+.card-col-item.selected-card{border:2px solid #1B6DC0;background:rgba(27,109,192,0.1);}
+.card-select-check{position:absolute;top:4px;left:4px;width:18px;height:18px;border-radius:50%;border:2px solid rgba(255,255,255,0.5);background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;}
+.card-select-check.checked{background:#1B6DC0;border-color:#1B6DC0;}
+.selection-bar{background:#1B6DC0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.selection-bar-text{font-size:13px;font-weight:600;color:#fff;}
+.btn-sel-delete{background:rgba(239,68,68,0.8);border:none;color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.btn-sel-cancel{background:rgba(255,255,255,0.15);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;}
+
+
 /* ── CARD FOLDERS ── */
 .card-folder{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:14px;overflow:hidden;margin-bottom:12px;transition:all 0.2s;}
 .card-folder-header{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;transition:background 0.15s;}
@@ -1876,37 +1892,59 @@ function renderCollection(){
         fSortBar.appendChild(b);
       });
       fBody.appendChild(fSortBar);
+      // Cards rendered by rebuildFolderCards
+      (function(sk,sc){rebuildFolderCards(sk,sc,fBody,false);})(setKey,setCards);
 
-      // Cards inside folder
-      if(cardColView==='grid'){
-        var cGrid=document.createElement('div');cGrid.className='cards-grid';
-        setCards.forEach(function(item){
-          var div=document.createElement('div');div.className='card-col-item'+(item.favorite?' fav':'');
-          var photo=item.photos&&item.photos.length?item.photos[0]:null;
-          if(photo){div.innerHTML='<img src="'+photo+'" loading="lazy"/>';}
-          else{div.innerHTML='<div class="card-col-item-empty">'+IC.grid(20)+'</div>';}
-          div.innerHTML+='<div class="card-col-name">'+item.name+'</div>';
-          if(item.favorite){var fb=document.createElement('div');fb.className='card-col-fav';fb.innerHTML=IC.star(10,'#f59e0b','#f59e0b');div.appendChild(fb);}
-          if(item.tags&&item.tags[0]){
-            var rb=document.createElement('div');rb.className='card-col-rarity '+getRarityClass(item.tags[0]);
-            rb.textContent=item.tags[0].substring(0,3).toUpperCase();div.appendChild(rb);
-          }
-          div.onclick=function(){openDetail(item.id);};
-          cGrid.appendChild(div);
-        });
-        fBody.appendChild(cGrid);
-      } else {
-        var cList=document.createElement('div');cList.className='col-list';
-        setCards.forEach(function(item){cList.appendChild(makeListCard(item));});
-        fBody.appendChild(cList);
-      }
+      // Action buttons (shown when open)
+      var fActions=document.createElement('div');fActions.className='folder-actions';
+      fActions.style.display='none';
+
+      var btnSelect=document.createElement('button');btnSelect.className='btn-folder-select';
+      btnSelect.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/></svg> Seleccionar';
+
+      var btnDelAll=document.createElement('button');btnDelAll.className='btn-folder-delete';
+      btnDelAll.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Borrar set';
+
+      (function(sk, sc){
+        btnDelAll.onclick=function(e){
+          e.stopPropagation();
+          if(!confirm('¿Eliminar las '+sc.length+' cartas de "'+sk+'"?'))return;
+          collection=collection.filter(function(c){
+            var cSetKey=c.set&&c.set.trim()?c.set.trim():c.category||'Sin set';
+            return cSetKey!==sk;
+          });
+          save();updateBadges();renderCollection();
+          toast('Set eliminado','#ef4444');
+        };
+        btnSelect.onclick=function(e){
+          e.stopPropagation();
+          cardSelecting[sk]=!cardSelecting[sk];
+          if(!cardSelecting[sk])delete cardSelectionMode[sk];
+          else cardSelectionMode[sk]=new Set();
+          btnSelect.innerHTML=cardSelecting[sk]
+            ?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Listo'
+            :'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/></svg> Seleccionar';
+          // Rebuild cards with selection mode
+          rebuildFolderCards(sk,sc,fBody,cardSelecting[sk]);
+        };
+      })(setKey, setCards);
+
+      fActions.appendChild(btnSelect);
+      fActions.appendChild(btnDelAll);
 
       // Toggle open/close
       fHeader.onclick=function(){
-        folder.classList.toggle('open');
+        var isOpen=folder.classList.toggle('open');
+        fActions.style.display=isOpen?'flex':'none';
+        if(!isOpen){
+          // Reset selection when closing
+          delete cardSelecting[setKey];
+          delete cardSelectionMode[setKey];
+        }
       };
 
       folder.appendChild(fHeader);
+      folder.appendChild(fActions);
       folder.appendChild(fBody);
       cardsSection.appendChild(folder);
     });
@@ -1915,9 +1953,41 @@ function renderCollection(){
     displayed=nonCardItems;
   }
 
-  var hasFavsNonCard=nonCardItems.some(function(c){return c.favorite;});
-  var showFavSection=colCatFilter==="all"&&hasFavsNonCard&&colViewMode==="grid"&&colEstadoFilter==="all"&&!hasCards;
-  if(!displayed.length&&!hasCards){hint.textContent='Sin ítems aquí';return;}
+  // Split nonCardItems into Figures, Gaming, Others
+  var FIGURE_CATS=['Dragon Ball','Marvel','Saint Seiya','Figuras','Funko','Amiibo','figura','figure'];
+  var GAMING_CATS=['Retro Gaming','Gaming','Videojuegos','Nintendo','PlayStation','Xbox','Game Boy','SNES','NES','Sega','Atari','retro','gaming','game'];
+
+  function matchesCat(item, cats){
+    return cats.some(function(kw){return item.category&&item.category.toLowerCase().includes(kw.toLowerCase());});
+  }
+
+  var figureItems=nonCardItems.filter(function(c){return matchesCat(c,FIGURE_CATS);});
+  var gamingItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&matchesCat(c,GAMING_CATS);});
+  var otherItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&!matchesCat(c,GAMING_CATS);});
+  displayed=otherItems;
+
+  if(colCatFilter==='all'&&colEstadoFilter==='all'){
+    if(figureItems.length){
+      content.appendChild(makeCategorySection(figureItems,'Figuras',
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8 14v7m8-7v7M5 21h14"/></svg>',
+        '#22c55e','rgba(34,197,94,0.15)'));
+    }
+    if(gamingItems.length){
+      content.appendChild(makeCategorySection(gamingItems,'Gaming',
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="3"/><line x1="8" y1="12" x2="12" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><circle cx="16" cy="11" r="0.5" fill="#06b6d4"/><circle cx="18" cy="13" r="0.5" fill="#06b6d4"/></svg>',
+        '#06b6d4','rgba(6,182,212,0.15)'));
+    }
+    if(otherItems.length&&(figureItems.length||gamingItems.length||hasCards)){
+      content.appendChild(makeCategorySection(otherItems,'Otros',
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/></svg>',
+        '#64748b','rgba(100,116,139,0.15)'));
+      displayed=[];
+    }
+  }
+
+  var hasFavsNonCard=otherItems.some(function(c){return c.favorite;});
+  var showFavSection=colCatFilter==="all"&&hasFavsNonCard&&colViewMode==="grid"&&colEstadoFilter==="all"&&!hasCards&&!figureItems.length&&!gamingItems.length;
+  if(!displayed.length&&!hasCards&&!figureItems.length&&!gamingItems.length){hint.textContent='Sin ítems aquí';return;}
   // ── Otros section (remaining non-card non-figure items)
   if(otherItems.length&&colCatFilter==='all'&&colEstadoFilter==='all'&&figureItems.length>0){
     var otrosLabel=document.createElement('div');
@@ -2819,6 +2889,86 @@ function buildPriceDiff(item){
 }
 
 
+
+function rebuildFolderCards(setKey, setCards, fBody, selecting){
+  // Clear existing cards, keep sort bar
+  var sortBar=fBody.querySelector('.cards-sort-bar,.btn-card-sort')&&fBody.firstChild;
+  // Remove all children except first (sort bar)
+  while(fBody.children.length>1) fBody.removeChild(fBody.lastChild);
+  // Remove selection bar if exists
+  var existingSel=fBody.querySelector('.selection-bar');
+  if(existingSel)fBody.removeChild(existingSel);
+
+  var selected=cardSelectionMode[setKey]||(cardSelectionMode[setKey]=new Set());
+
+  if(selecting){
+    // Selection toolbar
+    var selBar=document.createElement('div');selBar.className='selection-bar';
+    var selText=document.createElement('div');selText.className='selection-bar-text';
+    selText.textContent=selected.size+' seleccionadas';
+    var barBtns=document.createElement('div');barBtns.style.cssText='display:flex;gap:6px;';
+
+    var selAll=document.createElement('button');selAll.className='btn-sel-cancel';
+    selAll.textContent='Sel. todo';
+    selAll.onclick=function(){
+      setCards.forEach(function(c){selected.add(c.id);});
+      rebuildFolderCards(setKey,setCards,fBody,true);
+    };
+
+    var delSel=document.createElement('button');delSel.className='btn-sel-delete';
+    delSel.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg> Borrar ('+selected.size+')';
+    delSel.onclick=function(){
+      if(!selected.size)return;
+      if(!confirm('¿Eliminar '+selected.size+' cartas seleccionadas?'))return;
+      collection=collection.filter(function(c){return !selected.has(c.id);});
+      delete cardSelecting[setKey];
+      delete cardSelectionMode[setKey];
+      save();updateBadges();renderCollection();
+      toast(selected.size+' cartas eliminadas','#ef4444');
+    };
+    barBtns.appendChild(selAll);barBtns.appendChild(delSel);
+    selBar.appendChild(selText);selBar.appendChild(barBtns);
+    fBody.insertBefore(selBar, fBody.children[1]||null);
+  }
+
+  // Render cards
+  if(cardColView==='grid'){
+    var cGrid=document.createElement('div');cGrid.className='cards-grid';
+    setCards.forEach(function(item){
+      var div=document.createElement('div');
+      div.className='card-col-item'+(item.favorite?' fav':'')+(selecting?' selecting':'')+(selected.has(item.id)?' selected-card':'');
+      var photo=item.photos&&item.photos.length?item.photos[0]:null;
+      if(photo)div.innerHTML='<img src="'+photo+'" loading="lazy"/>';
+      else div.innerHTML='<div class="card-col-item-empty">'+IC.grid(20)+'</div>';
+      div.innerHTML+='<div class="card-col-name">'+item.name+'</div>';
+      if(item.favorite){var fb=document.createElement('div');fb.className='card-col-fav';fb.innerHTML=IC.star(10,'#f59e0b','#f59e0b');div.appendChild(fb);}
+      if(item.tags&&item.tags[0]){
+        var rb=document.createElement('div');rb.className='card-col-rarity '+getRarityClass(item.tags[0]);
+        rb.textContent=item.tags[0].substring(0,3).toUpperCase();div.appendChild(rb);
+      }
+      if(selecting){
+        var chk=document.createElement('div');
+        chk.className='card-select-check'+(selected.has(item.id)?' checked':'');
+        if(selected.has(item.id))chk.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        div.appendChild(chk);
+        div.onclick=function(){
+          if(selected.has(item.id))selected.delete(item.id);
+          else selected.add(item.id);
+          rebuildFolderCards(setKey,setCards,fBody,true);
+        };
+      } else {
+        div.onclick=function(){openDetail(item.id);};
+      }
+      cGrid.appendChild(div);
+    });
+    fBody.appendChild(cGrid);
+  } else {
+    var cList=document.createElement('div');cList.className='col-list';
+    setCards.forEach(function(item){cList.appendChild(makeListCard(item));});
+    fBody.appendChild(cList);
+  }
+}
+
 function makeCategorySection(items, title, iconSVG, color, bgColor){
   var section=document.createElement('div');section.className='cards-section';
   var header=document.createElement('div');header.className='cards-section-header';
@@ -3564,6 +3714,8 @@ var currentGame = 'pokemon';
 var CARD_CATEGORIES = ['Pokémon TCG','Magic: The Gathering','Yu-Gi-Oh!'];
 var cardColView = 'grid';
 var cardColSort = 'name';
+var cardSelectionMode = {}; // setKey -> Set of selected item ids
+var cardSelecting = {}; // setKey -> bool
 var scannerSearchTimeout = null;
 
 function openScanner(){
