@@ -184,6 +184,40 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── SETS ── */
+.scanner-tabs{display:flex;gap:0;margin-bottom:14px;background:#1e1e1e;border-radius:10px;padding:3px;}
+.scanner-tab{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#555;border-radius:8px;cursor:pointer;transition:all 0.2s;}
+.scanner-tab.active{background:#2a2a2a;color:#e2e8f0;}
+.set-list{display:flex;flex-direction:column;gap:8px;}
+.set-item{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.15s;}
+.set-item:active{transform:scale(0.98);border-color:#1B6DC0;}
+.set-logo{width:44px;height:44px;border-radius:8px;object-fit:contain;background:#111;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.set-logo img{width:100%;height:100%;object-fit:contain;}
+.set-info{flex:1;min-width:0;}
+.set-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.set-meta{font-size:11px;color:#64748b;margin-top:3px;}
+.set-count{font-size:11px;font-weight:600;color:#1B6DC0;flex-shrink:0;}
+.set-cards-view{display:flex;flex-direction:column;gap:10px;}
+.set-cards-header{display:flex;align-items:center;justify-content:space-between;}
+.set-cards-title{font-size:14px;font-weight:700;}
+.btn-back-sets{background:#2a2a2a;border:none;color:#94a3b8;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.set-cards-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.set-card-item{background:#1e1e1e;border-radius:8px;overflow:hidden;border:1px solid #2a2a2a;cursor:pointer;transition:all 0.15s;position:relative;}
+.set-card-item.selected{border-color:#52B848;background:rgba(82,184,72,0.08);}
+.set-card-item:active{transform:scale(0.96);}
+.set-card-item img{width:100%;aspect-ratio:2/3;object-fit:cover;}
+.set-card-name{font-size:9px;font-weight:600;padding:4px 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#94a3b8;}
+.set-card-check{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:#52B848;display:none;align-items:center;justify-content:center;}
+.set-card-item.selected .set-card-check{display:flex;}
+.btn-add-selected{width:100%;padding:12px;background:#52B848;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s;}
+.btn-add-selected:active{transform:scale(0.97);opacity:0.88;}
+.btn-add-all{width:100%;padding:12px;background:rgba(82,184,72,0.1);color:#52B848;border:1px solid rgba(82,184,72,0.3);border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.15s;}
+.btn-add-all:active{transform:scale(0.97);opacity:0.88;}
+.select-all-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.select-all-btn{font-size:11px;color:#1B6DC0;background:none;border:none;cursor:pointer;font-weight:600;}
+.selected-count{font-size:11px;color:#52B848;font-weight:600;}
+
+
 /* ── CARD SCANNER ── */
 .scanner-modal{display:none;position:fixed;inset:0;background:#0a0a0a;z-index:600;flex-direction:column;}
 .scanner-modal.open{display:flex;}
@@ -197,7 +231,8 @@ input[type="file"]{display:none;}
 .game-btn{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.15s;}
 .game-btn.active{border-color:#1B6DC0;background:rgba(27,109,192,0.12);}
 .game-btn:active{transform:scale(0.97);}
-.game-btn-icon{font-size:24px;margin-bottom:4px;}
+.game-btn-icon{margin-bottom:4px;color:#94a3b8;}
+.game-btn.active .game-btn-icon{color:#1B6DC0;}
 .game-btn-name{font-size:11px;font-weight:600;color:#94a3b8;}
 .game-btn.active .game-btn-name{color:#1B6DC0;}
 
@@ -1154,15 +1189,15 @@ input[type="file"]{display:none;}
       <div class="scanner-game-label">Juego</div>
       <div class="game-selector">
         <div class="game-btn active" id="gameBtn-pokemon" onclick="setGame('pokemon')">
-          <div class="game-btn-icon">⚡</div>
+          <div class="game-btn-icon" style="display:flex;align-items:center;justify-content:center;height:32px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div>
           <div class="game-btn-name">Pokémon</div>
         </div>
         <div class="game-btn" id="gameBtn-magic" onclick="setGame('magic')">
-          <div class="game-btn-icon">🔮</div>
+          <div class="game-btn-icon" style="display:flex;align-items:center;justify-content:center;height:32px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div>
           <div class="game-btn-name">Magic</div>
         </div>
         <div class="game-btn" id="gameBtn-yugioh" onclick="setGame('yugioh')">
-          <div class="game-btn-icon">👁️</div>
+          <div class="game-btn-icon" style="display:flex;align-items:center;justify-content:center;height:32px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div>
           <div class="game-btn-name">Yu-Gi-Oh</div>
         </div>
       </div>
@@ -1174,7 +1209,8 @@ input[type="file"]{display:none;}
       </button>
     </div>
     <div id="scannerResults"></div>
-  </div>
+  </div></div>
+  <div id="scannerSetsView" style="display:none;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;"></div>
 </div>
 
 <input type="file" id="fileInputP" accept="image/*" onchange="handleFileP(event)"/>
@@ -3444,6 +3480,217 @@ function addCardFromScanner(card){
   }
   save();closeScanner();renderPendientes();
   toast('Carta agregada: '+card.name+'!','#818cf8');
+  launchConfetti();
+}
+
+
+// ── SETS SYSTEM ────────────────────────────────────────
+var currentScanTab = 'search';
+var selectedSetCards = {};
+var currentSetData = null;
+
+function setScannerTab(tab){
+  currentScanTab = tab;
+  var searchView = document.getElementById('scannerSearchView');
+  var setsView = document.getElementById('scannerSetsView');
+  document.getElementById('scanTab-search').classList.toggle('active', tab==='search');
+  document.getElementById('scanTab-sets').classList.toggle('active', tab==='sets');
+  if(searchView) searchView.style.display = tab==='search' ? 'block' : 'none';
+  if(setsView) setsView.style.display = tab==='sets' ? 'flex' : 'none';
+  if(tab==='sets') loadSets();
+}
+
+async function loadSets(){
+  var view = document.getElementById('scannerSetsView');
+  if(!view) return;
+  view.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando sets...</div>';
+  try{
+    var sets = [];
+    if(currentGame==='pokemon') sets = await loadPokemonSets();
+    else if(currentGame==='magic') sets = await loadMagicSets();
+    else if(currentGame==='yugioh') sets = await loadYugiohSets();
+    renderSetsList(sets);
+  }catch(e){
+    view.innerHTML = '<div class="scanner-empty">Error cargando sets.</div>';
+  }
+}
+
+async function loadPokemonSets(){
+  var r = await fetch('https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=30');
+  var d = await r.json();
+  return (d.data||[]).map(function(s){
+    return{id:s.id,name:s.name,logo:s.images&&s.images.logo?s.images.logo:null,
+      count:s.total||0,released:s.releaseDate||'',game:'pokemon'};
+  });
+}
+
+async function loadMagicSets(){
+  var r = await fetch('https://api.scryfall.com/sets?order=released');
+  var d = await r.json();
+  return ((d.data||[]).filter(function(s){return s.set_type!=='memorabilia'&&s.card_count>0;})
+    .slice(0,30)).map(function(s){
+    return{id:s.code,name:s.name,logo:s.icon_svg_uri||null,
+      count:s.card_count||0,released:s.released_at||'',game:'magic'};
+  });
+}
+
+async function loadYugiohSets(){
+  var r = await fetch('https://db.ygoprodeck.com/api/v7/cardsets.php');
+  var d = await r.json();
+  return ((Array.isArray(d)?d:[]).slice(0,30)).map(function(s){
+    return{id:s.set_code,name:s.set_name,logo:null,
+      count:s.num_of_cards||0,released:s.tcg_date||'',game:'yugioh'};
+  });
+}
+
+function renderSetsList(sets){
+  var view = document.getElementById('scannerSetsView');
+  if(!view) return;
+  view.innerHTML = '';
+  if(!sets.length){view.innerHTML='<div class="scanner-empty">Sin sets disponibles.</div>';return;}
+  var list = document.createElement('div');list.className='set-list';
+  sets.forEach(function(set){
+    var item = document.createElement('div');item.className='set-item';
+    var logoHTML = set.logo
+      ?'<div class="set-logo"><img src="'+set.logo+'" loading="lazy"/></div>'
+      :'<div class="set-logo">'+IC.grid(22)+'</div>';
+    var date = set.released?set.released.substring(0,4):'';
+    item.innerHTML = logoHTML
+      +'<div class="set-info"><div class="set-name">'+set.name+'</div>'
+      +'<div class="set-meta">'+['Pokémon TCG','Magic: The Gathering','Yu-Gi-Oh!'][['pokemon','magic','yugioh'].indexOf(set.game)]+(date?' · '+date:'')+'</div></div>'
+      +'<div class="set-count">'+set.count+' cartas</div>';
+    item.onclick = function(){openSetCards(set);};
+    list.appendChild(item);
+  });
+  view.appendChild(list);
+}
+
+async function openSetCards(set){
+  var view = document.getElementById('scannerSetsView');
+  view.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando cartas...</div>';
+  try{
+    var cards = [];
+    if(set.game==='pokemon'){
+      var r = await fetch('https://api.pokemontcg.io/v2/cards?q=set.id:'+set.id+'&pageSize=50&orderBy=number');
+      var d = await r.json();
+      cards = (d.data||[]).map(function(c){
+        return{id:c.id,name:c.name,image:c.images&&c.images.small?c.images.small:null,
+          rarity:c.rarity||'',number:c.number||'',set:set.name,
+          priceUSD:c.tcgplayer&&c.tcgplayer.prices?(c.tcgplayer.prices.holofoil||c.tcgplayer.prices.normal||{}):null,
+          game:'pokemon'};
+      });
+    } else if(set.game==='magic'){
+      var r2 = await fetch('https://api.scryfall.com/cards/search?q=set:'+set.id+'&unique=prints&order=number');
+      var d2 = await r2.json();
+      cards = ((d2.data||[]).slice(0,60)).map(function(c){
+        return{id:c.id,name:c.name,image:c.image_uris?c.image_uris.small:null,
+          rarity:c.rarity||'',number:c.collector_number||'',set:set.name,
+          priceUSD:parseFloat(c.prices&&c.prices.usd?c.prices.usd:0)||0,
+          game:'magic'};
+      });
+    } else if(set.game==='yugioh'){
+      var r3 = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?cardset='+encodeURIComponent(set.name)+'&num=50&offset=0');
+      var d3 = await r3.json();
+      cards = ((d3.data||[]).slice(0,50)).map(function(c){
+        return{id:c.id,name:c.name,image:c.card_images&&c.card_images[0]?c.card_images[0].image_url_small:null,
+          rarity:(c.card_sets&&c.card_sets[0]&&c.card_sets[0].set_rarity)||'',
+          number:(c.card_sets&&c.card_sets[0]&&c.card_sets[0].set_code)||'',
+          set:set.name,priceUSD:0,game:'yugioh'};
+      });
+    }
+    currentSetData = {set:set, cards:cards};
+    selectedSetCards = {};
+    renderSetCards(set, cards);
+  }catch(e){
+    view.innerHTML = '<div class="scanner-empty">Error cargando cartas del set.</div>';
+  }
+}
+
+function renderSetCards(set, cards){
+  var view = document.getElementById('scannerSetsView');
+  view.innerHTML = '';
+  selectedSetCards = {};
+
+  var header = document.createElement('div');header.className='set-cards-view';
+  var hRow = document.createElement('div');hRow.className='set-cards-header';
+  var backBtn = document.createElement('button');backBtn.className='btn-back-sets';
+  backBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Sets';
+  backBtn.onclick = function(){loadSets();};
+  var title = document.createElement('div');title.className='set-cards-title';title.textContent=set.name;
+  hRow.appendChild(backBtn);hRow.appendChild(title);
+
+  var selRow = document.createElement('div');selRow.className='select-all-row';
+  var selAll = document.createElement('button');selAll.className='select-all-btn';selAll.textContent='Seleccionar todo';
+  var selCount = document.createElement('span');selCount.className='selected-count';selCount.id='selCount';selCount.textContent='';
+  selAll.onclick = function(){
+    var allSelected = Object.keys(selectedSetCards).length === cards.length;
+    if(allSelected){
+      selectedSetCards={};selAll.textContent='Seleccionar todo';
+    } else {
+      cards.forEach(function(c){selectedSetCards[c.id]=c;});
+      selAll.textContent='Deseleccionar todo';
+    }
+    document.querySelectorAll('.set-card-item').forEach(function(el){
+      el.classList.toggle('selected', !!selectedSetCards[el.dataset.id]);
+    });
+    updateSelCount();
+  };
+  selRow.appendChild(selAll);selRow.appendChild(selCount);
+
+  var grid = document.createElement('div');grid.className='set-cards-grid';
+  cards.forEach(function(card){
+    var item = document.createElement('div');item.className='set-card-item';item.dataset.id=card.id;
+    var check = document.createElement('div');check.className='set-card-check';
+    check.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    if(card.image){item.innerHTML='<img src="'+card.image+'" loading="lazy"/>';}
+    else{item.innerHTML='<div style="aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:#111;">'+IC.grid(16)+'</div>';}
+    item.innerHTML+='<div class="set-card-name">'+card.name+'</div>';
+    item.appendChild(check);
+    item.onclick = function(){
+      if(selectedSetCards[card.id]){delete selectedSetCards[card.id];}
+      else{selectedSetCards[card.id]=card;}
+      item.classList.toggle('selected', !!selectedSetCards[card.id]);
+      updateSelCount();
+    };
+    grid.appendChild(item);
+  });
+
+  function updateSelCount(){
+    var n = Object.keys(selectedSetCards).length;
+    var el=document.getElementById('selCount');
+    if(el)el.textContent = n>0?n+' seleccionadas':'';
+    var addSelBtn=document.getElementById('btnAddSelected');
+    if(addSelBtn)addSelBtn.textContent='Agregar '+n+' cartas seleccionadas';
+    addSelBtn&&(addSelBtn.style.display=n>0?'flex':'none');
+  }
+
+  var btnAll = document.createElement('button');btnAll.className='btn-add-all';
+  btnAll.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar set completo ('+cards.length+' cartas)';
+  btnAll.onclick = function(){addCardsFromSet(cards);};
+
+  var btnSel = document.createElement('button');btnSel.className='btn-add-selected';btnSel.id='btnAddSelected';
+  btnSel.style.display='none';btnSel.textContent='Agregar cartas seleccionadas';
+  btnSel.onclick = function(){addCardsFromSet(Object.values(selectedSetCards));};
+
+  view.appendChild(hRow);view.appendChild(selRow);view.appendChild(grid);view.appendChild(btnAll);view.appendChild(btnSel);
+}
+
+function addCardsFromSet(cards){
+  if(!cards.length)return;
+  var game = cards[0].game;
+  var gameLabel = {pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[game]||game;
+  if(!categories.includes(gameLabel))categories.push(gameLabel);
+  var added=0;
+  cards.forEach(function(card){
+    var clp=clpFromUSD(card.priceUSD&&card.priceUSD.market?card.priceUSD.market:card.priceUSD||0);
+    pendientes.push({
+      id:Date.now()+added,name:card.name,price:clp||0,acquired:false,
+      category:gameLabel,photo:card.image||null,note:card.rarity+(card.number?' · #'+card.number:'')
+    });
+    added++;
+  });
+  save();closeScanner();renderPendientes();
+  toast('Se agregaron '+added+' cartas!','#52B848');
   launchConfetti();
 }
 
