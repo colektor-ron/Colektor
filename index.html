@@ -1185,39 +1185,39 @@ input[type="file"]{display:none;}
     <button class="scanner-close" onclick="closeScanner()">Cerrar</button>
   </div>
   <div class="scanner-body">
-    <!-- Tabs -->
     <div class="scanner-tabs">
       <div class="scanner-tab active" id="scanTab-search" onclick="setScannerTab('search')">Buscar carta</div>
       <div class="scanner-tab" id="scanTab-sets" onclick="setScannerTab('sets')">Sets completos</div>
     </div>
-    <!-- Search view -->
     <div id="scannerSearchView">
-    <div>
-      <div class="scanner-game-label">Juego</div>
-      <div class="game-selector">
-        <div class="game-btn active" id="gameBtn-pokemon" onclick="setGame('pokemon')">
-          <div class="game-btn-icon" style="display:flex;align-items:center;justify-content:center;height:32px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div>
-          <div class="game-btn-name">Pokémon</div>
-        </div>
-        <div class="game-btn" id="gameBtn-magic" onclick="setGame('magic')">
-          <div class="game-btn-icon" style="display:flex;align-items:center;justify-content:center;height:32px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div>
-          <div class="game-btn-name">Magic</div>
-        </div>
-        <div class="game-btn" id="gameBtn-yugioh" onclick="setGame('yugioh')">
-          <div class="game-btn-icon" style="display:flex;align-items:center;justify-content:center;height:32px;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div>
-          <div class="game-btn-name">Yu-Gi-Oh</div>
+      <div>
+        <div class="scanner-game-label">Juego</div>
+        <div class="game-selector">
+          <div class="game-btn active" id="gameBtn-pokemon" onclick="setGame('pokemon')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div>
+            <div class="game-btn-name">Pokémon</div>
+          </div>
+          <div class="game-btn" id="gameBtn-magic" onclick="setGame('magic')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div>
+            <div class="game-btn-name">Magic</div>
+          </div>
+          <div class="game-btn" id="gameBtn-yugioh" onclick="setGame('yugioh')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div>
+            <div class="game-btn-name">Yu-Gi-Oh</div>
+          </div>
         </div>
       </div>
+      <div class="scanner-search-wrap">
+        <input class="scanner-search" id="scannerSearch" placeholder="Buscar por nombre de carta..." onkeydown="if(event.key==='Enter')searchCards()"/>
+        <button class="scanner-search-btn" onclick="searchCards()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+      </div>
+      <div id="scannerResults"></div>
     </div>
-    <div class="scanner-search-wrap">
-      <input class="scanner-search" id="scannerSearch" placeholder="Buscar por nombre de carta..." onkeydown="if(event.key==='Enter')searchCards()"/>
-      <button class="scanner-search-btn" onclick="searchCards()">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
-    </div>
-    <div id="scannerResults"></div>
-
-
+    <div id="scannerSetsView" style="display:none;flex-direction:column;gap:12px;"></div>
+  </div>
+</div>
 <input type="file" id="fileInputP" accept="image/*" onchange="handleFileP(event)"/>
 <input type="file" id="colPhotoInput" accept="image/*" onchange="handleColPhoto(event)"/>
 <input type="file" id="importFile" accept=".json" onchange="importData(event)"/>
