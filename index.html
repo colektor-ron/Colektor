@@ -184,6 +184,32 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── CARDS SECTION ── */
+.cards-section{margin-bottom:20px;position:relative;z-index:1;}
+.cards-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cards-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#818cf8;display:flex;align-items:center;gap:6px;}
+.cards-section-title::after{content:'';flex:1;height:1px;background:rgba(129,140,248,0.2);}
+.cards-section-count{font-size:11px;color:#555;font-weight:600;}
+.cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.card-col-item{background:#1e1e1e;border-radius:10px;overflow:hidden;border:1px solid #2a2a2a;cursor:pointer;transition:transform 0.15s;position:relative;}
+.card-col-item:active{transform:scale(0.96);}
+.card-col-item.fav{border-color:rgba(245,158,11,0.4);}
+.card-col-item img{width:100%;aspect-ratio:2/3;object-fit:cover;display:block;}
+.card-col-item-empty{width:100%;aspect-ratio:2/3;background:#111;display:flex;align-items:center;justify-content:center;}
+.card-col-name{font-size:9px;font-weight:600;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#94a3b8;background:#1a1a1a;}
+.card-col-fav{position:absolute;top:4px;right:4px;}
+.card-col-rarity{position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.7);border-radius:4px;padding:2px 5px;font-size:8px;font-weight:700;}
+.cards-view-toggle{display:flex;gap:4px;}
+.btn-cards-view{background:#2a2a2a;border:1px solid #3a3a3a;color:#555;border-radius:6px;padding:4px 8px;font-size:10px;cursor:pointer;font-weight:600;}
+.btn-cards-view.active{background:#818cf8;border-color:#818cf8;color:#fff;}
+
+/* Card sort bar */
+.cards-sort-bar{display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;}
+.cards-sort-bar::-webkit-scrollbar{display:none;}
+.btn-card-sort{padding:4px 10px;font-size:10px;font-weight:600;background:#1e1e1e;border:1px solid #2a2a2a;color:#555;border-radius:99px;white-space:nowrap;cursor:pointer;flex-shrink:0;}
+.btn-card-sort.active{background:rgba(129,140,248,0.15);border-color:#818cf8;color:#818cf8;}
+
+
 /* ── SETS ── */
 .scanner-tabs{display:flex;gap:0;margin-bottom:14px;background:#1e1e1e;border-radius:10px;padding:3px;}
 .scanner-tab{flex:1;padding:8px;text-align:center;font-size:12px;font-weight:600;color:#555;border-radius:8px;cursor:pointer;transition:all 0.2s;}
@@ -1708,7 +1734,75 @@ function renderCollection(){
     content.appendChild(es2);return;
   }
 
-  var showFavSection=colCatFilter==="all"&&hasFavs&&colViewMode==="grid"&&colEstadoFilter==="all";
+  // ── Cards section (TCG items grouped separately)
+  var cardItems=displayed.filter(function(c){return CARD_CATEGORIES.includes(c.category);});
+  var nonCardItems=displayed.filter(function(c){return !CARD_CATEGORIES.includes(c.category);});
+  var hasCards=cardItems.length>0&&colCatFilter==='all'&&colEstadoFilter==='all';
+
+  if(hasCards){
+    var cardsSection=document.createElement('div');cardsSection.className='cards-section';
+    // Header
+    var csHeader=document.createElement('div');csHeader.className='cards-section-header';
+    var csTitle=document.createElement('div');csTitle.className='cards-section-title';
+    csTitle.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Cartas ('+cardItems.length+')';
+    var csCount=document.createElement('div');csCount.className='cards-view-toggle';
+    // View toggle
+    var btnG=document.createElement('button');btnG.className='btn-cards-view'+(cardColView==='grid'?' active':'');
+    btnG.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+    var btnL=document.createElement('button');btnL.className='btn-cards-view'+(cardColView==='list'?' active':'');
+    btnL.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
+    btnG.onclick=function(){cardColView='grid';renderCollection();};
+    btnL.onclick=function(){cardColView='list';renderCollection();};
+    csCount.appendChild(btnG);csCount.appendChild(btnL);
+    csHeader.appendChild(csTitle);csHeader.appendChild(csCount);
+    cardsSection.appendChild(csHeader);
+    // Sort bar
+    var sortBar=document.createElement('div');sortBar.className='cards-sort-bar';
+    [['name','Nombre'],['set','Set'],['rarity','Rareza'],['value','Valor'],['date','Reciente']].forEach(function(s){
+      var b=document.createElement('button');b.className='btn-card-sort'+(cardColSort===s[0]?' active':'');
+      b.textContent=s[1];b.onclick=function(){cardColSort=s[0];renderCollection();};sortBar.appendChild(b);
+    });
+    cardsSection.appendChild(sortBar);
+    // Sort cards
+    var sortedCards=cardItems.slice().sort(function(a,b){
+      if(cardColSort==='name')return a.name.localeCompare(b.name);
+      if(cardColSort==='set')return(a.set||'').localeCompare(b.set||'');
+      if(cardColSort==='rarity')return(a.tags&&a.tags[0]||'').localeCompare(b.tags&&b.tags[0]||'');
+      if(cardColSort==='value')return(b.valorActual||0)-(a.valorActual||0);
+      if(cardColSort==='date')return(b.addedAt||0)-(a.addedAt||0);
+      return 0;
+    });
+    // Render cards
+    if(cardColView==='grid'){
+      var cGrid=document.createElement('div');cGrid.className='cards-grid';
+      sortedCards.forEach(function(item){
+        var div=document.createElement('div');div.className='card-col-item'+(item.favorite?' fav':'');
+        var photo=item.photos&&item.photos.length?item.photos[0]:null;
+        if(photo){div.innerHTML='<img src="'+photo+'" loading="lazy"/>';}
+        else{div.innerHTML='<div class="card-col-item-empty">'+IC.grid(20)+'</div>';}
+        div.innerHTML+='<div class="card-col-name">'+item.name+'</div>';
+        if(item.favorite){var fb=document.createElement('div');fb.className='card-col-fav';fb.innerHTML=IC.star(10,'#f59e0b','#f59e0b');div.appendChild(fb);}
+        if(item.tags&&item.tags[0]){
+          var rb=document.createElement('div');rb.className='card-col-rarity '+getRarityClass(item.tags[0]);
+          rb.textContent=item.tags[0].substring(0,3).toUpperCase();div.appendChild(rb);
+        }
+        div.onclick=function(){openDetail(item.id);};
+        cGrid.appendChild(div);
+      });
+      cardsSection.appendChild(cGrid);
+    } else {
+      var cList=document.createElement('div');cList.className='col-list';
+      sortedCards.forEach(function(item){cList.appendChild(makeListCard(item));});
+      cardsSection.appendChild(cList);
+    }
+    content.appendChild(cardsSection);
+    // Update displayed to only non-card items
+    displayed=nonCardItems;
+  }
+
+  var hasFavsNonCard=nonCardItems.some(function(c){return c.favorite;});
+  var showFavSection=colCatFilter==="all"&&hasFavsNonCard&&colViewMode==="grid"&&colEstadoFilter==="all"&&!hasCards;
+  if(!displayed.length&&!hasCards){hint.textContent='Sin ítems aquí';return;}
   if(showFavSection){
     var favs=displayed.filter(function(c){return c.favorite;});
     var rest=displayed.filter(function(c){return !c.favorite;});
@@ -3322,6 +3416,9 @@ function listenForUpdates(){
 
 // ── CARD SCANNER ───────────────────────────────────────
 var currentGame = 'pokemon';
+var CARD_CATEGORIES = ['Pokémon TCG','Magic: The Gathering','Yu-Gi-Oh!'];
+var cardColView = 'grid';
+var cardColSort = 'name';
 var scannerSearchTimeout = null;
 
 function openScanner(){
@@ -3470,23 +3567,29 @@ function renderScannerResults(cards){
 function addCardFromScanner(card){
   var clp=clpFromUSD(card.priceUSD);
   var gameLabel={pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[card.game]||card.game;
-  // Add to pendientes with pre-filled data
-  pendientes.push({
+  if(gameLabel&&!categories.includes(gameLabel)) categories.push(gameLabel);
+  // Add directly to collection
+  collection.push({
     id:Date.now(),
-    name:card.name+(card.set?' ('+card.set+')':''),
-    price:clp||0,
-    acquired:false,
+    name:card.name,
     category:gameLabel,
-    photo:card.image||null,
-    note:(card.rarity||'')+(card.number?' · #'+card.number:'')
+    photos:card.image?[card.image]:[],
+    note:(card.rarity||'')+(card.number?' · #'+card.number:''),
+    year:new Date().getFullYear().toString(),
+    rating:0,review:'',favorite:false,
+    estado:'Nuevo',
+    valorActual:clp||0,
+    precioPagado:clp||0,
+    edicion:card.number||'',
+    tags:card.rarity?[card.rarity]:[],
+    set:card.set||'',
+    addedAt:Date.now()
   });
-  // Also add category if not exists
-  if(gameLabel&&!categories.includes(gameLabel)){
-    categories.push(gameLabel);
-  }
-  save();closeScanner();renderPendientes();
-  toast('Carta agregada: '+card.name+'!','#818cf8');
+  save();closeScanner();
+  switchTab('coleccion');
+  toast('Carta agregada a tu colección!','#818cf8');
   launchConfetti();
+  setTimeout(function(){checkAchievements();},500);
 }
 
 
@@ -3762,17 +3865,32 @@ function addCardsFromSet(cards){
   var gameLabel = {pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[game]||game;
   if(!categories.includes(gameLabel))categories.push(gameLabel);
   var added=0;
+  var now=Date.now();
   cards.forEach(function(card){
-    var clp=clpFromUSD(card.priceUSD&&card.priceUSD.market?card.priceUSD.market:card.priceUSD||0);
-    pendientes.push({
-      id:Date.now()+added,name:card.name,price:clp||0,acquired:false,
-      category:gameLabel,photo:card.image||null,note:card.rarity+(card.number?' · #'+card.number:'')
+    var clp=clpFromUSD(card.priceUSD&&card.priceUSD.market?card.priceUSD.market:(typeof card.priceUSD==='number'?card.priceUSD:0));
+    collection.push({
+      id:now+added,
+      name:card.name,
+      category:gameLabel,
+      photos:card.image?[card.image]:[],
+      note:(card.rarity||'')+(card.number?' · #'+card.number:''),
+      year:new Date().getFullYear().toString(),
+      rating:0,review:'',favorite:false,
+      estado:'Nuevo',
+      valorActual:clp||0,
+      precioPagado:clp||0,
+      edicion:card.number||'',
+      tags:card.rarity?[card.rarity]:[],
+      set:card.set||'',
+      addedAt:now+added
     });
     added++;
   });
-  save();closeScanner();renderPendientes();
-  toast('Se agregaron '+added+' cartas!','#52B848');
+  save();updateBadges();closeScanner();
+  switchTab('coleccion');
+  toast('Se agregaron '+added+' cartas a tu colección!','#52B848');
   launchConfetti();
+  setTimeout(function(){checkAchievements();},500);
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
