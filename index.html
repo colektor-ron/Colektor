@@ -4607,6 +4607,8 @@ function openFolderInner(folderId, allCatItems){
 }
 
 var folderInnerViewMode = 'grid';
+var GRID_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
+var LIST_ICON = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
 function deleteFolderFromInner(){
   if(!currentOpenFolder) return;
   if(!confirm('¿Eliminar la carpeta "'+currentOpenFolder.name+'"? Los ítems NO se eliminarán.')) return;
@@ -4618,11 +4620,7 @@ function deleteFolderFromInner(){
 function toggleFolderInnerView(){
   folderInnerViewMode = folderInnerViewMode==='grid'?'list':'grid';
   var btn = document.getElementById('folderInnerViewToggle');
-  if(btn){
-    btn.innerHTML = folderInnerViewMode==='grid'
-      ?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>'
-      :'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
-  }
+  if(btn) btn.innerHTML = folderInnerViewMode==='grid' ? LIST_ICON : GRID_ICON;
   renderFolderInnerContent();
 }
 function closeFolderInner(){
@@ -4653,7 +4651,7 @@ function renderFolderInnerContent(){
     return;
   }
 
-  if(colViewMode==='list'){
+  if(folderInnerViewMode==='list'){
     var list = document.createElement('div');list.className='col-list';
     folderItems.forEach(function(item){
       var row = makeListCard(item);
