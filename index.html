@@ -2664,6 +2664,7 @@ function renderEstadoFilters(){
 function makeListCard(item){
   var card=document.createElement('div');
   card.className='col-list-item'+(item.favorite?' fav':'');
+  card.style.borderLeft='3px solid '+dotColor(item.category);
   var photo=item.photos&&item.photos.length?item.photos[0]:null;
   var rating=item.rating||0;
   var starsHTML=[1,2,3,4,5].map(function(n){
