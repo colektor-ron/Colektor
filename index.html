@@ -184,6 +184,28 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── CARD FOLDERS ── */
+.card-folder{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:14px;overflow:hidden;margin-bottom:12px;transition:all 0.2s;}
+.card-folder-header{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;transition:background 0.15s;}
+.card-folder-header:active{background:#2a2a2a;}
+.card-folder-cover{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;width:52px;height:52px;border-radius:8px;overflow:hidden;flex-shrink:0;background:#111;border:1px solid #333;}
+.card-folder-cover img{width:100%;height:100%;object-fit:cover;}
+.card-folder-cover-empty{width:100%;height:100%;background:#181818;display:flex;align-items:center;justify-content:center;}
+.card-folder-info{flex:1;min-width:0;}
+.card-folder-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.card-folder-meta{font-size:11px;color:#64748b;margin-top:3px;display:flex;align-items:center;gap:6px;}
+.card-folder-count{background:rgba(129,140,248,0.12);border:1px solid rgba(129,140,248,0.2);color:#818cf8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;}
+.card-folder-arrow{color:#3a3a3a;font-size:16px;flex-shrink:0;transition:transform 0.2s;}
+.card-folder.open .card-folder-arrow{transform:rotate(90deg);}
+.card-folder-body{display:none;padding:0 12px 12px;}
+.card-folder.open .card-folder-body{display:block;}
+.card-folder-game{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 7px;border-radius:4px;}
+.folder-game-pokemon{background:rgba(239,68,68,0.1);color:#ef4444;}
+.folder-game-magic{background:rgba(129,140,248,0.1);color:#818cf8;}
+.folder-game-yugioh{background:rgba(245,158,11,0.1);color:#f59e0b;}
+.folder-game-other{background:rgba(100,116,139,0.1);color:#64748b;}
+
+
 /* ── CARDS SECTION ── */
 .cards-section{margin-bottom:20px;position:relative;z-index:1;}
 .cards-section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
@@ -1794,34 +1816,61 @@ function renderCollection(){
       });
     }
 
-    // Render each set group
+    // Render each set as a folder
     setKeys.forEach(function(setKey){
       var setCards=setGroups[setKey];
-      var setWrap=document.createElement('div');setWrap.style.cssText='margin-bottom:16px;';
 
-      // Set header
-      var setHeader=document.createElement('div');
-      setHeader.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;';
-      var setLbl=document.createElement('div');
-      setLbl.style.cssText='font-size:11px;font-weight:700;color:#818cf8;display:flex;align-items:center;gap:6px;flex:1;';
-      setLbl.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>'+setKey;
-      setLbl.innerHTML+='<span style="display:inline-block;width:1px;flex:1;height:1px;background:rgba(129,140,248,0.2);margin-left:6px;"></span>';
-      var setCnt=document.createElement('div');
-      setCnt.style.cssText='font-size:10px;color:#555;font-weight:600;margin-left:8px;flex-shrink:0;';
-      setCnt.textContent=setCards.length+' carta'+(setCards.length!==1?'s':'');
-      setHeader.appendChild(setLbl);setHeader.appendChild(setCnt);
+      // Determine game label for badge
+      var gameClass='folder-game-other';
+      var gameName='';
+      if(setCards[0]){
+        var cat=setCards[0].category||'';
+        if(cat==='Pokémon TCG'){gameClass='folder-game-pokemon';gameName='Pokémon';}
+        else if(cat==='Magic: The Gathering'){gameClass='folder-game-magic';gameName='Magic';}
+        else if(cat==="Yu-Gi-Oh!"){gameClass='folder-game-yugioh';gameName='Yu-Gi-Oh';}
+      }
 
-      // Toggle collapse
-      var setBody=document.createElement('div');
-      var collapsed=false;
-      setHeader.onclick=function(){
-        collapsed=!collapsed;
-        setBody.style.display=collapsed?'none':'block';
-        setCnt.textContent=collapsed?'▶ '+setCards.length:setCards.length+' carta'+(setCards.length!==1?'s':'');
-      };
-      setWrap.appendChild(setHeader);
+      // Cover: up to 4 card images in 2x2 grid
+      var coverPhotos=[];
+      setCards.forEach(function(c){
+        if(coverPhotos.length<4&&c.photos&&c.photos.length) coverPhotos.push(c.photos[0]);
+      });
+      var coverHTML='';
+      for(var ci=0;ci<4;ci++){
+        if(coverPhotos[ci]) coverHTML+='<img src="'+coverPhotos[ci]+'" loading="lazy"/>';
+        else coverHTML+='<div class="card-folder-cover-empty">'+IC.grid(10)+'</div>';
+      }
 
-      // Cards grid or list
+      var folder=document.createElement('div');folder.className='card-folder';
+
+      // Header
+      var fHeader=document.createElement('div');fHeader.className='card-folder-header';
+      fHeader.innerHTML=
+        '<div class="card-folder-cover">'+coverHTML+'</div>'
+        +'<div class="card-folder-info">'
+        +'<div class="card-folder-name">'+setKey+'</div>'
+        +'<div class="card-folder-meta">'
+        +(gameName?'<span class="card-folder-game '+gameClass+'">'+gameName+'</span>':'')
+        +'<span>'+setCards.filter(function(c){return c.favorite;}).length+' fav</span>'
+        +'</div></div>'
+        +'<div class="card-folder-count">'+setCards.length+'</div>'
+        +'<div class="card-folder-arrow">›</div>';
+
+      // Body (hidden by default)
+      var fBody=document.createElement('div');fBody.className='card-folder-body';
+
+      // Sort bar inside folder
+      var fSortBar=document.createElement('div');
+      fSortBar.style.cssText='display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;';
+      [['name','Nombre'],['rarity','Rareza'],['value','Valor']].forEach(function(s){
+        var b=document.createElement('button');b.className='btn-card-sort'+(cardColSort===s[0]?' active':'');
+        b.textContent=s[1];
+        b.onclick=function(e){e.stopPropagation();cardColSort=s[0];renderCollection();};
+        fSortBar.appendChild(b);
+      });
+      fBody.appendChild(fSortBar);
+
+      // Cards inside folder
       if(cardColView==='grid'){
         var cGrid=document.createElement('div');cGrid.className='cards-grid';
         setCards.forEach(function(item){
@@ -1838,14 +1887,21 @@ function renderCollection(){
           div.onclick=function(){openDetail(item.id);};
           cGrid.appendChild(div);
         });
-        setBody.appendChild(cGrid);
+        fBody.appendChild(cGrid);
       } else {
         var cList=document.createElement('div');cList.className='col-list';
         setCards.forEach(function(item){cList.appendChild(makeListCard(item));});
-        setBody.appendChild(cList);
+        fBody.appendChild(cList);
       }
-      setWrap.appendChild(setBody);
-      cardsSection.appendChild(setWrap);
+
+      // Toggle open/close
+      fHeader.onclick=function(){
+        folder.classList.toggle('open');
+      };
+
+      folder.appendChild(fHeader);
+      folder.appendChild(fBody);
+      cardsSection.appendChild(folder);
     });
     content.appendChild(cardsSection);
     // Update displayed to only non-card items
