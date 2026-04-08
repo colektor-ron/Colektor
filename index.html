@@ -224,7 +224,7 @@ input[type="file"]{display:none;}
 .scanner-header{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;}
 .scanner-title{font-size:17px;font-weight:800;}
 .scanner-close{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;border-radius:99px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;}
-.scanner-body{flex:1;padding:0 16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
+.scanner-body{flex:1;padding:16px 16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px;}
 
 /* Game selector */
 .game-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
@@ -3498,10 +3498,18 @@ function setScannerTab(tab){
   currentScanTab = tab;
   var searchView = document.getElementById('scannerSearchView');
   var setsView = document.getElementById('scannerSetsView');
-  document.getElementById('scanTab-search').classList.toggle('active', tab==='search');
-  document.getElementById('scanTab-sets').classList.toggle('active', tab==='sets');
-  if(searchView) searchView.style.display = tab==='search' ? 'block' : 'none';
-  if(setsView) setsView.style.display = tab==='sets' ? 'flex' : 'none';
+  var tabSearch = document.getElementById('scanTab-search');
+  var tabSets = document.getElementById('scanTab-sets');
+  if(tabSearch) tabSearch.classList.toggle('active', tab==='search');
+  if(tabSets) tabSets.classList.toggle('active', tab==='sets');
+  if(searchView){
+    searchView.style.display = tab==='search' ? 'block' : 'none';
+  }
+  if(setsView){
+    setsView.style.display = tab==='sets' ? 'flex' : 'none';
+    setsView.style.flexDirection = 'column';
+    setsView.style.gap = '12px';
+  }
   if(tab==='sets') loadSets();
 }
 
