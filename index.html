@@ -4254,7 +4254,7 @@ function renderSetCards(set, cards){
   btnSel.style.display='none';btnSel.textContent='Agregar cartas seleccionadas';
   btnSel.onclick = function(){addCardsFromSet(Object.values(selectedSetCards));};
 
-  view.appendChild(hRow);view.appendChild(selRow);view.appendChild(grid);view.appendChild(btnAll);view.appendChild(btnSel);
+  view.appendChild(hRow);view.appendChild(btnAll);view.appendChild(selRow);view.appendChild(grid);view.appendChild(btnSel);
 }
 
 function addCardsFromSet(cards){
