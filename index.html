@@ -201,8 +201,8 @@ input[type="file"]{display:none;}
 .badges-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
 .badge-card{background:#2a2a2a;border-radius:12px;padding:12px 8px;text-align:center;border:1px solid #333;}
 .badge-card.unlocked{border-color:#f59e0b;background:rgba(245,158,11,0.06);}
-.badge-icon{font-size:26px;margin-bottom:5px;opacity:0.2;transition:opacity 0.3s;display:block;}
-.badge-card.unlocked .badge-icon{opacity:1;}
+.badge-icon{width:28px;height:28px;margin:0 auto 6px;opacity:0.15;transition:opacity 0.3s;display:flex;align-items:center;justify-content:center;color:#e2e8f0;}
+.badge-card.unlocked .badge-icon{opacity:1;color:#f59e0b;}
 .badge-name{font-size:10px;font-weight:700;color:#555;}
 .badge-card.unlocked .badge-name{color:#f59e0b;}
 .badge-desc{font-size:9px;color:#444;margin-top:2px;line-height:1.4;}
@@ -860,7 +860,7 @@ input[type="file"]{display:none;}
 <div class="confetti-container" id="confettiContainer"></div>
 <!-- ACHIEVEMENT TOAST -->
 <div class="achievement-toast" id="achievementToast">
-  <div class="achievement-icon" id="achievementIcon">🏆</div>
+  <div class="achievement-icon" id="achievementIcon" style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#f59e0b;"></div>
   <div class="achievement-text">
     <div class="achievement-label">Logro desbloqueado!</div>
     <div class="achievement-title" id="achievementTitle"></div>
@@ -2529,18 +2529,18 @@ function launchConfetti(){
 
 // ── ACHIEVEMENTS ───────────────────────────────────────
 var ACHIEVEMENTS=[
-  {id:'first_item',icon:'🎯',title:'Primer ítem',desc:'Agrega tu primer ítem',check:function(){return collection.length>=1;}},
-  {id:'five_items',icon:'⭐',title:'Coleccionista',desc:'5 ítems en tu colección',check:function(){return collection.length>=5;}},
-  {id:'ten_items',icon:'🏅',title:'Colección en marcha',desc:'10 ítems en tu colección',check:function(){return collection.length>=10;}},
-  {id:'fifty_items',icon:'🏆',title:'Gran coleccionista',desc:'50 ítems en tu colección',check:function(){return collection.length>=50;}},
-  {id:'first_fav',icon:'💛',title:'Primer favorito',desc:'Marca tu primer favorito',check:function(){return collection.some(function(c){return c.favorite;});}},
-  {id:'five_favs',icon:'❤️',title:'Corazón de coleccionista',desc:'5 ítems favoritos',check:function(){return collection.filter(function(c){return c.favorite;}).length>=5;}},
-  {id:'first_sale',icon:'💰',title:'Primera venta',desc:'Pon a la venta un ítem',check:function(){return trades.some(function(t){return t.type==='sell';});}},
-  {id:'sold_one',icon:'🤑',title:'Vendedor',desc:'Vende tu primer ítem',check:function(){return trades.some(function(t){return t.status==='sold';});}},
-  {id:'rated_five',icon:'✨',title:'Crítico exigente',desc:'Puntúa con 5 estrellas',check:function(){return collection.some(function(c){return c.rating===5;});}},
-  {id:'first_review',icon:'📝',title:'Reseñador',desc:'Escribe tu primera reseña',check:function(){return collection.some(function(c){return c.review&&c.review.length>10;});}},
-  {id:'value_100k',icon:'💎',title:'Colección valiosa',desc:'Supera $100.000 en valor',check:function(){return collection.reduce(function(s,c){return s+(c.valorActual||0);},0)>=100000;}},
-  {id:'value_1m',icon:'👑',title:'Millonario',desc:'Supera $1.000.000 en valor',check:function(){return collection.reduce(function(s,c){return s+(c.valorActual||0);},0)>=1000000;}},
+  {id:'first_item',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>',title:'Primer ítem',desc:'Agrega tu primer ítem',check:function(){return collection.length>=1;}},
+  {id:'five_items',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>',title:'Coleccionista',desc:'5 ítems en tu colección',check:function(){return collection.length>=5;}},
+  {id:'ten_items',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',title:'Colección en marcha',desc:'10 ítems en tu colección',check:function(){return collection.length>=10;}},
+  {id:'fifty_items',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8 14v7m8-7v7M5 21h14"/></svg>',title:'Gran coleccionista',desc:'50 ítems en tu colección',check:function(){return collection.length>=50;}},
+  {id:'first_fav',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',title:'Primer favorito',desc:'Marca tu primer favorito',check:function(){return collection.some(function(c){return c.favorite;});}},
+  {id:'five_favs',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',title:'Corazón de coleccionista',desc:'5 ítems favoritos',check:function(){return collection.filter(function(c){return c.favorite;}).length>=5;}},
+  {id:'first_sale',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',title:'Primera venta',desc:'Pon a la venta un ítem',check:function(){return trades.some(function(t){return t.type==='sell';});}},
+  {id:'sold_one',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',title:'Vendedor',desc:'Vende tu primer ítem',check:function(){return trades.some(function(t){return t.status==='sold';});}},
+  {id:'rated_five',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" style="opacity:0.3"/></svg>',title:'Crítico exigente',desc:'Puntúa con 5 estrellas',check:function(){return collection.some(function(c){return c.rating===5;});}},
+  {id:'first_review',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',title:'Reseñador',desc:'Escribe tu primera reseña',check:function(){return collection.some(function(c){return c.review&&c.review.length>10;});}},
+  {id:'value_100k',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',title:'Colección valiosa',desc:'Supera $100.000 en valor',check:function(){return collection.reduce(function(s,c){return s+(c.valorActual||0);},0)>=100000;}},
+  {id:'value_1m',icon:'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2.5"/></svg>',title:'Millonario',desc:'Supera $1.000.000 en valor',check:function(){return collection.reduce(function(s,c){return s+(c.valorActual||0);},0)>=1000000;}},
 ];
 var unlockedAchievements=[];
 async function loadAchievements(){try{var a=await IDB.get('achievements');if(a)unlockedAchievements=a;}catch(e){}}
@@ -2555,7 +2555,7 @@ function checkAchievements(){
 function showAchievementToast(ach){
   var t=document.getElementById('achievementToast');
   if(!t)return;
-  document.getElementById('achievementIcon').textContent=ach.icon;
+  document.getElementById('achievementIcon').innerHTML=ach.icon;
   document.getElementById('achievementTitle').textContent=ach.title;
   document.getElementById('achievementSub').textContent=ach.desc;
   t.classList.add('show');
