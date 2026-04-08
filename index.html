@@ -334,11 +334,11 @@ input[type="file"]{display:none;}
 .scanner-header{padding:54px 20px 16px;display:flex;align-items:center;justify-content:space-between;}
 .scanner-title{font-size:17px;font-weight:800;}
 .scanner-close{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;border-radius:99px;padding:7px 16px;font-size:12px;font-weight:600;cursor:pointer;}
-.scanner-body{flex:1;padding:16px 16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;}
-.scanner-search-wrap{margin-top:4px;}
+.scanner-body{flex:1;padding:16px 16px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;}
+.scanner-search-wrap{margin-top:0;}
 
 /* Game selector */
-.game-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.game-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0;}
 .game-btn{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.15s;}
 .game-btn.active{border-color:#1B6DC0;background:rgba(27,109,192,0.12);}
 .game-btn:active{transform:scale(0.97);}
@@ -1375,6 +1375,7 @@ input[type="file"]{display:none;}
   </div>
   <div class="folder-inner-body" id="folderInnerBody"></div>
   <div class="folder-inner-actions">
+    <button class="btn-folder-view-toggle" id="folderInnerDeleteBtn" onclick="deleteFolderFromInner()" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg></button>
     <button class="btn-folder-view-toggle" id="folderInnerViewToggle" onclick="toggleFolderInnerView()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg></button>
     <button class="btn-folder-add-items" id="folderInnerAddBtn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -3785,11 +3786,16 @@ function listenForUpdates(){
       if(!newWorker) return;
       newWorker.addEventListener('statechange', function(){
         if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
-          // New version available!
           pendingWorker = newWorker;
-          doSilentBackup(); // Auto backup first
-          var banner = document.getElementById('updateBanner');
-          if(banner) banner.classList.add('show');
+          doSilentBackup();
+          // Only show banner if user has data worth backing up
+          if(collection.length > 0 || pendientes.length > 0){
+            var banner = document.getElementById('updateBanner');
+            if(banner) banner.classList.add('show');
+          } else {
+            // No data, just update silently
+            dismissUpdate();
+          }
         }
       });
     });
@@ -4601,6 +4607,14 @@ function openFolderInner(folderId, allCatItems){
 }
 
 var folderInnerViewMode = 'grid';
+function deleteFolderFromInner(){
+  if(!currentOpenFolder) return;
+  if(!confirm('¿Eliminar la carpeta "'+currentOpenFolder.name+'"? Los ítems NO se eliminarán.')) return;
+  customFolders = customFolders.filter(function(f){return f.id!==currentOpenFolder.id;});
+  saveCustomFolders();
+  closeFolderInner();
+  toast('Carpeta eliminada','#ef4444');
+}
 function toggleFolderInnerView(){
   folderInnerViewMode = folderInnerViewMode==='grid'?'list':'grid';
   var btn = document.getElementById('folderInnerViewToggle');
