@@ -1918,6 +1918,14 @@ function renderCollection(){
   var hasFavsNonCard=nonCardItems.some(function(c){return c.favorite;});
   var showFavSection=colCatFilter==="all"&&hasFavsNonCard&&colViewMode==="grid"&&colEstadoFilter==="all"&&!hasCards;
   if(!displayed.length&&!hasCards){hint.textContent='Sin ítems aquí';return;}
+  // ── Otros section (remaining non-card non-figure items)
+  if(otherItems.length&&colCatFilter==='all'&&colEstadoFilter==='all'&&figureItems.length>0){
+    var otrosLabel=document.createElement('div');
+    otrosLabel.className='section-label muted';
+    otrosLabel.textContent='Otros';
+    content.appendChild(otrosLabel);
+  }
+
   if(showFavSection){
     var favs=displayed.filter(function(c){return c.favorite;});
     var rest=displayed.filter(function(c){return !c.favorite;});
@@ -2808,6 +2816,28 @@ function buildPriceDiff(item){
   var arrow=diff>0?'↑':diff<0?'↓':'→';
   var label=diff>0?'Ganancia':diff<0?'Pérdida':'Sin cambio';
   return '<div class="price-diff '+cls+'">'+arrow+' '+label+': '+fmt(Math.abs(diff))+' ('+(pct>0?'+':'')+pct+'%)</div>';
+}
+
+
+function makeCategorySection(items, title, iconSVG, color, bgColor){
+  var section=document.createElement('div');section.className='cards-section';
+  var header=document.createElement('div');header.className='cards-section-header';
+  var titleEl=document.createElement('div');
+  titleEl.style.cssText='font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:'+color+';display:flex;align-items:center;gap:6px;flex:1;';
+  titleEl.innerHTML=iconSVG+' '+title+' ('+items.length+')'
+    +'<span style="display:inline-block;flex:1;height:1px;background:'+bgColor+';margin-left:6px;"></span>';
+  header.appendChild(titleEl);
+  section.appendChild(header);
+  if(colViewMode==='list'){
+    var list=document.createElement('div');list.className='col-list';
+    items.forEach(function(i){list.appendChild(makeListCard(i));});
+    section.appendChild(list);
+  } else {
+    var grid=document.createElement('div');grid.className='col-grid';
+    items.forEach(function(i){grid.appendChild(makeColCard(i));});
+    section.appendChild(grid);
+  }
+  return section;
 }
 
 function makeStatsCard(title, iconSVG){
@@ -3749,7 +3779,7 @@ function renderSetsTab(){
   // Set search bar
   var searchRow = document.createElement('div');
   searchRow.className = 'scanner-search-wrap';
-  searchRow.innerHTML = '<input class="scanner-search" id="setsSearchInput" placeholder="Buscar set por nombre..."/>'
+  searchRow.innerHTML = '<input class="scanner-search" id="setsSearchInput" placeholder="Buscar set por nombre..." style="height:48px;"/>'
     +'<button class="scanner-search-btn" id="setsSearchBtn">'
     +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'
     +'</button>';
@@ -3870,7 +3900,7 @@ async function openSetCards(set){
   try{
     var cards = [];
     if(set.game==='pokemon'){
-      var r = await fetch('https://api.pokemontcg.io/v2/cards?q=set.id:'+set.id+'&pageSize=50&orderBy=number');
+      var r = await fetch('https://api.pokemontcg.io/v2/cards?q=set.id:'+set.id+'&pageSize=250&orderBy=number');
       var d = await r.json();
       cards = (d.data||[]).map(function(c){
         return{id:c.id,name:c.name,image:c.images&&c.images.small?c.images.small:null,
@@ -3880,9 +3910,9 @@ async function openSetCards(set){
           game:'pokemon'};
       });
     } else if(set.game==='magic'){
-      var r2 = await fetch('https://api.scryfall.com/cards/search?q=set:'+set.id+'&unique=prints&order=number');
+      var r2 = await fetch('https://api.scryfall.com/cards/search?q=set:'+set.id+'&unique=prints&order=number&page=1');
       var d2 = await r2.json();
-      cards = ((d2.data||[]).slice(0,60)).map(function(c){
+      cards = (d2.data||[]).map(function(c){
         return{id:c.id,name:c.name,image:c.image_uris?c.image_uris.small:null,
           rarity:c.rarity||'',number:c.collector_number||'',set:set.name,
           setLogo:set.logo||null,
@@ -3890,9 +3920,9 @@ async function openSetCards(set){
           game:'magic'};
       });
     } else if(set.game==='yugioh'){
-      var r3 = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?cardset='+encodeURIComponent(set.name)+'&num=50&offset=0');
+      var r3 = await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?cardset='+encodeURIComponent(set.name)+'&num=500&offset=0');
       var d3 = await r3.json();
-      cards = ((d3.data||[]).slice(0,50)).map(function(c){
+      cards = (d3.data||[]).map(function(c){
         return{id:c.id,name:c.name,image:c.card_images&&c.card_images[0]?c.card_images[0].image_url_small:null,
           rarity:(c.card_sets&&c.card_sets[0]&&c.card_sets[0].set_rarity)||'',
           number:(c.card_sets&&c.card_sets[0]&&c.card_sets[0].set_code)||'',
