@@ -188,7 +188,7 @@ input[type="file"]{display:none;}
 .folder-inner-view{display:none;position:fixed;inset:0;background:#181818;z-index:350;flex-direction:column;overflow:hidden;}
 .folder-inner-view.open{display:flex;}
 .folder-inner-header{padding:54px 16px 14px;display:flex;align-items:center;gap:12px;background:#181818;border-bottom:1px solid #1e1e1e;}
-.folder-inner-header-bar{display:flex;align-items:center;justify-content:space-between;padding:54px 16px 0;background:#181818;flex-shrink:0;}
+.folder-inner-header-bar{display:flex;align-items:center;justify-content:space-between;padding:54px 16px 14px;background:#181818;flex-shrink:0;}
 .folder-inner-cover{position:relative;width:100%;height:160px;background:#111;flex-shrink:0;overflow:hidden;}
 .folder-inner-cover img{width:100%;height:100%;object-fit:cover;display:block;}
 .folder-inner-cover-empty{width:100%;height:100%;background:linear-gradient(135deg,#1a2744,#0d2a1a);display:flex;align-items:center;justify-content:center;}
@@ -1342,9 +1342,9 @@ input[type="file"]{display:none;}
     </div>
     <input type="text" class="folder-name-input" id="folderNameInput" placeholder="Nombre de la carpeta..."/>
     <select class="folder-cat-select" id="folderCatSelect">
-      <option value="Figuras">🏆 Figuras</option>
-      <option value="Gaming">🎮 Gaming</option>
-      <option value="Otros">📦 Otros</option>
+      <option value="Figuras">Figuras</option>
+      <option value="Gaming">Gaming</option>
+      <option value="Otros">Otros</option>
     </select>
     <div class="folder-create-actions">
       <button class="btn-folder-create" onclick="saveCustomFolder()">Guardar carpeta</button>
