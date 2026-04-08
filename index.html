@@ -3860,7 +3860,7 @@ async function searchCards(){
 }
 
 async function searchPokemon(query){
-  var url='https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(query)+'"&pageSize=12&orderBy=-set.releaseDate';
+  var url='https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(query)+'"&pageSize=250&orderBy=-set.releaseDate';
   var r=await fetch(url);var d=await r.json();
   return (d.data||[]).map(function(c){
     var price=c.tcgplayer&&c.tcgplayer.prices?
@@ -3882,7 +3882,7 @@ async function searchPokemon(query){
 
 
 async function searchPokemonJP(query){
-  var url='https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(query)+'"&pageSize=12&orderBy=-set.releaseDate';
+  var url='https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(query)+'"&pageSize=250&orderBy=-set.releaseDate';
   // Try JP sets filter
   var r=await fetch(url+'&q=set.series:"sv" OR set.ptcgoCode:"SV"');
   var d=await r.json();
@@ -3901,7 +3901,7 @@ async function searchPokemonJP(query){
 }
 
 async function searchMagic(query){
-  var url='https://api.scryfall.com/cards/search?q='+encodeURIComponent(query)+'&unique=prints&order=released&dir=desc';
+  var url='https://api.scryfall.com/cards/search?q='+encodeURIComponent(query)+'&unique=prints&order=released&dir=desc&page=1';
   var r=await fetch(url);var d=await r.json();
   return ((d.data||[]).slice(0,12)).map(function(c){
     var price=parseFloat(c.prices&&c.prices.usd?c.prices.usd:0)||0;
@@ -3919,7 +3919,7 @@ async function searchMagic(query){
 }
 
 async function searchYugioh(query){
-  var url='https://db.ygoprodeck.com/api/v7/cardinfo.php?fname='+encodeURIComponent(query)+'&num=12&offset=0';
+  var url='https://db.ygoprodeck.com/api/v7/cardinfo.php?fname='+encodeURIComponent(query)+'&num=100&offset=0';
   var r=await fetch(url);var d=await r.json();
   return ((d.data||[]).slice(0,12)).map(function(c){
     var price=c.card_prices&&c.card_prices[0]?parseFloat(c.card_prices[0].tcgplayer_price||0):0;
@@ -4079,7 +4079,7 @@ async function loadSetsData(){
   try{
     var sets = [];
     if(currentGame==='pokemon') sets = await loadPokemonSets();
-    else if(currentGame==='pokemonjp') sets = await loadPokemonJPSets();
+    else if(currentGame==='pokemonjp') sets = (await loadPokemonSets()).map(function(s){return Object.assign({},s,{game:'pokemonjp'});});
     else if(currentGame==='magic') sets = await loadMagicSets();
     else if(currentGame==='yugioh') sets = await loadYugiohSets();
     allSetsData = sets;
