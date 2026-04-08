@@ -1185,6 +1185,13 @@ input[type="file"]{display:none;}
     <button class="scanner-close" onclick="closeScanner()">Cerrar</button>
   </div>
   <div class="scanner-body">
+    <!-- Tabs -->
+    <div class="scanner-tabs">
+      <div class="scanner-tab active" id="scanTab-search" onclick="setScannerTab('search')">Buscar carta</div>
+      <div class="scanner-tab" id="scanTab-sets" onclick="setScannerTab('sets')">Sets completos</div>
+    </div>
+    <!-- Search view -->
+    <div id="scannerSearchView">
     <div>
       <div class="scanner-game-label">Juego</div>
       <div class="game-selector">
@@ -1209,9 +1216,7 @@ input[type="file"]{display:none;}
       </button>
     </div>
     <div id="scannerResults"></div>
-  </div></div>
-  <div id="scannerSetsView" style="display:none;flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;"></div>
-</div>
+
 
 <input type="file" id="fileInputP" accept="image/*" onchange="handleFileP(event)"/>
 <input type="file" id="colPhotoInput" accept="image/*" onchange="handleColPhoto(event)"/>
