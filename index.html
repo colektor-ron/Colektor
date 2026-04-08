@@ -184,6 +184,22 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── BACKUP SAFETY ── */
+.update-banner{position:fixed;bottom:80px;left:12px;right:12px;background:#1e1e1e;border:1px solid #f59e0b;border-radius:14px;padding:14px 16px;z-index:9990;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,0.6);transform:translateY(120px);transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1);visibility:hidden;}
+.update-banner.show{transform:translateY(0);visibility:visible;}
+.update-banner-icon{flex-shrink:0;color:#f59e0b;}
+.update-banner-text{flex:1;}
+.update-banner-title{font-size:13px;font-weight:700;color:#f59e0b;}
+.update-banner-sub{font-size:11px;color:#64748b;margin-top:2px;}
+.update-banner-actions{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+.btn-backup-now{padding:7px 12px;background:#f59e0b;color:#000;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.btn-backup-dismiss{padding:5px 8px;background:transparent;color:#555;border:none;font-size:11px;cursor:pointer;}
+
+/* Auto backup indicator */
+.backup-indicator{position:fixed;bottom:82px;right:16px;background:#22c55e;color:#fff;border-radius:99px;padding:6px 12px;font-size:11px;font-weight:600;z-index:9989;opacity:0;transition:opacity 0.3s;pointer-events:none;display:flex;align-items:center;gap:5px;}
+.backup-indicator.show{opacity:1;}
+
+
 /* ── VITRINA ── */
 .vitrina-modal{display:none;position:fixed;inset:0;background:#0a0a0a;z-index:500;flex-direction:column;}
 .vitrina-modal.open{display:flex;}
@@ -1023,6 +1039,28 @@ input[type="file"]{display:none;}
   <div class="vitrina-filters" id="vitrinaFilters"></div>
   <div class="vitrina-grid" id="vitrinaGrid"></div>
   <div class="vitrina-count" id="vitrinaCount"></div>
+</div>
+
+
+<!-- UPDATE SAFETY BANNER -->
+<div class="update-banner" id="updateBanner">
+  <div class="update-banner-icon">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17" stroke-width="2.5"/></svg>
+  </div>
+  <div class="update-banner-text">
+    <div class="update-banner-title">Hay una actualización disponible</div>
+    <div class="update-banner-sub">Guarda un backup antes de actualizar</div>
+  </div>
+  <div class="update-banner-actions">
+    <button class="btn-backup-now" onclick="exportDataAndUpdate()">Backup y actualizar</button>
+    <button class="btn-backup-dismiss" onclick="dismissUpdate()">Ahora no</button>
+  </div>
+</div>
+
+<!-- BACKUP INDICATOR -->
+<div class="backup-indicator" id="backupIndicator">
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+  Backup guardado
 </div>
 
 <input type="file" id="fileInputP" accept="image/*" onchange="handleFileP(event)"/>
@@ -2991,8 +3029,138 @@ function renderVitrina(){
   });
 }
 
+
+// ── BACKUP SAFETY ──────────────────────────────────────
+var pendingWorker = null;
+var autoBackupInterval = null;
+var lastBackupKey = 'colektor_last_backup';
+
+// Auto-backup every 30 minutes while app is open
+function startAutoBackup(){
+  autoBackupInterval = setInterval(function(){
+    if(collection.length > 0 || pendientes.length > 0){
+      doSilentBackup();
+    }
+  }, 30 * 60 * 1000);
+}
+
+function doSilentBackup(){
+  try{
+    var data = JSON.stringify({
+      pendientes:pendientes,
+      categories:categories,
+      collection:collection,
+      trades:trades,
+      profile:profile,
+      backupAt: new Date().toISOString()
+    });
+    localStorage.setItem('colektor_auto_backup', data);
+    localStorage.setItem(lastBackupKey, new Date().toISOString());
+    showBackupIndicator();
+  }catch(e){}
+}
+
+function showBackupIndicator(){
+  var el = document.getElementById('backupIndicator');
+  if(!el) return;
+  el.classList.add('show');
+  setTimeout(function(){el.classList.remove('show');}, 2000);
+}
+
+function exportDataAndUpdate(){
+  // First export backup
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({
+    pendientes:pendientes,categories:categories,
+    collection:collection,trades:trades,profile:profile,
+    exportedAt:new Date().toISOString()
+  },null,2)],{type:'application/json'}));
+  a.download = 'colektor-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  // Then apply update
+  setTimeout(function(){
+    if(pendingWorker){
+      pendingWorker.postMessage({type:'SKIP_WAITING'});
+    } else {
+      window.location.reload();
+    }
+  }, 1000);
+  dismissUpdate();
+  toast('Backup descargado! Actualizando...', '#f59e0b');
+}
+
+function dismissUpdate(){
+  var banner = document.getElementById('updateBanner');
+  if(banner) banner.classList.remove('show');
+  // Apply update silently
+  if(pendingWorker){
+    pendingWorker.postMessage({type:'SKIP_WAITING'});
+    pendingWorker = null;
+  }
+}
+
+// Check if auto backup exists and offer restore on first load
+function checkAutoBackupOnStart(){
+  var saved = localStorage.getItem('colektor_auto_backup');
+  var lastBackup = localStorage.getItem(lastBackupKey);
+  if(!saved) return;
+  
+  // Only show if collection is empty but backup exists (possible data loss scenario)
+  if(collection.length === 0 && pendientes.length === 0){
+    try{
+      var backup = JSON.parse(saved);
+      if((backup.collection && backup.collection.length > 0) || 
+         (backup.pendientes && backup.pendientes.length > 0)){
+        var backupDate = new Date(backup.backupAt).toLocaleDateString('es-CL', {
+          day:'numeric', month:'long', hour:'2-digit', minute:'2-digit'
+        });
+        if(confirm('Se detectó un backup automático del ' + backupDate + '\n\n¿Deseas restaurarlo?')){
+          if(backup.pendientes) pendientes = backup.pendientes;
+          if(backup.categories) categories = backup.categories;
+          if(backup.collection) collection = backup.collection;
+          if(backup.trades) trades = backup.trades;
+          if(backup.profile) profile = backup.profile;
+          save();
+          saveProfileData();
+          renderPendientes();
+          updateBadges();
+          toast('Backup restaurado!', '#22c55e');
+        }
+      }
+    }catch(e){}
+  }
+  
+  // Also do a fresh backup now that we've loaded
+  doSilentBackup();
+}
+
+// Listen for SW updates
+function listenForUpdates(){
+  if(!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready.then(function(reg){
+    reg.addEventListener('updatefound', function(){
+      var newWorker = reg.installing;
+      if(!newWorker) return;
+      newWorker.addEventListener('statechange', function(){
+        if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+          // New version available!
+          pendingWorker = newWorker;
+          doSilentBackup(); // Auto backup first
+          var banner = document.getElementById('updateBanner');
+          if(banner) banner.classList.add('show');
+        }
+      });
+    });
+  }).catch(function(){});
+  
+  // Handle controller change (after skipWaiting)
+  navigator.serviceWorker.addEventListener('controllerchange', function(){
+    window.location.reload();
+  });
+}
+
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
-async function init(){await load();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();}
+async function init(){await load();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
 </script>
 <script>document.addEventListener("click",function(e){if(sortDropdownOpen&&!e.target.closest("#colToolbar")){sortDropdownOpen=false;var dd=document.getElementById("sortDropdown");if(dd)dd.classList.add("hidden");}});</script>
