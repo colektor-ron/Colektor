@@ -4102,34 +4102,21 @@ function renderSeriesView(sets){
     var card=document.createElement('div');
     card.className='series-card';
 
-    // Left color fillet
+    // Fillet
     var fillet=document.createElement('div');
     fillet.className='series-card-fillet';
     fillet.style.background=color;
     card.appendChild(fillet);
-
-    // Logo area
-    var logoDiv=document.createElement('div');
-    logoDiv.className='series-card-logo';
-    if(series.seriesLogo){
-      var img=document.createElement('img');
-      img.src=series.seriesLogo;
-      img.loading='lazy';
-      logoDiv.appendChild(img);
-    }
-    card.appendChild(logoDiv);
-
     // Info
     var info=document.createElement('div');
     info.className='series-card-info';
     info.innerHTML='<div class="series-card-name">'+series.name+'</div>'
       +'<div class="series-card-count">'+series.sets.length+' set'+(series.sets.length!==1?'s':'')+'</div>';
     card.appendChild(info);
-
     // Arrow
     var arrow=document.createElement('div');
     arrow.className='series-card-arrow';
-    arrow.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+    arrow.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
     card.appendChild(arrow);
 
     card.onclick=function(){renderSeriesSets(series.sets,series.name,color);};
