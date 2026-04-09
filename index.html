@@ -1328,18 +1328,6 @@ input[type="file"]{display:none;}
             <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div>
             <div class="game-btn-name">Yu-Gi-Oh</div>
           </div>
-          <div class="game-btn" id="gameBtn-digimon" onclick="setGame('digimon')">
-            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2c0 5.5-4 8-4 10s4 4.5 4 10"/><path d="M2 12c5.5 0 8 4 10 4s4.5-4 10-4"/></svg></div>
-            <div class="game-btn-name">Digimon</div>
-          </div>
-          <div class="game-btn" id="gameBtn-dragonball" onclick="setGame('dragonball')">
-            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2 4-6 5-6 9a6 6 0 0 0 12 0c0-4-4-5-6-9z"/><circle cx="12" cy="11" r="2"/></svg></div>
-            <div class="game-btn-name">Dragon Ball</div>
-          </div>
-          <div class="game-btn" id="gameBtn-gundam" onclick="setGame('gundam')">
-            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 4v6c0 5-4 9-9 10C7 21 3 17 3 12V6l9-4z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg></div>
-            <div class="game-btn-name">Gundam</div>
-          </div>
         </div>
       </div>
       <div class="scanner-search-wrap">
@@ -3851,7 +3839,7 @@ function closeScanner(){document.getElementById('scannerModal').classList.remove
 
 function setGame(game){
   currentGame=game;
-  ['pokemon','magic','yugioh','digimon','dragonball','gundam'].forEach(function(g){
+  ['pokemon','magic','yugioh'].forEach(function(g){
     var btn=document.getElementById('gameBtn-'+g);
     if(btn)btn.classList.toggle('active',g===game);
   });
@@ -3876,9 +3864,7 @@ async function searchCards(){
     if(currentGame==='pokemon') cards=await searchPokemon(query);
     else if(currentGame==='magic') cards=await searchMagic(query);
     else if(currentGame==='yugioh') cards=await searchYugioh(query);
-    else if(currentGame==='digimon') cards=await searchDigimon(query);
-    else if(currentGame==='dragonball') cards=await searchDragonBall(query);
-    else if(currentGame==='gundam') cards=await searchGundam(query);
+
     renderScannerResults(cards);
   }catch(err){
     results.innerHTML='<div class="scanner-empty">Error al buscar. Verifica tu conexión.</div>';
@@ -3962,50 +3948,8 @@ async function searchYugioh(query){
   });
 }
 
-async function searchDigimon(query){
-  try{
-    var r=await fetch('https://digimoncard.io/api-public/search?n='+encodeURIComponent(query)+'&series=Digimon%20Card%20Game&sort=name&sortdirection=asc');
-    var d=await r.json();
-    // Deduplicate by cardnumber
-    var seen={};
-    var cards=[];
-    (Array.isArray(d)?d:[]).forEach(function(c){
-      if(!seen[c.cardnumber]){
-        seen[c.cardnumber]=true;
-        var setName=Array.isArray(c.set_name)?c.set_name[0]||'':c.set_name||'';
-        cards.push({id:c.cardnumber,name:c.name,set:setName,number:c.cardnumber||'',
-          rarity:c.rarity||'',image:c.image_url||null,priceUSD:0,game:'digimon',type:c.type||''});
-      }
-    });
-    return cards.slice(0,30);
-  }catch(e){console.error('Digimon search error',e);return[];}
-}
 
-async function searchDragonBall(query){
-  try{
-    var proxy='https://corsproxy.io/?url=';
-    var r=await fetch(proxy+encodeURIComponent('https://apitcg.com/api/dragon-ball-fusion/cards?name='+query));
-    var d=await r.json();
-    return (d.data||[]).map(function(c){
-      return{id:c.id,name:c.name,set:(c.set&&c.set.name)||'',number:c.code||'',
-        rarity:c.rarity||'',image:c.images&&c.images.small?c.images.small:null,
-        priceUSD:0,game:'dragonball',type:c.cardType||''};
-    });
-  }catch(e){console.error('DragonBall search error',e);return[];}
-}
 
-async function searchGundam(query){
-  try{
-    var proxy='https://corsproxy.io/?url=';
-    var r=await fetch(proxy+encodeURIComponent('https://apitcg.com/api/gundam/cards?name='+query));
-    var d=await r.json();
-    return (d.data||[]).map(function(c){
-      return{id:c.id,name:c.name,set:(c.set&&c.set.name)||'',number:c.code||'',
-        rarity:c.rarity||'',image:c.images&&c.images.small?c.images.small:null,
-        priceUSD:0,game:'gundam',type:c.cardType||c.sourceTitle||''};
-    });
-  }catch(e){console.error('Gundam search error',e);return[];}
-}
 
 function getRarityClass(rarity){
   if(!rarity)return'';
@@ -4226,9 +4170,6 @@ async function loadSetsData(){
       return;
     } else if(currentGame==='magic') sets = await loadMagicSets();
     else if(currentGame==='yugioh') sets = await loadYugiohSets();
-    else if(currentGame==='digimon') sets = await loadDigimonSets();
-    else if(currentGame==='dragonball') sets = await loadDragonBallSets();
-    else if(currentGame==='gundam') sets = await loadGundamSets();
     allSetsData = sets;
     renderSetsList(sets);
   }catch(e){
@@ -4238,7 +4179,7 @@ async function loadSetsData(){
 
 function setSetsGame(game){
   currentGame = game;
-  ['pokemon','magic','yugioh','digimon','dragonball','gundam'].forEach(function(g){
+  ['pokemon','magic','yugioh'].forEach(function(g){
     var b1 = document.getElementById('gameBtn-'+g);
     var b2 = document.getElementById('sgBtn-'+g);
     if(b1) b1.classList.toggle('active', g===game);
@@ -4311,118 +4252,11 @@ async function loadPokemonJPSets(){
   }catch(e){return[];}
 }
 
-async function loadDigimonSets(){
-  try{
-    var r=await fetch('https://digimoncard.io/api-public/getAllCards?sort=name&series=Digimon%20Card%20Game&sortdirection=asc');
-    var data=await r.json();
-    var setMap={};
-    (Array.isArray(data)?data:[]).forEach(function(c){
-      // set_name is an array of pack names
-      var sets=Array.isArray(c.set_name)?c.set_name:(c.set_name?[c.set_name]:[]);
-      sets.forEach(function(sn){
-        if(!sn||sn.trim()==='')return;
-        var k=sn.trim();
-        if(!setMap[k])setMap[k]={id:k,name:k,logo:null,count:0,released:'',game:'digimon'};
-        setMap[k].count++;
-      });
-    });
-    var result=Object.values(setMap).filter(function(s){return s.count>0;});
-    return result.sort(function(a,b){return a.name.localeCompare(b.name);});
-  }catch(e){console.error('Digimon sets error:',e);return[];}
-}
 
-async function loadDragonBallSets(){
-  try{
-    // Fetch multiple searches to get representative sets
-    var queries=['Goku','Vegeta','Frieza','Gohan','Piccolo'];
-    var setMap={};
-    for(var qi=0;qi<queries.length;qi++){
-      var r=await fetch('https://corsproxy.io/?'+encodeURIComponent('https://apitcg.com/api/dragon-ball-fusion/cards?name='+queries[qi]));
-      var d=await r.json();
-      (d.data||[]).forEach(function(c){
-        if(c.set&&c.set.id&&!setMap[c.set.id]){
-          setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,count:0,released:'',game:'dragonball'};
-        }
-        if(c.set&&c.set.id)setMap[c.set.id].count++;
-      });
-    }
-    return Object.values(setMap).sort(function(a,b){return a.name.localeCompare(b.name);});
-  }catch(e){return[];}
-}
 
-async function loadGundamSets(){
-  try{
-    var queries=['Gundam','Strike','Freedom','Unicorn','Wing','Zeta','Nu'];
-    var setMap={};
-    for(var qi=0;qi<queries.length;qi++){
-      var r=await fetch('https://corsproxy.io/?'+encodeURIComponent('https://apitcg.com/api/gundam/cards?name='+queries[qi]));
-      var d=await r.json();
-      (d.data||[]).forEach(function(c){
-        if(c.set&&c.set.id&&!setMap[c.set.id]){
-          setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,count:0,released:'',game:'gundam'};
-        }
-        if(c.set&&c.set.id)setMap[c.set.id].count++;
-      });
-    }
-    return Object.values(setMap).sort(function(a,b){return a.name.localeCompare(b.name);});
-  }catch(e){return[];}
-}
 
-async function loadDigimonSets(){
-  try{
-    var r=await fetch('https://digimoncard.io/api-public/getAllCards?sort=name&series=Digimon%20Card%20Game&sortdirection=asc');
-    var data=await r.json();
-    var setMap={};
-    (Array.isArray(data)?data:[]).forEach(function(c){
-      var sets=Array.isArray(c.set_name)?c.set_name:(c.set_name?[c.set_name]:[]);
-      sets.forEach(function(sn){
-        if(!sn||!sn.trim())return;
-        var k=sn.trim();
-        if(!setMap[k])setMap[k]={id:k,name:k,logo:null,count:0,released:'',game:'digimon'};
-        setMap[k].count++;
-      });
-    });
-    return Object.values(setMap).filter(function(s){return s.count>0;}).sort(function(a,b){return a.name.localeCompare(b.name);});
-  }catch(e){console.error('Digimon sets error',e);return[];}
-}
 
-async function loadDragonBallSets(){
-  try{
-    var proxy='https://corsproxy.io/?url=';
-    var queries=['Goku','Vegeta','Frieza','Gohan'];
-    var setMap={};
-    for(var qi=0;qi<queries.length;qi++){
-      var r=await fetch(proxy+encodeURIComponent('https://apitcg.com/api/dragon-ball-fusion/cards?name='+queries[qi]));
-      var d=await r.json();
-      (d.data||[]).forEach(function(c){
-        if(c.set&&c.set.id&&!setMap[c.set.id]){
-          setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,count:0,released:'',game:'dragonball'};
-        }
-        if(c.set&&c.set.id)setMap[c.set.id].count++;
-      });
-    }
-    return Object.values(setMap).sort(function(a,b){return a.name.localeCompare(b.name);});
-  }catch(e){console.error('DragonBall sets error',e);return[];}
-}
 
-async function loadGundamSets(){
-  try{
-    var proxy='https://corsproxy.io/?url=';
-    var queries=['Gundam','Strike','Freedom','Unicorn'];
-    var setMap={};
-    for(var qi=0;qi<queries.length;qi++){
-      var r=await fetch(proxy+encodeURIComponent('https://apitcg.com/api/gundam/cards?name='+queries[qi]));
-      var d=await r.json();
-      (d.data||[]).forEach(function(c){
-        if(c.set&&c.set.id&&!setMap[c.set.id]){
-          setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,count:0,released:'',game:'gundam'};
-        }
-        if(c.set&&c.set.id)setMap[c.set.id].count++;
-      });
-    }
-    return Object.values(setMap).sort(function(a,b){return a.name.localeCompare(b.name);});
-  }catch(e){console.error('Gundam sets error',e);return[];}
-}
 
 async function loadMagicSets(){
   var r = await fetch('https://api.scryfall.com/sets?order=released');
@@ -4458,7 +4292,7 @@ function renderSetsList(sets, appendToContainer){
     var date = set.released?set.released.substring(0,4):'';
     item.innerHTML = logoHTML
       +'<div class="set-info"><div class="set-name">'+set.name+'</div>'
-      +'<div class="set-meta">'+{'pokemon':'Pokémon TCG','magic':'Magic: The Gathering','yugioh':'Yu-Gi-Oh!','digimon':'Digimon TCG','dragonball':'Dragon Ball Fusion','gundam':'Gundam Card Game'}[set.game]||set.game+(date?' · '+date:'')+'</div></div>'
+      +'<div class="set-meta">'+{'pokemon':'Pokémon TCG','magic':'Magic: The Gathering','yugioh':'Yu-Gi-Oh!'}[set.game]||set.game+(date?' · '+date:'')+'</div></div>'
       +'<div class="set-count">'+set.count+' cartas</div>';
     item.onclick = function(){openSetCards(set);};
     list.appendChild(item);
@@ -4501,14 +4335,6 @@ async function openSetCards(set){
           number:(c.card_sets&&c.card_sets[0]&&c.card_sets[0].set_code)||'',
           set:set.name,setLogo:null,priceUSD:0,game:'yugioh'};
       });
-    } else if(set.game==='digimon'){
-      var rd=await fetch('https://digimoncard.io/api-public/search?pack='+encodeURIComponent(set.id)+'&series=Digimon%20Card%20Game&sort=name&sortdirection=asc');
-      var dd=await rd.json();
-      cards=(Array.isArray(dd)?dd:[]).map(function(c){return{id:c.cardnumber,name:c.name,image:(c.image_url||c.img||null),rarity:c.rarity||'',number:c.cardnumber||'',set:set.name,setLogo:null,priceUSD:0,game:'digimon'};});
-    } else if(set.game==='dragonball'){
-      cards=await loadSetCardsFromAPI('dragon-ball-fusion',set.id,set.name,'dragonball');
-    } else if(set.game==='gundam'){
-      cards=await loadSetCardsFromAPI('gundam',set.id,set.name,'gundam');
     }
     currentSetData = {set:set, cards:cards};
     selectedSetCards = {};
@@ -4518,14 +4344,6 @@ async function openSetCards(set){
   }
 }
 
-async function loadSetCardsFromAPI(endpoint, setId, setName, game){
-  var r=await fetch('https://corsproxy.io/?'+encodeURIComponent('https://apitcg.com/api/'+endpoint+'/cards?limit=500'));
-  var d=await r.json();
-  return (d.data||[]).filter(function(c){return c.set&&(c.set.id===setId||c.set.name===setName);}).map(function(c){
-    return{id:c.id,name:c.name,image:c.images&&c.images.small?c.images.small:null,
-      rarity:c.rarity||'',number:c.code||'',set:setName,setLogo:null,priceUSD:0,game:game};
-  });
-}
 
 function renderSetCards(set, cards){
   var view = document.getElementById('setsListContainer');
