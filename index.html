@@ -4084,14 +4084,82 @@ function renderSetsTab(){
 
 var allSetsData = [];
 
+var seriesColors = {
+  'Scarlet & Violet':'#7c3aed','Sword & Shield':'#db2777',
+  'Sun & Moon':'#d97706','XY':'#2563eb','Black & White':'#374151',
+  'HeartGold & SoulSilver':'#b45309','Platinum':'#6366f1',
+  'Diamond & Pearl':'#0ea5e9','EX':'#dc2626','Base':'#16a34a',
+  'Gym':'#15803d','Neo':'#7c3aed','e-Card':'#0891b2','Otros':'#374151'
+};
+function getSeriesColor(name){
+  for(var k in seriesColors){if(name&&name.includes(k))return seriesColors[k];}
+  return '#374151';
+}
+function renderSeriesView(sets){
+  var container=document.getElementById('setsListContainer');
+  if(!container)return;
+  container.innerHTML='';
+  var seriesMap={};
+  sets.forEach(function(s){
+    var ser=s.series||'Otros';
+    if(!seriesMap[ser])seriesMap[ser]={name:ser,sets:[],seriesLogo:null,latestDate:'0000'};
+    seriesMap[ser].sets.push(s);
+    if(!seriesMap[ser].seriesLogo&&s.logo)seriesMap[ser].seriesLogo=s.logo;
+    if(s.released>seriesMap[ser].latestDate)seriesMap[ser].latestDate=s.released;
+  });
+  var arr=Object.values(seriesMap).sort(function(a,b){return b.latestDate>a.latestDate?1:-1;});
+  var list=document.createElement('div');list.className='series-list';
+  arr.forEach(function(series){
+    var color=getSeriesColor(series.name);
+    var card=document.createElement('div');
+    card.className='series-card';
+    card.style.background=color;
+    if(series.seriesLogo){
+      var bg=document.createElement('div');
+      bg.className='series-card-bg';
+      bg.style.backgroundImage='url('+series.seriesLogo+')';
+      card.appendChild(bg);
+    }
+    var grad=document.createElement('div');
+    grad.style.cssText='position:absolute;inset:0;background:linear-gradient(to right,'+color+'dd 0%,'+color+'99 100%);';
+    card.appendChild(grad);
+    var info=document.createElement('div');
+    info.className='series-card-info';
+    info.innerHTML='<div class="series-card-name">'+series.name+'</div>'
+      +'<div class="series-card-count">'+series.sets.length+' set'+(series.sets.length!==1?'s':'')+'</div>';
+    card.appendChild(info);
+    card.onclick=function(){renderSeriesSets(series.sets,series.name,color);};
+    list.appendChild(card);
+  });
+  container.appendChild(list);
+}
+function renderSeriesSets(sets,seriesName,color){
+  var container=document.getElementById('setsListContainer');
+  container.innerHTML='';
+  var header=document.createElement('div');
+  header.style.cssText='display:flex;align-items:center;gap:10px;margin-bottom:12px;';
+  var backBtn=document.createElement('button');backBtn.className='btn-back-sets';
+  backBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Series';
+  backBtn.onclick=function(){renderSeriesView(allSetsData);};
+  var title=document.createElement('div');
+  title.style.cssText='font-size:14px;font-weight:700;color:'+color+';';
+  title.textContent=seriesName;
+  header.appendChild(backBtn);header.appendChild(title);
+  container.appendChild(header);
+  renderSetsList(sets);
+}
+
 async function loadSetsData(){
   var container = document.getElementById('setsListContainer');
   if(!container) return;
   try{
     var sets = [];
-    if(currentGame==='pokemon') sets = await loadPokemonSets();
-    else if(currentGame==='pokemonjp') sets = (await loadPokemonSets()).map(function(s){return Object.assign({},s,{game:'pokemonjp'});});
-    else if(currentGame==='magic') sets = await loadMagicSets();
+    if(currentGame==='pokemon'){
+      sets = await loadPokemonSets();
+      allSetsData = sets;
+      renderSeriesView(sets);
+      return;
+    } else if(currentGame==='magic') sets = await loadMagicSets();
     else if(currentGame==='yugioh') sets = await loadYugiohSets();
     allSetsData = sets;
     renderSetsList(sets);
@@ -4118,15 +4186,12 @@ function setSetsGame(game){
 
 function filterSets(query){
   if(!allSetsData.length) return;
-  query = query.trim();
+  query = (query||'').trim();
   var filtered = query
     ? allSetsData.filter(function(s){return s.name.toLowerCase().includes(query.toLowerCase());})
     : allSetsData;
-  if(!query && currentGame==='pokemon'){
-    renderSeriesView(allSetsData);
-  } else {
-    renderSetsList(filtered);
-  }
+  if(!query && currentGame==='pokemon') renderSeriesView(allSetsData);
+  else renderSetsList(filtered);
 }
 
 // loadSets replaced by renderSetsTab + loadSetsData
