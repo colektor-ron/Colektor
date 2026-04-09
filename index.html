@@ -1328,6 +1328,18 @@ input[type="file"]{display:none;}
             <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div>
             <div class="game-btn-name">Yu-Gi-Oh</div>
           </div>
+          <div class="game-btn" id="gameBtn-digimon" onclick="setGame('digimon')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2c0 5.5-4 8-4 10s4 4.5 4 10"/><path d="M2 12c5.5 0 8 4 10 4s4.5-4 10-4"/></svg></div>
+            <div class="game-btn-name">Digimon</div>
+          </div>
+          <div class="game-btn" id="gameBtn-dragonball" onclick="setGame('dragonball')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2 4-6 5-6 9a6 6 0 0 0 12 0c0-4-4-5-6-9z"/><circle cx="12" cy="11" r="2"/></svg></div>
+            <div class="game-btn-name">Dragon Ball</div>
+          </div>
+          <div class="game-btn" id="gameBtn-gundam" onclick="setGame('gundam')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 4v6c0 5-4 9-9 10C7 21 3 17 3 12V6l9-4z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg></div>
+            <div class="game-btn-name">Gundam</div>
+          </div>
         </div>
       </div>
       <div class="scanner-search-wrap">
@@ -4254,48 +4266,53 @@ async function loadPokemonJPSets(){
 
 async function loadDigimonSets(){
   try{
-    var r=await fetch('https://apitcg.com/api/digimon/cards?name=&limit=500');
-    var d=await r.json();
+    // Use digimoncard.io getAllCards which returns all cards with set info
+    var r=await fetch('https://digimoncard.io/api-public/getAllCards.php?sort=name&series=Digimon+Card+Game&sortdirection=asc');
+    var data=await r.json();
     var setMap={};
-    (d.data||[]).forEach(function(c){
-      if(c.set&&c.set.id&&!setMap[c.set.id]){
-        setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,
-          count:0,released:'',game:'digimon'};
-      }
-      if(c.set&&c.set.id)setMap[c.set.id].count++;
+    (Array.isArray(data)?data:[]).forEach(function(c){
+      var setName=(c.pack_name||c.set_name||'');
+      if(!setName)return;
+      if(!setMap[setName])setMap[setName]={id:setName,name:setName,logo:null,count:0,released:'',game:'digimon'};
+      setMap[setName].count++;
     });
-    return Object.values(setMap).sort(function(a,b){return a.name.localeCompare(b.name);});
+    return Object.values(setMap).filter(function(s){return s.count>0;}).sort(function(a,b){return a.name.localeCompare(b.name);});
   }catch(e){return[];}
 }
 
 async function loadDragonBallSets(){
   try{
-    var r=await fetch('https://apitcg.com/api/dragon-ball-fusion/cards?name=&limit=500');
-    var d=await r.json();
+    // Fetch multiple searches to get representative sets
+    var queries=['Goku','Vegeta','Frieza','Gohan','Piccolo'];
     var setMap={};
-    (d.data||[]).forEach(function(c){
-      if(c.set&&c.set.id&&!setMap[c.set.id]){
-        setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,
-          count:0,released:'',game:'dragonball'};
-      }
-      if(c.set&&c.set.id)setMap[c.set.id].count++;
-    });
+    for(var qi=0;qi<queries.length;qi++){
+      var r=await fetch('https://apitcg.com/api/dragon-ball-fusion/cards?name='+queries[qi]);
+      var d=await r.json();
+      (d.data||[]).forEach(function(c){
+        if(c.set&&c.set.id&&!setMap[c.set.id]){
+          setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,count:0,released:'',game:'dragonball'};
+        }
+        if(c.set&&c.set.id)setMap[c.set.id].count++;
+      });
+    }
     return Object.values(setMap).sort(function(a,b){return a.name.localeCompare(b.name);});
   }catch(e){return[];}
 }
 
 async function loadGundamSets(){
   try{
-    var r=await fetch('https://apitcg.com/api/gundam/cards?name=&limit=500');
-    var d=await r.json();
+    var queries=['Gundam','Strike','Freedom','Unicorn','Wing','Zeta','Nu'];
     var setMap={};
-    (d.data||[]).forEach(function(c){
-      if(c.set&&c.set.id&&!setMap[c.set.id]){
-        setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,
-          count:0,released:'',game:'gundam'};
-      }
-      if(c.set&&c.set.id)setMap[c.set.id].count++;
-    });
+    for(var qi=0;qi<queries.length;qi++){
+      var r=await fetch('https://apitcg.com/api/gundam/cards?name='+queries[qi]);
+      var d=await r.json();
+      (d.data||[]).forEach(function(c){
+        if(c.set&&c.set.id&&!setMap[c.set.id]){
+          setMap[c.set.id]={id:c.set.id,name:c.set.name||c.set.id,logo:null,count:0,released:'',game:'gundam'};
+        }
+        if(c.set&&c.set.id)setMap[c.set.id].count++;
+      });
+    }
     return Object.values(setMap).sort(function(a,b){return a.name.localeCompare(b.name);});
   }catch(e){return[];}
 }
@@ -4378,7 +4395,9 @@ async function openSetCards(set){
           set:set.name,setLogo:null,priceUSD:0,game:'yugioh'};
       });
     } else if(set.game==='digimon'){
-      cards=await loadSetCardsFromAPI('digimon',set.id,set.name,'digimon');
+      var rd=await fetch('https://digimoncard.io/api-public/search.php?pack='+encodeURIComponent(set.name)+'&series=Digimon+Card+Game&sort=name&sortdirection=asc');
+      var dd=await rd.json();
+      cards=(Array.isArray(dd)?dd:[]).map(function(c){return{id:c.cardnumber||c.card_number,name:c.name,image:c.image_url||null,rarity:c.rarity||'',number:c.cardnumber||'',set:set.name,setLogo:null,priceUSD:0,game:'digimon'};});
     } else if(set.game==='dragonball'){
       cards=await loadSetCardsFromAPI('dragon-ball-fusion',set.id,set.name,'dragonball');
     } else if(set.game==='gundam'){
