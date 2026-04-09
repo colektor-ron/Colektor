@@ -184,6 +184,18 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── SERIES VIEW ── */
+.series-list{display:flex;flex-direction:column;gap:10px;}
+.series-card{border-radius:14px;overflow:hidden;cursor:pointer;position:relative;min-height:80px;display:flex;align-items:flex-end;border:1px solid rgba(255,255,255,0.06);transition:transform 0.15s;}
+.series-card:active{transform:scale(0.98);}
+.series-card-bg{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center;opacity:0.35;}
+.series-card-gradient{position:absolute;inset:0;}
+.series-card-info{position:relative;z-index:1;padding:14px 16px;width:100%;}
+.series-card-name{font-size:15px;font-weight:700;}
+.series-card-count{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;}
+.series-colors{Scarlet & Violet:'#8b5cf6',Sword & Shield:'#ec4899',Sun & Moon:'#f59e0b',XY:'#3b82f6',Black & White:'#6b7280',Base:'#22c55e'}
+
+
 /* ── FOLDER INNER VIEW ── */
 .folder-inner-view{display:none;position:fixed;inset:0;background:#181818;z-index:350;flex-direction:column;overflow:hidden;}
 .folder-inner-view.open{display:flex;}
@@ -3827,13 +3839,14 @@ function closeScanner(){document.getElementById('scannerModal').classList.remove
 
 function setGame(game){
   currentGame=game;
-  ['pokemon','magic','yugioh'].forEach(function(g){
+  ['pokemon','pokemonjp','magic','yugioh'].forEach(function(g){
     var btn=document.getElementById('gameBtn-'+g);
     if(btn)btn.classList.toggle('active',g===game);
   });
   document.getElementById('scannerResults').innerHTML='';
   var placeholders={
     pokemon:'Ej: Charizard, Pikachu, Mewtwo...',
+    pokemonjp:'Ej: リザードン, ピカチュウ...',
     magic:'Ej: Black Lotus, Lightning Bolt...',
     yugioh:'Ej: Blue-Eyes White Dragon...'
   };
@@ -3849,6 +3862,7 @@ async function searchCards(){
   try{
     var cards=[];
     if(currentGame==='pokemon') cards=await searchPokemon(query);
+    else if(currentGame==='pokemonjp') cards=await searchPokemonJP(query);
     else if(currentGame==='magic') cards=await searchMagic(query);
     else if(currentGame==='yugioh') cards=await searchYugioh(query);
     renderScannerResults(cards);
@@ -3878,6 +3892,25 @@ async function searchPokemon(query){
   });
 }
 
+
+async function searchPokemonJP(query){
+  var url='https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(query)+'"&pageSize=250&orderBy=-set.releaseDate';
+  // Try JP sets filter
+  var r=await fetch(url+'&q=set.series:"sv" OR set.ptcgoCode:"SV"');
+  var d=await r.json();
+  if(!(d.data&&d.data.length)){
+    // Fallback: search all
+    var r2=await fetch(url);var d2=await r2.json();d=d2;
+  }
+  return (d.data||[]).map(function(c){
+    var price=c.tcgplayer&&c.tcgplayer.prices?
+      (c.tcgplayer.prices.holofoil||c.tcgplayer.prices.normal||{}):null;
+    var usdPrice=price?(price.market||price.mid||0):0;
+    return{id:c.id,name:c.name,set:(c.set&&c.set.name)||'',number:c.number||'',
+      rarity:c.rarity||'',image:c.images&&c.images.small?c.images.small:null,
+      priceUSD:usdPrice,game:'pokemonjp',hp:c.hp||'',types:(c.types||[]).join(', ')};
+  });
+}
 
 async function searchMagic(query){
   var url='https://api.scryfall.com/cards/search?q='+encodeURIComponent(query)+'&unique=prints&order=released&dir=desc&page=1';
@@ -4020,8 +4053,9 @@ function renderSetsTab(){
   // Game selector (reuse current game)
   var gameRow = document.createElement('div');
   gameRow.innerHTML = '<div class="scanner-game-label">Juego</div>'
-    +'<div class="game-selector" >'
-    +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon</div></div>'
+    +'<div class="game-selector" style="grid-template-columns:repeat(2,1fr);">'
+    +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon EN</div></div>'
+    +'<div class="game-btn'+(currentGame==='pokemonjp'?' active':'')+'" id="sgBtn-pokemonjp" onclick="setSetsGame(&quot;pokemonjp&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon JP</div></div>'
     +'<div class="game-btn'+(currentGame==='magic'?' active':'')+'" id="sgBtn-magic" onclick="setSetsGame(&quot;magic&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div><div class="game-btn-name">Magic</div></div>'
     +'<div class="game-btn'+(currentGame==='yugioh'?' active':'')+'" id="sgBtn-yugioh" onclick="setSetsGame(&quot;yugioh&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div><div class="game-btn-name">Yu-Gi-Oh</div></div>'
     +'</div>';
@@ -4057,6 +4091,7 @@ async function loadSetsData(){
   try{
     var sets = [];
     if(currentGame==='pokemon') sets = await loadPokemonSets();
+    else if(currentGame==='pokemonjp') sets = (await loadPokemonSets()).map(function(s){return Object.assign({},s,{game:'pokemonjp'});});
     else if(currentGame==='magic') sets = await loadMagicSets();
     else if(currentGame==='yugioh') sets = await loadYugiohSets();
     allSetsData = sets;
@@ -4068,7 +4103,7 @@ async function loadSetsData(){
 
 function setSetsGame(game){
   currentGame = game;
-  ['pokemon','magic','yugioh'].forEach(function(g){
+  ['pokemon','pokemonjp','magic','yugioh'].forEach(function(g){
     var b1 = document.getElementById('gameBtn-'+g);
     var b2 = document.getElementById('sgBtn-'+g);
     if(b1) b1.classList.toggle('active', g===game);
@@ -4084,10 +4119,15 @@ function setSetsGame(game){
 
 function filterSets(query){
   if(!allSetsData.length) return;
-  var filtered = query.trim()
+  query = query.trim();
+  var filtered = query
     ? allSetsData.filter(function(s){return s.name.toLowerCase().includes(query.toLowerCase());})
     : allSetsData;
-  renderSetsList(filtered);
+  if(!query && currentGame==='pokemon'){
+    renderSeriesView(allSetsData);
+  } else {
+    renderSetsList(filtered);
+  }
 }
 
 // loadSets replaced by renderSetsTab + loadSetsData
@@ -4101,6 +4141,43 @@ async function loadPokemonSets(){
   });
 }
 
+
+async function loadPokemonJPSets(){
+  // Use TCG Collector API for JP sets - falls back to filtered EN sets
+  try{
+    // Try fetching JP sets from pokemontcg.io filtering by series with short ptcgoCode (JP sets)
+    var r = await fetch('https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=250');
+    var d = await r.json();
+    // JP exclusive sets have no ptcgoCode or very short codes, and specific series
+    // Known JP series identifiers
+    var jpKeywords = ['sv','svp','sv1','sv2','sv3','sv4','sv5','sv6','sv7','sv8',
+      'sma','smb','smc','sm1','sm2','sm3','sm4','sm5','sm6','sm7','sm8','sm9','sm10','sm11','sm12',
+      'dp','pl','hgss','bw','xy','base','gym','neo','aqua','magma','legend','call','stormfront',
+      'Japanese','japan'];
+    var allSets = d.data||[];
+    // Filter: sets where ptcgoCode is missing or matches JP pattern OR name has Japanese keywords
+    var jpSets = allSets.filter(function(s){
+      var code = (s.ptcgoCode||'').toLowerCase();
+      var name = (s.name||'').toLowerCase();
+      // JP sets from SV era have specific prefixes
+      var isSVJP = code.startsWith('sv') && !['svp','sve'].includes(code);
+      var hasJPName = name.includes('japanese') || name.includes(' jp') || name.includes('(jp)');
+      // Also include sets that are NOT in standard EN rotation markers
+      return hasJPName || isSVJP;
+    });
+    // If few results, just return all sets sorted by date (EN sets have JP equivalents)
+    if(jpSets.length < 5){
+      jpSets = allSets.filter(function(s){
+        return s.series&&(s.series==='Scarlet & Violet'||s.series==='Sword & Shield'||
+               s.series==='Sun & Moon'||s.series==='XY'||s.series==='Black & White');
+      });
+    }
+    return jpSets.map(function(s){
+      return{id:s.id,name:s.name,logo:s.images&&s.images.logo?s.images.logo:null,
+        count:s.total||0,released:s.releaseDate||'',game:'pokemonjp'};
+    });
+  }catch(e){return[];}
+}
 
 async function loadMagicSets(){
   var r = await fetch('https://api.scryfall.com/sets?order=released');
@@ -4136,7 +4213,7 @@ function renderSetsList(sets){
     var date = set.released?set.released.substring(0,4):'';
     item.innerHTML = logoHTML
       +'<div class="set-info"><div class="set-name">'+set.name+'</div>'
-      +'<div class="set-meta">'+['Pokémon TCG','Pokémon JP','Magic: The Gathering','Yu-Gi-Oh!'][['pokemon','magic','yugioh'].indexOf(set.game)]||set.game+(date?' · '+date:'')+'</div></div>'
+      +'<div class="set-meta">'+['Pokémon TCG','Pokémon JP','Magic: The Gathering','Yu-Gi-Oh!'][['pokemon','pokemonjp','magic','yugioh'].indexOf(set.game)]||set.game+(date?' · '+date:'')+'</div></div>'
       +'<div class="set-count">'+set.count+' cartas</div>';
     item.onclick = function(){openSetCards(set);};
     list.appendChild(item);
@@ -4150,7 +4227,7 @@ async function openSetCards(set){
   view.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando cartas...</div>';
   try{
     var cards = [];
-    if(set.game==='pokemon'){
+    if(set.game==='pokemon'||set.game==='pokemonjp'){
       var r = await fetch('https://api.pokemontcg.io/v2/cards?q=set.id:'+set.id+'&pageSize=250&orderBy=number');
       var d = await r.json();
       cards = (d.data||[]).map(function(c){
@@ -4266,7 +4343,7 @@ function addCardsFromSet(cards){
   var game = cards[0].game;
   var gameLabel = 'Cartas'; // All TCG cards go to Cartas category
   // Store original game for set field
-  var originalGame = {pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[game]||game;
+  var originalGame = {pokemon:'Pokémon TCG',pokemonjp:'Pokémon JP',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[game]||game;
   var added=0;
   var now=Date.now();
   cards.forEach(function(card){
