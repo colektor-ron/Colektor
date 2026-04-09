@@ -4266,18 +4266,22 @@ async function loadPokemonJPSets(){
 
 async function loadDigimonSets(){
   try{
-    // Use digimoncard.io getAllCards which returns all cards with set info
-    var r=await fetch('https://digimoncard.io/api-public/getAllCards.php?sort=name&series=Digimon+Card+Game&sortdirection=asc');
+    var r=await fetch('https://digimoncard.io/api-public/getAllCards?sort=name&series=Digimon%20Card%20Game&sortdirection=asc');
     var data=await r.json();
     var setMap={};
     (Array.isArray(data)?data:[]).forEach(function(c){
-      var setName=(c.pack_name||c.set_name||'');
-      if(!setName)return;
-      if(!setMap[setName])setMap[setName]={id:setName,name:setName,logo:null,count:0,released:'',game:'digimon'};
-      setMap[setName].count++;
+      // set_name is an array of pack names
+      var sets=Array.isArray(c.set_name)?c.set_name:(c.set_name?[c.set_name]:[]);
+      sets.forEach(function(sn){
+        if(!sn||sn.trim()==='')return;
+        var k=sn.trim();
+        if(!setMap[k])setMap[k]={id:k,name:k,logo:null,count:0,released:'',game:'digimon'};
+        setMap[k].count++;
+      });
     });
-    return Object.values(setMap).filter(function(s){return s.count>0;}).sort(function(a,b){return a.name.localeCompare(b.name);});
-  }catch(e){return[];}
+    var result=Object.values(setMap).filter(function(s){return s.count>0;});
+    return result.sort(function(a,b){return a.name.localeCompare(b.name);});
+  }catch(e){console.error('Digimon sets error:',e);return[];}
 }
 
 async function loadDragonBallSets(){
@@ -4286,7 +4290,7 @@ async function loadDragonBallSets(){
     var queries=['Goku','Vegeta','Frieza','Gohan','Piccolo'];
     var setMap={};
     for(var qi=0;qi<queries.length;qi++){
-      var r=await fetch('https://apitcg.com/api/dragon-ball-fusion/cards?name='+queries[qi]);
+      var r=await fetch('https://corsproxy.io/?'+encodeURIComponent('https://apitcg.com/api/dragon-ball-fusion/cards?name='+queries[qi]));
       var d=await r.json();
       (d.data||[]).forEach(function(c){
         if(c.set&&c.set.id&&!setMap[c.set.id]){
@@ -4304,7 +4308,7 @@ async function loadGundamSets(){
     var queries=['Gundam','Strike','Freedom','Unicorn','Wing','Zeta','Nu'];
     var setMap={};
     for(var qi=0;qi<queries.length;qi++){
-      var r=await fetch('https://apitcg.com/api/gundam/cards?name='+queries[qi]);
+      var r=await fetch('https://corsproxy.io/?'+encodeURIComponent('https://apitcg.com/api/gundam/cards?name='+queries[qi]));
       var d=await r.json();
       (d.data||[]).forEach(function(c){
         if(c.set&&c.set.id&&!setMap[c.set.id]){
@@ -4395,9 +4399,9 @@ async function openSetCards(set){
           set:set.name,setLogo:null,priceUSD:0,game:'yugioh'};
       });
     } else if(set.game==='digimon'){
-      var rd=await fetch('https://digimoncard.io/api-public/search.php?pack='+encodeURIComponent(set.name)+'&series=Digimon+Card+Game&sort=name&sortdirection=asc');
+      var rd=await fetch('https://digimoncard.io/api-public/search?pack='+encodeURIComponent(set.id)+'&series=Digimon%20Card%20Game&sort=name&sortdirection=asc');
       var dd=await rd.json();
-      cards=(Array.isArray(dd)?dd:[]).map(function(c){return{id:c.cardnumber||c.card_number,name:c.name,image:c.image_url||null,rarity:c.rarity||'',number:c.cardnumber||'',set:set.name,setLogo:null,priceUSD:0,game:'digimon'};});
+      cards=(Array.isArray(dd)?dd:[]).map(function(c){return{id:c.cardnumber,name:c.name,image:(c.image_url||c.img||null),rarity:c.rarity||'',number:c.cardnumber||'',set:set.name,setLogo:null,priceUSD:0,game:'digimon'};});
     } else if(set.game==='dragonball'){
       cards=await loadSetCardsFromAPI('dragon-ball-fusion',set.id,set.name,'dragonball');
     } else if(set.game==='gundam'){
@@ -4412,7 +4416,7 @@ async function openSetCards(set){
 }
 
 async function loadSetCardsFromAPI(endpoint, setId, setName, game){
-  var r=await fetch('https://apitcg.com/api/'+endpoint+'/cards?limit=500');
+  var r=await fetch('https://corsproxy.io/?'+encodeURIComponent('https://apitcg.com/api/'+endpoint+'/cards?limit=500'));
   var d=await r.json();
   return (d.data||[]).filter(function(c){return c.set&&(c.set.id===setId||c.set.name===setName);}).map(function(c){
     return{id:c.id,name:c.name,image:c.images&&c.images.small?c.images.small:null,
