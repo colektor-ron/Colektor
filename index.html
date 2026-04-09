@@ -4053,11 +4053,10 @@ function renderSetsTab(){
   // Game selector (reuse current game)
   var gameRow = document.createElement('div');
   gameRow.innerHTML = '<div class="scanner-game-label">Juego</div>'
-    +'<div class="game-selector" style="grid-template-columns:repeat(2,1fr);">'
-    +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon EN</div></div>'
-    +'<div class="game-btn'+(currentGame==='pokemonjp'?' active':'')+'" id="sgBtn-pokemonjp" onclick="setSetsGame(&quot;pokemonjp&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon JP</div></div>'
-    +'<div class="game-btn'+(currentGame==='magic'?' active':'')+'" id="sgBtn-magic" onclick="setSetsGame(&quot;magic&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div><div class="game-btn-name">Magic</div></div>'
-    +'<div class="game-btn'+(currentGame==='yugioh'?' active':'')+'" id="sgBtn-yugioh" onclick="setSetsGame(&quot;yugioh&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div><div class="game-btn-name">Yu-Gi-Oh</div></div>'
+    +'<div class="game-selector">'
+    +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"2\" y1=\"12\" x2=\"22\" y2=\"12\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M12 2a10 10 0 0 1 10 10\"/></svg></div><div class="game-btn-name">Pokémon</div></div>'
+    +'<div class="game-btn'+(currentGame==='magic'?' active':'')+'" id="sgBtn-magic" onclick="setSetsGame(&quot;magic&quot;)"><div class="game-btn-icon"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polygon points=\"12 2 22 9 18 21 6 21 2 9\"/><line x1=\"12\" y1=\"2\" x2=\"12\" y2=\"21\"/><line x1=\"2\" y1=\"9\" x2=\"22\" y2=\"9\"/></svg></div><div class="game-btn-name">Magic</div></div>'
+    +'<div class="game-btn'+(currentGame==='yugioh'?' active':'')+'" id="sgBtn-yugioh" onclick="setSetsGame(&quot;yugioh&quot;)"><div class="game-btn-icon"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2L2 20h20L12 2z\"/><circle cx=\"12\" cy=\"14\" r=\"3\"/><line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"10\"/></svg></div><div class="game-btn-name">Yu-Gi-Oh</div></div>'
     +'</div>';
   view.appendChild(gameRow);
 
@@ -4137,7 +4136,7 @@ async function loadPokemonSets(){
   var d = await r.json();
   return (d.data||[]).map(function(s){
     return{id:s.id,name:s.name,logo:s.images&&s.images.logo?s.images.logo:null,
-      count:s.total||0,released:s.releaseDate||'',game:'pokemon'};
+      count:s.total||0,released:s.releaseDate||'',series:s.series||'Otros',game:'pokemon'};
   });
 }
 
