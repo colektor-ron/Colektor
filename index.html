@@ -4101,21 +4101,37 @@ function renderSeriesView(sets){
     var color=getSeriesColor(series.name);
     var card=document.createElement('div');
     card.className='series-card';
-    card.style.background=color;
+
+    // Left color fillet
+    var fillet=document.createElement('div');
+    fillet.className='series-card-fillet';
+    fillet.style.background=color;
+    card.appendChild(fillet);
+
+    // Logo area
+    var logoDiv=document.createElement('div');
+    logoDiv.className='series-card-logo';
     if(series.seriesLogo){
-      var bg=document.createElement('div');
-      bg.className='series-card-bg';
-      bg.style.backgroundImage='url('+series.seriesLogo+')';
-      card.appendChild(bg);
+      var img=document.createElement('img');
+      img.src=series.seriesLogo;
+      img.loading='lazy';
+      logoDiv.appendChild(img);
     }
-    var grad=document.createElement('div');
-    grad.style.cssText='position:absolute;inset:0;background:linear-gradient(to right,'+color+'dd 0%,'+color+'99 100%);';
-    card.appendChild(grad);
+    card.appendChild(logoDiv);
+
+    // Info
     var info=document.createElement('div');
     info.className='series-card-info';
     info.innerHTML='<div class="series-card-name">'+series.name+'</div>'
       +'<div class="series-card-count">'+series.sets.length+' set'+(series.sets.length!==1?'s':'')+'</div>';
     card.appendChild(info);
+
+    // Arrow
+    var arrow=document.createElement('div');
+    arrow.className='series-card-arrow';
+    arrow.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+    card.appendChild(arrow);
+
     card.onclick=function(){renderSeriesSets(series.sets,series.name,color);};
     list.appendChild(card);
   });
