@@ -350,7 +350,7 @@ input[type="file"]{display:none;}
 .scanner-search-wrap{margin-top:8px;}
 
 /* Game selector */
-.game-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.game-selector{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}.game-btn-name{font-size:10px;}
 .game-btn{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.15s;}
 .game-btn.active{border-color:#1B6DC0;background:rgba(27,109,192,0.12);}
 .game-btn:active{transform:scale(0.97);}
@@ -1327,6 +1327,18 @@ input[type="file"]{display:none;}
           <div class="game-btn" id="gameBtn-yugioh" onclick="setGame('yugioh')">
             <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div>
             <div class="game-btn-name">Yu-Gi-Oh</div>
+          </div>
+          <div class="game-btn" id="gameBtn-digimon" onclick="setGame('digimon')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2c0 5.5-4 8-4 10s4 4.5 4 10"/><path d="M2 12c5.5 0 8 4 10 4s4.5-4 10-4"/></svg></div>
+            <div class="game-btn-name">Digimon</div>
+          </div>
+          <div class="game-btn" id="gameBtn-dragonball" onclick="setGame('dragonball')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2 4-6 5-6 9a6 6 0 0 0 12 0c0-4-4-5-6-9z"/><circle cx="12" cy="11" r="2"/></svg></div>
+            <div class="game-btn-name">Dragon Ball</div>
+          </div>
+          <div class="game-btn" id="gameBtn-gundam" onclick="setGame('gundam')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 4v6c0 5-4 9-9 10C7 21 3 17 3 12V6l9-4z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg></div>
+            <div class="game-btn-name">Gundam</div>
           </div>
         </div>
       </div>
@@ -3865,6 +3877,9 @@ async function searchCards(){
     else if(currentGame==='pokemonjp') cards=await searchPokemonJP(query);
     else if(currentGame==='magic') cards=await searchMagic(query);
     else if(currentGame==='yugioh') cards=await searchYugioh(query);
+    else if(currentGame==='digimon') cards=await searchDigimon(query);
+    else if(currentGame==='dragonball') cards=await searchDragonBall(query);
+    else if(currentGame==='gundam') cards=await searchGundam(query);
     renderScannerResults(cards);
   }catch(err){
     results.innerHTML='<div class="scanner-empty">Error al buscar. Verifica tu conexión.</div>';
@@ -3948,6 +3963,40 @@ async function searchYugioh(query){
   });
 }
 
+async function searchDigimon(query){
+  try{
+    var r=await fetch('https://apitcg.com/api/digimon/cards?name='+encodeURIComponent(query));
+    var d=await r.json();
+    return (d.data||[]).map(function(c){
+      return{id:c.id,name:c.name,set:(c.set&&c.set.name)||'',number:c.code||'',
+        rarity:c.rarity||'',image:c.images&&c.images.small?c.images.small:null,
+        priceUSD:0,game:'digimon',type:c.cardType||''};
+    });
+  }catch(e){return[];}
+}
+async function searchDragonBall(query){
+  try{
+    var r=await fetch('https://apitcg.com/api/dragon-ball-fusion/cards?name='+encodeURIComponent(query));
+    var d=await r.json();
+    return (d.data||[]).map(function(c){
+      return{id:c.id,name:c.name,set:(c.set&&c.set.name)||'',number:c.code||'',
+        rarity:c.rarity||'',image:c.images&&c.images.small?c.images.small:null,
+        priceUSD:0,game:'dragonball',type:c.cardType||''};
+    });
+  }catch(e){return[];}
+}
+async function searchGundam(query){
+  try{
+    var r=await fetch('https://apitcg.com/api/gundam/cards?name='+encodeURIComponent(query));
+    var d=await r.json();
+    return (d.data||[]).map(function(c){
+      return{id:c.id,name:c.name,set:(c.set&&c.set.name)||'',number:c.code||'',
+        rarity:c.rarity||'',image:c.images&&c.images.small?c.images.small:null,
+        priceUSD:0,game:'gundam',type:c.cardType||c.sourceTitle||''};
+    });
+  }catch(e){return[];}
+}
+
 function getRarityClass(rarity){
   if(!rarity)return'';
   var r=rarity.toLowerCase();
@@ -3980,7 +4029,7 @@ function renderScannerResults(cards){
       ?'<img class="scanner-result-img" src="'+card.image+'" loading="lazy"/>'
       :'<div class="scanner-result-img-empty">'+IC.grid(20)+'</div>';
     var clp=clpFromUSD(card.priceUSD);
-    var gameLabel={pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[card.game]||'';
+    var gameLabel={pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!',digimon:'Digimon TCG',dragonball:'Dragon Ball Fusion',gundam:'Gundam Card Game'}[card.game]||card.game;
     div.innerHTML=imgHTML
       +'<div class="scanner-result-info">'
       +'<div class="scanner-result-name">'+card.name+'</div>'
@@ -4416,9 +4465,7 @@ function renderSetCards(set, cards){
 function addCardsFromSet(cards){
   if(!cards.length)return;
   var game = cards[0].game;
-  var gameLabel = 'Cartas'; // All TCG cards go to Cartas category
-  // Store original game for set field
-  var originalGame = {pokemon:'Pokémon TCG',pokemonjp:'Pokémon JP',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[game]||game;
+  var gameLabel = 'Cartas';
   var added=0;
   var now=Date.now();
   cards.forEach(function(card){
