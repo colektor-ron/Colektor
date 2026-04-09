@@ -3966,11 +3966,18 @@ async function searchDigimon(query){
   try{
     var r=await fetch('https://digimoncard.io/api-public/search?n='+encodeURIComponent(query)+'&series=Digimon%20Card%20Game&sort=name&sortdirection=asc');
     var d=await r.json();
-    return (Array.isArray(d)?d:[]).slice(0,50).map(function(c){
-      var setName=Array.isArray(c.set_name)?c.set_name[0]||'':c.set_name||'';
-      return{id:c.cardnumber,name:c.name,set:setName,number:c.cardnumber||'',
-        rarity:c.rarity||'',image:c.image_url||null,priceUSD:0,game:'digimon',type:c.type||''};
+    // Deduplicate by cardnumber
+    var seen={};
+    var cards=[];
+    (Array.isArray(d)?d:[]).forEach(function(c){
+      if(!seen[c.cardnumber]){
+        seen[c.cardnumber]=true;
+        var setName=Array.isArray(c.set_name)?c.set_name[0]||'':c.set_name||'';
+        cards.push({id:c.cardnumber,name:c.name,set:setName,number:c.cardnumber||'',
+          rarity:c.rarity||'',image:c.image_url||null,priceUSD:0,game:'digimon',type:c.type||''});
+      }
     });
+    return cards.slice(0,30);
   }catch(e){console.error('Digimon search error',e);return[];}
 }
 
@@ -4041,7 +4048,10 @@ function renderScannerResults(cards){
       +(card.type||card.types?'<div style="font-size:10px;color:#555;margin-top:2px;">'+(card.type||card.types)+'</div>':'')
       +'</div>'
       +(clp?'<div class="scanner-result-price">'+fmt(clp)+'</div>':'');
-    div.onclick=function(){addCardFromScanner(card);};
+    div.onclick=function(){
+      toast(card.name+' agregada!','#818cf8');
+      setTimeout(function(){addCardFromScanner(card);},800);
+    };
     results.appendChild(div);
   });
 }
@@ -4111,9 +4121,6 @@ function renderSetsTab(){
     +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><line x1=\"2\" y1=\"12\" x2=\"22\" y2=\"12\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/><path d=\"M12 2a10 10 0 0 1 10 10\"/></svg></div><div class="game-btn-name">Pokémon</div></div>'
     +'<div class="game-btn'+(currentGame==='magic'?' active':'')+'" id="sgBtn-magic" onclick="setSetsGame(&quot;magic&quot;)"><div class="game-btn-icon"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><polygon points=\"12 2 22 9 18 21 6 21 2 9\"/><line x1=\"12\" y1=\"2\" x2=\"12\" y2=\"21\"/><line x1=\"2\" y1=\"9\" x2=\"22\" y2=\"9\"/></svg></div><div class="game-btn-name">Magic</div></div>'
     +'<div class="game-btn'+(currentGame==='yugioh'?' active':'')+'" id="sgBtn-yugioh" onclick="setSetsGame(&quot;yugioh&quot;)"><div class="game-btn-icon"><svg width=\"22\" height=\"22\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2L2 20h20L12 2z\"/><circle cx=\"12\" cy=\"14\" r=\"3\"/><line x1=\"12\" y1=\"8\" x2=\"12\" y2=\"10\"/></svg></div><div class="game-btn-name">Yu-Gi-Oh</div></div>'
-    +'<div class="game-btn'+(currentGame==='digimon'?' active':'')+'" id="sgBtn-digimon" onclick="setSetsGame(&quot;digimon&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2c0 5.5-4 8-4 10s4 4.5 4 10"/><path d="M2 12c5.5 0 8 4 10 4s4.5-4 10-4"/></svg></div><div class="game-btn-name">Digimon</div></div>'
-    +'<div class="game-btn'+(currentGame==='dragonball'?' active':'')+'" id="sgBtn-dragonball" onclick="setSetsGame(&quot;dragonball&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c-2 4-6 5-6 9a6 6 0 0 0 12 0c0-4-4-5-6-9z"/><circle cx="12" cy="11" r="2"/></svg></div><div class="game-btn-name">Dragon Ball</div></div>'
-    +'<div class="game-btn'+(currentGame==='gundam'?' active':'')+'" id="sgBtn-gundam" onclick="setSetsGame(&quot;gundam&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 4v6c0 5-4 9-9 10C7 21 3 17 3 12V6l9-4z"/><line x1="12" y1="8" x2="12" y2="14"/><line x1="9" y1="11" x2="15" y2="11"/></svg></div><div class="game-btn-name">Gundam</div></div>'
     +'</div>';
   view.appendChild(gameRow);
 
