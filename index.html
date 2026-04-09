@@ -185,15 +185,14 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 input[type="file"]{display:none;}
 
 /* ── SERIES VIEW ── */
-.series-list{display:flex;flex-direction:column;gap:10px;}
-.series-card{border-radius:14px;overflow:hidden;cursor:pointer;position:relative;min-height:80px;display:flex;align-items:flex-end;border:1px solid rgba(255,255,255,0.06);transition:transform 0.15s;}
-.series-card:active{transform:scale(0.98);}
-.series-card-bg{position:absolute;inset:0;background-size:contain;background-repeat:no-repeat;background-position:center;opacity:0.35;}
-.series-card-gradient{position:absolute;inset:0;}
-.series-card-info{position:relative;z-index:1;padding:14px 16px;width:100%;}
-.series-card-name{font-size:15px;font-weight:700;}
-.series-card-count{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px;}
-.series-colors{Scarlet & Violet:'#8b5cf6',Sword & Shield:'#ec4899',Sun & Moon:'#f59e0b',XY:'#3b82f6',Black & White:'#6b7280',Base:'#22c55e'}
+.series-list{display:flex;flex-direction:column;gap:7px;}
+.series-card{border-radius:12px;cursor:pointer;background:#1c1c1e;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:stretch;height:64px;overflow:hidden;transition:background 0.15s;}
+.series-card:active{background:#252527;}
+.series-card-fillet{width:5px;flex-shrink:0;}
+.series-card-info{flex:1;padding:0 14px;display:flex;flex-direction:column;justify-content:center;min-width:0;}
+.series-card-name{font-size:14px;font-weight:700;color:#f0f0f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.series-card-count{font-size:11px;color:#555;margin-top:3px;}
+.series-card-arrow{width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#444;}
 
 
 /* ── FOLDER INNER VIEW ── */
