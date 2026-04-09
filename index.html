@@ -4149,7 +4149,7 @@ function renderSeriesSets(sets,seriesName,color){
   title.textContent=seriesName;
   header.appendChild(backBtn);header.appendChild(title);
   container.appendChild(header);
-  renderSetsList(sets);
+  renderSetsList(sets, true);
 }
 
 async function loadSetsData(){
@@ -4265,12 +4265,12 @@ async function loadYugiohSets(){
   });
 }
 
-function renderSetsList(sets){
+function renderSetsList(sets, appendToContainer){
   var view = document.getElementById('setsListContainer');
   if(!view) view = document.getElementById('scannerSetsView');
   if(!view) return;
-  view.innerHTML = '';
-  if(!sets.length){view.innerHTML='<div class="scanner-empty">Sin sets encontrados.</div>';return;}
+  if(!appendToContainer) view.innerHTML = '';
+  if(!sets.length){var emp=document.createElement('div');emp.className='scanner-empty';emp.textContent='Sin sets encontrados.';view.appendChild(emp);return;}
   var list = document.createElement('div');list.className='set-list';
   sets.forEach(function(set){
     var item = document.createElement('div');item.className='set-item';
