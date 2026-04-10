@@ -2144,9 +2144,9 @@ function renderCollection(){
       // Action buttons (shown when open)
       // Borrar set - small red icon button in header top-right
       var btnDelAll=document.createElement('button');
-      btnDelAll.style.cssText='position:absolute;top:10px;right:10px;background:none;border:none;color:rgba(239,68,68,0.5);cursor:pointer;padding:6px;border-radius:8px;z-index:2;';
-      btnDelAll.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
-      btnDelAll.title='Borrar set';
+      btnDelAll.className='btn-folder-delete';
+      btnDelAll.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Borrar set';
+      
 
       var fActions=document.createElement('div');fActions.className='folder-actions';
       fActions.style.display='none';
@@ -2189,9 +2189,8 @@ function renderCollection(){
         }
       };
 
-      folder.style.position='relative';
       folder.appendChild(fHeader);
-      folder.appendChild(btnDelAll);
+      fActions.appendChild(btnDelAll);
       folder.appendChild(fActions);
       folder.appendChild(fBody);
       cardsSection.appendChild(folder);
@@ -5433,22 +5432,6 @@ function openMusicScanner(){
     +'<button class="music-modal-close" onclick="closeMusicScanner()">Cerrar</button>';
   modal.appendChild(header);
 
-  // Format filters
-  var formatRow = document.createElement('div');
-  formatRow.className = 'music-format-row';
-  [['all','Todos'],['Vinyl','Vinilo 🎵'],['CD','CD 💿'],['Cassette','Cassette 📼'],['Box Set','Box Set 📦']].forEach(function(f){
-    var btn = document.createElement('button');
-    btn.className = 'music-format-btn'+(musicCurrentFormat===f[0]?' active':'');
-    btn.textContent = f[1];
-    btn.onclick = function(){
-      musicCurrentFormat = f[0];
-      formatRow.querySelectorAll('.music-format-btn').forEach(function(b){b.classList.remove('active');});
-      btn.classList.add('active');
-    };
-    formatRow.appendChild(btn);
-  });
-  modal.appendChild(formatRow);
-
   // Search bar
   var searchBar = document.createElement('div');
   searchBar.className = 'music-search-bar';
@@ -5484,7 +5467,7 @@ async function searchMusic(){
 
   try{
     // MusicBrainz - free, no auth, CORS open
-    var searchUrl = 'https://musicbrainz.org/ws/2/release-group/?query='+encodeURIComponent(query)+'&fmt=json&limit=25';
+    var searchUrl = 'https://musicbrainz.org/ws/2/release-group/?query='+encodeURIComponent(query)+'&fmt=json&limit=50';
     var r = await fetch(searchUrl, {headers:{'User-Agent':'ColeKtoR/1.0 ( collector-app )','Accept':'application/json'}});
     var d = await r.json();
     var releases = d['release-groups']||[];
