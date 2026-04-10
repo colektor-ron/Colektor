@@ -199,8 +199,8 @@ input[type="file"]{display:none;}
 .music-results{flex:1;overflow-y:auto;padding:0 16px 32px;}
 .music-result-item{display:flex;align-items:center;gap:12px;background:#1c1c1e;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:10px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;}
 .music-result-item:active{background:#252527;}
-.music-result-cover{width:60px;height:60px;border-radius:10px;object-fit:cover;background:#111;flex-shrink:0;}
-.music-result-cover-empty{width:60px;height:60px;border-radius:10px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px;}
+.music-result-cover{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#1a1a1a;flex-shrink:0;}
+.music-result-cover-empty{width:64px;height:64px;border-radius:10px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:28px;}
 .music-result-info{flex:1;min-width:0;}
 .music-result-title{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .music-result-artist{font-size:11px;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -2010,7 +2010,7 @@ function renderCollection(){
   // ── Cards section (TCG items grouped separately)
   var cardItems=displayed.filter(function(c){return CARD_CATEGORIES.includes(c.category);});
   var nonCardItems=displayed.filter(function(c){return !CARD_CATEGORIES.includes(c.category);});
-  var hasCards=cardItems.length>0&&(colCatFilter==='all'||colCatFilter==='Cartas')&&colEstadoFilter==='all';
+  var hasCards=cardItems.length>0&&(colCatFilter==='all'||colCatFilter==='Cartas');
 
   if(hasCards){
     var cardsSection=document.createElement('div');cardsSection.className='cards-section';
@@ -4175,10 +4175,7 @@ function renderScannerResults(cards){
       +(card.type||card.types?'<div style="font-size:10px;color:#555;margin-top:2px;">'+(card.type||card.types)+'</div>':'')
       +'</div>'
       +(clp?'<div class="scanner-result-price">'+fmt(clp)+'</div>':'');
-    div.onclick=function(){
-      toast(card.name+' agregada!','#818cf8');
-      setTimeout(function(){addCardFromScanner(card);},800);
-    };
+    (function(c){div.onclick=function(){addCardFromScanner(c);};})(card);
     results.appendChild(div);
   });
 }
@@ -5535,15 +5532,22 @@ async function searchMusic(){
         ? '<img class="music-result-cover" src="'+thumb+'" loading="lazy"/>'
         : '<div class="music-result-cover-empty">🎵</div>';
       // Parse title (usually "Artist - Album")
-      var parts = (rel.title||'').split(' - ');
-      var artist = parts.length>1 ? parts[0] : (rel.artist||'');
-      var album = parts.length>1 ? parts.slice(1).join(' - ') : rel.title;
+      // Discogs: title is usually "Artist - Album", artist is array
+      var rawTitle = rel.title||'';
+      var artistArr = rel.artist || [];
+      var artist = Array.isArray(artistArr) ? artistArr.join(', ') : artistArr;
+      var album = rawTitle;
+      if(!artist && rawTitle.includes(' - ')){
+        var parts = rawTitle.split(' - ');
+        artist = parts[0];
+        album = parts.slice(1).join(' - ');
+      }
       var formats = (rel.format||[]).join(', ');
       var year = rel.year||'';
       item.innerHTML = coverHTML
         +'<div class="music-result-info">'
-        +'<div class="music-result-title">'+escH(album)+'</div>'
-        +'<div class="music-result-artist">'+escH(artist)+'</div>'
+        +'<div class="music-result-title">'+escH(album||rawTitle)+'</div>'
+        +'<div class="music-result-artist">'+(artist?escH(artist):'')+'</div>'
         +'<div class="music-result-meta">'
         +(formats?'<span class="music-result-tag">'+escH(formats.substring(0,20))+'</span>':'')
         +(year?'<span class="music-result-year">'+year+'</span>':'')
@@ -5577,7 +5581,7 @@ async function searchMusic(){
 function addMusicItem(data){
   var item = {
     id: Date.now(),
-    name: data.title+(data.artist?' — '+data.artist:''),
+    name: (data.title||'Sin título')+(data.artist?' — '+data.artist:''),
     category: 'Música',
     photos: (data.cover&&!data.cover.includes('spacer')) ? [data.cover] : [],
     note: [data.format, data.label, data.genre].filter(Boolean).join(' · '),
