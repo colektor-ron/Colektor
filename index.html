@@ -2264,7 +2264,9 @@ function renderCollection(){
       var rg=document.createElement("div");rg.className="col-grid";
       rest.forEach(function(i){rg.appendChild(makeColCard(i));});content.appendChild(rg);
     }
-  }else if(!hasCards){
+  }else if(!hasCards && colCatFilter==='all'){
+    // Only render the grid fallback when showing ALL items
+    // (specific category views are already handled by renderCustomFolders above)
     if(colViewMode==="list"){
       var lv=document.createElement("div");lv.className="col-list";
       displayed.forEach(function(i){lv.appendChild(makeListCard(i));});content.appendChild(lv);
