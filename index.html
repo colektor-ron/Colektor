@@ -4563,14 +4563,184 @@ function renderPriceAlerts(alerts){
   });
 }
 
+function openBarcodeScanner(){
+  var modal = document.createElement('div');
+  modal.className = 'barcode-modal';
+  modal.id = 'barcodeModal';
+  modal.innerHTML = '<div class="barcode-header">'
+    +'<div class="barcode-title">📦 Escanear código</div>'
+    +'<button class="barcode-close" onclick="closeBarcodeScanner()">Cerrar</button>'
+    +'</div>'
+    +'<div class="barcode-viewport">'
+    +'<video id="barcodeVideo" autoplay muted playsinline></video>'
+    +'<div class="barcode-reticle"><div class="barcode-reticle-box"></div><div class="barcode-reticle-line"></div></div>'
+    +'<div class="barcode-hint">Apunta al código de barras del producto</div>'
+    +'</div>';
+  document.body.appendChild(modal);
+  startBarcodeCamera();
+}
 
+async function loadZXing(){
+  if(typeof ZXing !== 'undefined') return;
+  return new Promise(function(resolve){
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.18.6/umd/index.min.js';
+    s.onload=resolve;s.onerror=resolve;
+    document.head.appendChild(s);
+  });
+}
+async function startBarcodeCamera(){
+  await loadZXing();
+  try{
+    barcodeStream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
+    });
+    var video = document.getElementById('barcodeVideo');
+    if(video){video.srcObject = barcodeStream;video.play();}
+    barcodeScanActive = true;
+    scanBarcodeFrame(video);
+  }catch(e){
+    toast('No se pudo acceder a la cámara','#ef4444');
+    closeBarcodeScanner();
+  }
+}
 
+function scanBarcodeFrame(video){
+  if(!barcodeScanActive) return;
+  // Try native BarcodeDetector first (Chrome/Android)
+  if('BarcodeDetector' in window){
+    var detector = new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
+    var scan = function(){
+      if(!barcodeScanActive) return;
+      detector.detect(video).then(function(codes){
+        if(codes.length > 0){
+          barcodeScanActive = false;
+          lookupBarcode(codes[0].rawValue);
+        } else {
+          requestAnimationFrame(scan);
+        }
+      }).catch(function(){requestAnimationFrame(scan);});
+    };
+    video.addEventListener('loadeddata', scan);
+  } else if(typeof ZXing !== 'undefined'){
+    // Fallback: ZXing
+    try{
+      barcodeReader = new ZXing.BrowserMultiFormatReader();
+      barcodeReader.decodeFromVideoDevice(null,'barcodeVideo',function(result,err){
+        if(result && barcodeScanActive){
+          barcodeScanActive = false;
+          barcodeReader.reset();
+          lookupBarcode(result.getText());
+        }
+      });
+    }catch(e){toast('Escaneo no disponible en este dispositivo','#f59e0b');}
+  } else {
+    toast('Escaneo no disponible. Ingresa el código manualmente.','#f59e0b');
+    closeBarcodeScanner();
+  }
+}
 
+async function lookupBarcode(code){
+  toast('Buscando producto...','#1B6DC0');
+  try{
+    // UPC Item DB - free tier, 100 requests/day
+    var r = await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc='+code);
+    var d = await r.json();
+    var item = d.items && d.items[0];
+    if(item && item.title){
+      showBarcodeResult(item, code);
+    } else {
+      // Try Open Food Facts as fallback
+      var r2 = await fetch('https://world.openfoodfacts.org/api/v0/product/'+code+'.json');
+      var d2 = await r2.json();
+      if(d2.product && d2.product.product_name){
+        showBarcodeResult({
+          title: d2.product.product_name,
+          description: d2.product.brands||'',
+          images: d2.product.image_url?[d2.product.image_url]:[]
+        }, code);
+      } else {
+        showBarcodeResult({title: 'Producto #'+code, description:'Código: '+code, images:[]}, code);
+      }
+    }
+  }catch(e){
+    showBarcodeResult({title:'Producto #'+code, description:'Código: '+code, images:[]}, code);
+  }
+}
 
+function showBarcodeResult(item, code){
+  // Store pending barcode item globally to avoid quote escaping issues
+  window._pendingBarcodeItem = {
+    title: item.title||'Producto #'+code,
+    description: item.description||'',
+    image: item.images&&item.images[0]?item.images[0]:'',
+    category: detectCategoryFromName(item.title||'')
+  };
+  var d = window._pendingBarcodeItem;
+  var sheet = document.createElement('div');
+  sheet.className = 'barcode-result';
+  sheet.id = 'barcodeResultSheet';
+  var img = d.image ? '<img class="barcode-result-img" src="'+d.image+'" />' : '';
+  sheet.innerHTML = '<div class="barcode-result-sheet">'
+    +'<div class="barcode-result-title">'+escH(d.title)+'</div>'
+    +'<div class="barcode-result-sub">Código: '+code+' · Categoría sugerida: '+d.category+'</div>'
+    +img
+    +'<div class="barcode-result-desc">'+(d.description?escH(d.description.substring(0,120)):'')+'</div>'
+    +'<div class="barcode-result-btns">'
+    +'<button class="btn-add-barcode" onclick="addFromBarcodePending()">+ Agregar a colección</button>'
+    +'<button class="btn-scan-again" onclick="scanAgain()">Escanear otro</button>'
+    +'</div></div>';
+  document.body.appendChild(sheet);
+}
 
+function detectCategoryFromName(name){
+  var n = (name||'').toLowerCase();
+  if(n.includes('figure')||n.includes('figura')||n.includes('figuart')||n.includes('action')) return 'Figuras';
+  if(n.includes('card')||n.includes('carta')||n.includes('pokemon')||n.includes('magic')||n.includes('yugioh')) return 'Cartas';
+  if(n.includes('game')||n.includes('juego')||n.includes('console')||n.includes('nintendo')||n.includes('playstation')) return 'Gaming';
+  if(n.includes('comic')||n.includes('manga')||n.includes('vol.')||n.includes('volume')) return 'Cómics';
+  return 'Otros';
+}
 
+function addFromBarcodePending(){
+  var d = window._pendingBarcodeItem;
+  if(!d) return;
+  addFromBarcode(d.title, d.category, d.image);
+  window._pendingBarcodeItem = null;
+}
+function addFromBarcode(name, category, imageUrl){
+  var item = {
+    id: Date.now(), name: name, category: category,
+    photos: imageUrl ? [imageUrl] : [],
+    note:'', year: new Date().getFullYear().toString(),
+    rating:0, review:'', favorite:false,
+    estado:'Nuevo', valorActual:0, precioPagado:0,
+    edicion:'', tags:[], addedAt:Date.now()
+  };
+  collection.push(item);
+  save(); updateBadges();
+  toast(name+' agregado a '+category+'!','#22c55e');
+  closeBarcodeScanner();
+  setTimeout(function(){checkAchievements();},500);
+}
 
+function scanAgain(){
+  var sheet = document.getElementById('barcodeResultSheet');
+  if(sheet) sheet.remove();
+  barcodeScanActive = true;
+  var video = document.getElementById('barcodeVideo');
+  if(video) scanBarcodeFrame(video);
+}
 
+function closeBarcodeScanner(){
+  barcodeScanActive = false;
+  if(barcodeStream){barcodeStream.getTracks().forEach(function(t){t.stop();});barcodeStream=null;}
+  if(barcodeReader){try{barcodeReader.reset();}catch(e){}barcodeReader=null;}
+  var modal = document.getElementById('barcodeModal');
+  var sheet = document.getElementById('barcodeResultSheet');
+  if(modal) modal.remove();
+  if(sheet) sheet.remove();
+}
 
 // ── MUSIC SCANNER ──
 var musicCurrentFormat = 'all';
