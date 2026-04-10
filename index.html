@@ -5268,18 +5268,25 @@ async function lookupBarcode(code){
 }
 
 function showBarcodeResult(item, code){
+  // Store pending barcode item globally to avoid quote escaping issues
+  window._pendingBarcodeItem = {
+    title: item.title||'Producto #'+code,
+    description: item.description||'',
+    image: item.images&&item.images[0]?item.images[0]:'',
+    category: detectCategoryFromName(item.title||'')
+  };
+  var d = window._pendingBarcodeItem;
   var sheet = document.createElement('div');
   sheet.className = 'barcode-result';
   sheet.id = 'barcodeResultSheet';
-  var img = item.images && item.images[0] ? '<img class="barcode-result-img" src="'+item.images[0]+'" />' : '';
-  var cat = detectCategoryFromName(item.title);
+  var img = d.image ? '<img class="barcode-result-img" src="'+d.image+'" />' : '';
   sheet.innerHTML = '<div class="barcode-result-sheet">'
-    +'<div class="barcode-result-title">'+escH(item.title)+'</div>'
-    +'<div class="barcode-result-sub">Código: '+code+' · Categoría sugerida: '+cat+'</div>'
+    +'<div class="barcode-result-title">'+escH(d.title)+'</div>'
+    +'<div class="barcode-result-sub">Código: '+code+' · Categoría sugerida: '+d.category+'</div>'
     +img
-    +'<div class="barcode-result-desc">'+(item.description?escH(item.description.substring(0,120)):'')+'</div>'
+    +'<div class="barcode-result-desc">'+(d.description?escH(d.description.substring(0,120)):'')+'</div>'
     +'<div class="barcode-result-btns">'
-    +'<button class="btn-add-barcode" onclick="addFromBarcode(''+escH(item.title).replace(/'/g,"\'")+ '',''+cat+'',''+(item.images&&item.images[0]?item.images[0]:'')+'')">+ Agregar a colección</button>'
+    +'<button class="btn-add-barcode" onclick="addFromBarcodePending()">+ Agregar a colección</button>'
     +'<button class="btn-scan-again" onclick="scanAgain()">Escanear otro</button>'
     +'</div></div>';
   document.body.appendChild(sheet);
@@ -5294,6 +5301,12 @@ function detectCategoryFromName(name){
   return 'Otros';
 }
 
+function addFromBarcodePending(){
+  var d = window._pendingBarcodeItem;
+  if(!d) return;
+  addFromBarcode(d.title, d.category, d.image);
+  window._pendingBarcodeItem = null;
+}
 function addFromBarcode(name, category, imageUrl){
   var item = {
     id: Date.now(), name: name, category: category,
