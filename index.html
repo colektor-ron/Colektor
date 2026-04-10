@@ -2264,7 +2264,7 @@ function renderCollection(){
       var rg=document.createElement("div");rg.className="col-grid";
       rest.forEach(function(i){rg.appendChild(makeColCard(i));});content.appendChild(rg);
     }
-  }else{
+  }else if(!hasCards){
     if(colViewMode==="list"){
       var lv=document.createElement("div");lv.className="col-list";
       displayed.forEach(function(i){lv.appendChild(makeListCard(i));});content.appendChild(lv);
