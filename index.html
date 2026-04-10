@@ -393,6 +393,8 @@ input[type="file"]{display:none;}
 .cards-sort-bar::-webkit-scrollbar{display:none;}
 .btn-card-sort{padding:4px 10px;font-size:10px;font-weight:600;background:#1e1e1e;border:1px solid #2a2a2a;color:#555;border-radius:99px;white-space:nowrap;cursor:pointer;flex-shrink:0;}
 .btn-card-sort.active{background:rgba(129,140,248,0.15);border-color:#818cf8;color:#818cf8;}
+.btn-card-sort[data-f='owned'].active,.btn-card-sort:nth-child(2).active{background:rgba(34,197,94,0.1);border-color:#22c55e;color:#22c55e;}
+.btn-card-sort[data-f='missing'].active,.btn-card-sort:nth-child(3).active{background:rgba(239,68,68,0.1);border-color:#ef4444;color:#ef4444;}
 
 
 /* ── SETS ── */
@@ -1998,14 +2000,21 @@ function renderCollection(){
     csCount.appendChild(btnG);csCount.appendChild(btnL);
     csHeader.appendChild(csTitle);csHeader.appendChild(csCount);
     cardsSection.appendChild(csHeader);
-    // Sort bar
+    // Filter bar: Todas / Propias / Falta
     var sortBar=document.createElement('div');sortBar.className='cards-sort-bar';
-    [['name','Nombre'],['set','Set'],['rarity','Rareza'],['value','Valor'],['date','Reciente']].forEach(function(s){
-      var b=document.createElement('button');b.className='btn-card-sort'+(cardColSort===s[0]?' active':'');
-      b.textContent=s[1];b.onclick=function(){cardColSort=s[0];renderCollection();};sortBar.appendChild(b);
+    if(!window.cardColFilter) window.cardColFilter='all';
+    [['all','Todas'],['owned','Propias'],['missing','Falta']].forEach(function(s){
+      var b=document.createElement('button');
+      b.className='btn-card-sort'+(window.cardColFilter===s[0]?' active':'');
+      b.textContent=s[1];
+      if(s[0]==='owned') b.style.cssText+='border-color:#22c55e33;';
+      if(s[0]==='missing') b.style.cssText+='border-color:#ef444433;';
+      b.onclick=function(){window.cardColFilter=s[0];renderCollection();};
+      sortBar.appendChild(b);
     });
+    // Count badge per filter
     cardsSection.appendChild(sortBar);
-    // Sort cards
+    // Filter cards
     var sortedCards=cardItems.slice().sort(function(a,b){
       if(cardColSort==='name')return a.name.localeCompare(b.name);
       if(cardColSort==='set')return(a.set||a.category||'').localeCompare(b.set||b.category||'');
