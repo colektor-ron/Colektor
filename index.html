@@ -1892,6 +1892,7 @@ function renderPendientes(){
       +'<button class="btn-open-add" style="flex:1;" onclick="showAddP=true;renderPendientes()">'+IC.plus(18)+' Agregar ítem</button>'
       +'<div style="display:flex;gap:8px;align-items:center;">'
     +'<button class="btn-open-add" style="flex:1;background:rgba(129,140,248,0.1);border-color:#818cf8;color:#818cf8;gap:8px;" onclick="openScanner()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h.01M12 8h.01M17 8h.01M7 11h.01M12 11h.01M17 11h.01"/></svg> Buscar cartas TCG</button>'
+    +'<button style="background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.3);color:#ec4899;border-radius:10px;width:44px;height:44px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="openMusicScanner()" title="Buscar música en Discogs"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>'
     +'<button style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#22c55e;border-radius:10px;width:44px;height:44px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="openBarcodeScanner()" title="Escanear código de barras"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10" y1="8" x2="10" y2="16"/><line x1="13" y1="8" x2="13" y2="11"/><line x1="16" y1="8" x2="16" y2="16"/><line x1="13" y1="14" x2="13" y2="16"/></svg></button>'
     +'</div>'
       +'</div>';
@@ -2252,23 +2253,25 @@ function renderCollection(){
   var otherItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&!matchesCat(c,GAMING_CATS)&&c.category!=='Cómics'&&c.category!=='Música';});
   displayed=otherItems;
 
+  var catMap={
+    'Figuras':{items:figureItems,color:'#22c55e'},
+    'Gaming':{items:gamingItems,color:'#06b6d4'},
+    'Cómics':{items:comicsItems,color:'#f97316'},
+    'Música':{items:musicItems,color:'#ec4899'},
+    'Otros':{items:otherItems,color:'#94a3b8'}
+  };
   if(colCatFilter==='all'&&colEstadoFilter==='all'){
-    if(figureItems.length||customFolders.some(function(f){return f.category==='Figuras';})){
-      renderCustomFolders(figureItems,'Figuras','#22c55e',content);
-    }
-    if(gamingItems.length||customFolders.some(function(f){return f.category==='Gaming';})){
-      renderCustomFolders(gamingItems,'Gaming','#06b6d4',content);
-    }
-    if(comicsItems.length||customFolders.some(function(f){return f.category==='Cómics';})){
-      renderCustomFolders(comicsItems,'Cómics','#f97316',content);
-    }
-    if(musicItems.length||customFolders.some(function(f){return f.category==='Música';})){
-      renderCustomFolders(musicItems,'Música','#ec4899',content);
-    }
-    if(otherItems.length||customFolders.some(function(f){return f.category==='Otros';})){
-      renderCustomFolders(otherItems,'Otros','#94a3b8',content);
-      displayed=[];
-    }
+    Object.keys(catMap).forEach(function(cat){
+      var m=catMap[cat];
+      if(m.items.length||customFolders.some(function(f){return f.category===cat;})){
+        renderCustomFolders(m.items,cat,m.color,content);
+        if(cat==='Otros') displayed=[];
+      }
+    });
+  } else if(catMap[colCatFilter]){
+    var m=catMap[colCatFilter];
+    displayed=m.items;
+    renderCustomFolders(m.items,colCatFilter,m.color,content);
   }
 
   var hasFavsNonCard=otherItems.some(function(c){return c.favorite;});
