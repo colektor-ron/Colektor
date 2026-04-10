@@ -1425,7 +1425,7 @@ const IDB={
 
 const DOT=["#1B6DC0","#ef4444","#818cf8","#22c55e","#eab308","#06b6d4","#ec4899","#a78bfa"];
 const ESTADOS=["Nuevo","Abierto","En vitrina","Dañado"];
-const FIXED_CATS=["Cartas","Figuras","Gaming","Otros"];
+const FIXED_CATS=["Cartas","Figuras","Gaming","Cómics","Otros"];
 
 let pendientes=[],categories=[],collection=[],trades=[];
 let pStatusFilter="all",pCatFilter="all",colCatFilter="all",tradeFilter="all";
@@ -1667,7 +1667,7 @@ function renderPendientes(){
 
   // Cat filters - fixed categories only
   var cf=document.getElementById("pCatFilters");cf.innerHTML="";
-  var catColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Otros":"#94a3b8"};
+  var catColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Cómics":"#f97316","Otros":"#94a3b8"};
   var ab=document.createElement("button");ab.className="btn-cat"+(pCatFilter==="all"?" active":"");
   ab.textContent="Todo";ab.onclick=function(){pCatFilter="all";renderPendientes();};cf.appendChild(ab);
   FIXED_CATS.forEach(function(c){
@@ -1834,7 +1834,7 @@ function renderCollection(){
 
   // Filters
   var hasFavs=collection.some(function(c){return c.favorite;});
-  var colCatColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Otros":"#94a3b8"};
+  var colCatColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Cómics":"#f97316","Otros":"#94a3b8"};
   var cf=document.getElementById("colFilters");cf.innerHTML="";
   // All + Favs + Fixed cats (only show if has items)
   var filtersToShow=["all"];
