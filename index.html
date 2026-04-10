@@ -2010,7 +2010,7 @@ function renderCollection(){
   // ── Cards section (TCG items grouped separately)
   var cardItems=displayed.filter(function(c){return CARD_CATEGORIES.includes(c.category);});
   var nonCardItems=displayed.filter(function(c){return !CARD_CATEGORIES.includes(c.category);});
-  var hasCards=cardItems.length>0&&colCatFilter==='all'&&colEstadoFilter==='all';
+  var hasCards=cardItems.length>0&&(colCatFilter==='all'||colCatFilter==='Cartas')&&colEstadoFilter==='all';
 
   if(hasCards){
     var cardsSection=document.createElement('div');cardsSection.className='cards-section';
@@ -5528,8 +5528,11 @@ async function searchMusic(){
     releases.forEach(function(rel){
       var item = document.createElement('div');
       item.className = 'music-result-item';
-      var coverHTML = rel.cover_image && !rel.cover_image.includes('spacer')
-        ? '<img class="music-result-cover" src="'+rel.cover_image+'" loading="lazy"/>'
+      // Use thumb for faster loading, fallback to cover_image
+      var thumb = rel.thumb || rel.cover_image || '';
+      var hasImg = thumb && !thumb.includes('spacer') && thumb.length > 10;
+      var coverHTML = hasImg
+        ? '<img class="music-result-cover" src="'+thumb+'" loading="lazy"/>'
         : '<div class="music-result-cover-empty">🎵</div>';
       // Parse title (usually "Artist - Album")
       var parts = (rel.title||'').split(' - ');
@@ -5550,7 +5553,7 @@ async function searchMusic(){
       // Store data
       var releaseData = {
         title: album, artist: artist,
-        cover: (rel.cover_image&&!rel.cover_image.includes('spacer'))?rel.cover_image:'',
+        cover: (thumb&&!thumb.includes('spacer'))?thumb:'',
         format: formats, year: year,
         label: (rel.label||[]).join(', '),
         genre: (rel.genre||[]).join(', ')
@@ -5576,7 +5579,7 @@ function addMusicItem(data){
     id: Date.now(),
     name: data.title+(data.artist?' — '+data.artist:''),
     category: 'Música',
-    photos: data.cover ? [data.cover] : [],
+    photos: (data.cover&&!data.cover.includes('spacer')) ? [data.cover] : [],
     note: [data.format, data.label, data.genre].filter(Boolean).join(' · '),
     year: data.year||new Date().getFullYear().toString(),
     rating:0, review:'', favorite:false,
