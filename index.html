@@ -2010,9 +2010,9 @@ function renderCollection(){
   // ── Cards section (TCG items grouped separately)
   var cardItems=displayed.filter(function(c){return CARD_CATEGORIES.includes(c.category);});
   var nonCardItems=displayed.filter(function(c){return !CARD_CATEGORIES.includes(c.category);});
-  var hasCards=cardItems.length>0&&(colCatFilter==='all'||colCatFilter==='Cartas');
+  var hasCards=cardItems.length>0;
 
-  if(hasCards){
+  if(hasCards&&(colCatFilter==='all'||colCatFilter==='Cartas')){
     var cardsSection=document.createElement('div');cardsSection.className='cards-section';
     // Header
     var csHeader=document.createElement('div');csHeader.className='cards-section-header';
