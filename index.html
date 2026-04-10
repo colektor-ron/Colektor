@@ -2010,9 +2010,9 @@ function renderCollection(){
   // ── Cards section (TCG items grouped separately)
   var cardItems=displayed.filter(function(c){return CARD_CATEGORIES.includes(c.category);});
   var nonCardItems=displayed.filter(function(c){return !CARD_CATEGORIES.includes(c.category);});
-  var hasCards=cardItems.length>0;
+  var hasCards=cardItems.length>0&&(colCatFilter==='all'||colCatFilter==='Cartas');
 
-  if(hasCards&&(colCatFilter==='all'||colCatFilter==='Cartas')){
+  if(hasCards){
     var cardsSection=document.createElement('div');cardsSection.className='cards-section';
     // Header
     var csHeader=document.createElement('div');csHeader.className='cards-section-header';
@@ -2042,16 +2042,10 @@ function renderCollection(){
 
     // Group by set (use category as fallback group)
     var setGroups={};
-    var individualCards=[]; // Cards without a real set
     sortedCards.forEach(function(item){
-      var hasRealSet = item.set && item.set.trim() && item.set.trim()!==item.category && item.set.trim()!=='Cartas';
-      if(hasRealSet){
-        var setKey=item.set.trim();
-        if(!setGroups[setKey])setGroups[setKey]=[];
-        setGroups[setKey].push(item);
-      } else {
-        individualCards.push(item);
-      }
+      var setKey=item.set&&item.set.trim()?item.set.trim():item.category||'Sin set';
+      if(!setGroups[setKey])setGroups[setKey]=[];
+      setGroups[setKey].push(item);
     });
 
     // Sort set groups
@@ -2202,37 +2196,7 @@ function renderCollection(){
       folder.appendChild(fBody);
       cardsSection.appendChild(folder);
     });
-    // Render individual cards (no set) as flat grid
-    if(individualCards.length){
-      var indivSection=document.createElement('div');
-      indivSection.style.cssText='margin-top:10px;';
-      var indivLabel=document.createElement('div');
-      indivLabel.style.cssText='font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;';
-      indivLabel.textContent='Cartas sueltas ('+individualCards.length+')';
-      indivSection.appendChild(indivLabel);
-      if(cardColView==='grid'){
-        var indivGrid=document.createElement('div');indivGrid.className='cards-grid';
-        individualCards.forEach(function(item){
-          var div=document.createElement('div');
-          div.className='card-col-item'+(item.favorite?' fav':'');
-          var photo=item.photos&&item.photos.length?item.photos[0]:null;
-          if(photo)div.innerHTML='<img src="'+photo+'" loading="lazy"/>';
-          else div.innerHTML='<div class="card-col-item-empty">'+IC.grid(20)+'</div>';
-          div.innerHTML+='<div class="card-col-name">'+item.name+'</div>';
-          if(item.favorite){var fb=document.createElement('div');fb.className='card-col-fav';fb.innerHTML=IC.star(10,'#f59e0b','#f59e0b');div.appendChild(fb);}
-          if(item.tags&&item.tags[0]){var rb=document.createElement('div');rb.className='card-col-rarity '+getRarityClass(item.tags[0]);rb.textContent=item.tags[0].substring(0,3).toUpperCase();div.appendChild(rb);}
-          if(ownedCards[item.id]){var ob=document.createElement('div');ob.style.cssText='position:absolute;top:5px;right:5px;width:20px;height:20px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:3;';ob.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';div.appendChild(ob);}
-          (function(id){div.onclick=function(){openDetail(id);};})(item.id);
-          indivGrid.appendChild(div);
-        });
-        indivSection.appendChild(indivGrid);
-      } else {
-        var indivList=document.createElement('div');indivList.className='col-list';
-        individualCards.forEach(function(item){indivList.appendChild(makeListCard(item));});
-        indivSection.appendChild(indivList);
-      }
-      cardsSection.appendChild(indivSection);
-    }
+
     content.appendChild(cardsSection);
     // Update displayed to only non-card items
     displayed=nonCardItems;
@@ -2253,26 +2217,28 @@ function renderCollection(){
   var otherItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&!matchesCat(c,GAMING_CATS)&&c.category!=='Cómics'&&c.category!=='Música';});
   displayed=otherItems;
 
-  var catMap={
-    'Figuras':{items:figureItems,color:'#22c55e'},
-    'Gaming':{items:gamingItems,color:'#06b6d4'},
-    'Cómics':{items:comicsItems,color:'#f97316'},
-    'Música':{items:musicItems,color:'#ec4899'},
-    'Otros':{items:otherItems,color:'#94a3b8'}
-  };
   if(colCatFilter==='all'&&colEstadoFilter==='all'){
-    Object.keys(catMap).forEach(function(cat){
-      var m=catMap[cat];
-      if(m.items.length||customFolders.some(function(f){return f.category===cat;})){
-        renderCustomFolders(m.items,cat,m.color,content);
-        if(cat==='Otros') displayed=[];
-      }
-    });
-  } else if(catMap[colCatFilter]){
-    var m=catMap[colCatFilter];
-    displayed=m.items;
-    renderCustomFolders(m.items,colCatFilter,m.color,content);
-  }
+    if(figureItems.length||customFolders.some(function(f){return f.category==='Figuras';})){
+      renderCustomFolders(figureItems,'Figuras','#22c55e',content);
+    }
+    if(gamingItems.length||customFolders.some(function(f){return f.category==='Gaming';})){
+      renderCustomFolders(gamingItems,'Gaming','#06b6d4',content);
+    }
+    if(comicsItems.length||customFolders.some(function(f){return f.category==='Cómics';})){
+      renderCustomFolders(comicsItems,'Cómics','#f97316',content);
+    }
+    if(musicItems.length||customFolders.some(function(f){return f.category==='Música';})){
+      renderCustomFolders(musicItems,'Música','#ec4899',content);
+    }
+    if(otherItems.length||customFolders.some(function(f){return f.category==='Otros';})){
+      renderCustomFolders(otherItems,'Otros','#94a3b8',content);
+      displayed=[];
+    }
+  } else if(colCatFilter==='Figuras'){displayed=figureItems;renderCustomFolders(figureItems,'Figuras','#22c55e',content);
+  } else if(colCatFilter==='Gaming'){displayed=gamingItems;renderCustomFolders(gamingItems,'Gaming','#06b6d4',content);
+  } else if(colCatFilter==='Cómics'){displayed=comicsItems;renderCustomFolders(comicsItems,'Cómics','#f97316',content);
+  } else if(colCatFilter==='Música'){displayed=musicItems;renderCustomFolders(musicItems,'Música','#ec4899',content);
+  } else if(colCatFilter==='Otros'){displayed=otherItems;renderCustomFolders(otherItems,'Otros','#94a3b8',content);}
 
   var hasFavsNonCard=otherItems.some(function(c){return c.favorite;});
   var showFavSection=colCatFilter==="all"&&hasFavsNonCard&&colViewMode==="grid"&&colEstadoFilter==="all"&&!hasCards&&!figureItems.length&&!gamingItems.length;
@@ -5512,64 +5478,45 @@ async function searchMusic(){
   results.innerHTML = '<div class="music-loading"><div class="scanner-spinner"></div>Buscando en Discogs...</div>';
 
   try{
-    var url = 'https://api.discogs.com/database/search?q='+encodeURIComponent(query)+'&per_page=25&type=release';
-    if(musicCurrentFormat !== 'all') url += '&format='+encodeURIComponent(musicCurrentFormat);
-    var r = await fetch(url, {headers:{'User-Agent':'ColeKtoR/1.0'}});
+    // MusicBrainz - free, no auth, CORS open
+    var searchUrl = 'https://musicbrainz.org/ws/2/release-group/?query='+encodeURIComponent(query)+'&fmt=json&limit=25';
+    var r = await fetch(searchUrl, {headers:{'User-Agent':'ColeKtoR/1.0 ( collector-app )','Accept':'application/json'}});
     var d = await r.json();
-    var releases = d.results||[];
+    var releases = d['release-groups']||[];
     if(!releases.length){
       results.innerHTML = '<div class="music-empty">Sin resultados para "'+escH(query)+'"</div>';
       return;
     }
     results.innerHTML = '<div style="font-size:11px;color:#444;margin-bottom:10px;">'+releases.length+' resultados</div>';
-    releases.forEach(function(rel){
+    releases.forEach(function(rg){
       var item = document.createElement('div');
       item.className = 'music-result-item';
-      // Use thumb for faster loading, fallback to cover_image
-      var thumb = rel.thumb || rel.cover_image || '';
-      var hasImg = thumb && !thumb.includes('spacer') && thumb.length > 10;
-      var coverHTML = hasImg
-        ? '<img class="music-result-cover" src="'+thumb+'" loading="lazy"/>'
+      var mbid = rg.id||'';
+      var title = rg.title||'';
+      var artist = (rg['artist-credit']||[]).map(function(a){return a.artist?a.artist.name:'';}).filter(Boolean).join(', ');
+      var year = rg['first-release-date']?rg['first-release-date'].substring(0,4):'';
+      var type = rg['primary-type']||'';
+      var coverUrl = mbid ? 'https://coverartarchive.org/release-group/'+mbid+'/front-250' : '';
+      var imgHTML = coverUrl
+        ? '<img class="music-result-cover" src="'+coverUrl+'" loading="lazy">'
         : '<div class="music-result-cover-empty">🎵</div>';
-      // Parse title (usually "Artist - Album")
-      // Discogs: title is usually "Artist - Album", artist is array
-      var rawTitle = rel.title||'';
-      var artistArr = rel.artist || [];
-      var artist = Array.isArray(artistArr) ? artistArr.join(', ') : artistArr;
-      var album = rawTitle;
-      if(!artist && rawTitle.includes(' - ')){
-        var parts = rawTitle.split(' - ');
-        artist = parts[0];
-        album = parts.slice(1).join(' - ');
-      }
-      var formats = (rel.format||[]).join(', ');
-      var year = rel.year||'';
-      item.innerHTML = coverHTML
+      item.innerHTML = imgHTML
         +'<div class="music-result-info">'
-        +'<div class="music-result-title">'+escH(album||rawTitle)+'</div>'
-        +'<div class="music-result-artist">'+(artist?escH(artist):'')+'</div>'
+        +'<div class="music-result-title">'+escH(title)+'</div>'
+        +'<div class="music-result-artist">'+escH(artist)+'</div>'
         +'<div class="music-result-meta">'
-        +(formats?'<span class="music-result-tag">'+escH(formats.substring(0,20))+'</span>':'')
+        +(type?'<span class="music-result-tag">'+escH(type)+'</span>':'')
         +(year?'<span class="music-result-year">'+year+'</span>':'')
         +'</div></div>'
-        +'<button class="music-add-btn" onclick="event.stopPropagation()">+ Agregar</button>';
-
-      // Store data
-      var releaseData = {
-        title: album, artist: artist,
-        cover: (thumb&&!thumb.includes('spacer'))?thumb:'',
-        format: formats, year: year,
-        label: (rel.label||[]).join(', '),
-        genre: (rel.genre||[]).join(', ')
-      };
+        +'<button class="music-add-btn">+ Agregar</button>';
+      var rd = {title:title, artist:artist, cover:coverUrl, format:type, year:year, label:'', genre:''};
       item.querySelector('.music-add-btn').onclick = function(e){
         e.stopPropagation();
-        addMusicItem(releaseData);
-        item.querySelector('.music-add-btn').textContent = '✓ Agregado';
-        item.querySelector('.music-add-btn').style.background = 'rgba(34,197,94,0.1)';
-        item.querySelector('.music-add-btn').style.color = '#22c55e';
-        item.querySelector('.music-add-btn').style.borderColor = '#22c55e';
-        item.querySelector('.music-add-btn').disabled = true;
+        if(this.disabled) return;
+        this.disabled = true;
+        addMusicItem(rd);
+        this.textContent = '✓ Agregado';
+        this.style.cssText += 'background:rgba(34,197,94,0.1);color:#22c55e;border-color:#22c55e;';
       };
       results.appendChild(item);
     });
