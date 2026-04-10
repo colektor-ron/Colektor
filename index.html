@@ -4076,7 +4076,16 @@ var seriesColors = {
   'Sun & Moon':'#d97706','XY':'#2563eb','Black & White':'#374151',
   'HeartGold & SoulSilver':'#b45309','Platinum':'#6366f1',
   'Diamond & Pearl':'#0ea5e9','EX':'#dc2626','Base':'#16a34a',
-  'Gym':'#15803d','Neo':'#7c3aed','e-Card':'#0891b2','Otros':'#374151'
+  'Gym':'#15803d','Neo':'#7c3aed','e-Card':'#0891b2',
+  'Expansion':'#1B6DC0','Core Set':'#059669','Masters':'#7c3aed',
+  'Draft Innovation':'#0891b2','Commander':'#b45309','Starter':'#16a34a',
+  'Duel Deck':'#6366f1','From the Vault':'#d97706','Premium Deck':'#b45309',
+  'Funny':'#f59e0b','Box Set':'#374151','Promo':'#6b7280',
+  'Structure & Starter':'#1B6DC0','Legendary':'#d97706','Premium':'#7c3aed',
+  'Speed Duel':'#0891b2','Battles of Legend':'#dc2626','Secrets':'#6366f1',
+  'Tins':'#b45309','2024 Sets':'#059669','2023 Sets':'#0ea5e9',
+  '2022 Sets':'#2563eb','2021 Sets':'#7c3aed','Recent Sets':'#1B6DC0',
+  'Otros':'#374151','Other':'#374151'
 };
 function getSeriesColor(name){
   for(var k in seriesColors){if(name&&name.includes(k))return seriesColors[k];}
@@ -4150,8 +4159,17 @@ async function loadSetsData(){
       allSetsData = sets;
       renderSeriesView(sets);
       return;
-    } else if(currentGame==='magic') sets = await loadMagicSets();
-    else if(currentGame==='yugioh') sets = await loadYugiohSets();
+    } else if(currentGame==='magic'){
+      sets = await loadMagicSets();
+      allSetsData = sets;
+      renderSeriesView(sets);
+      return;
+    } else if(currentGame==='yugioh'){
+      sets = await loadYugiohSets();
+      allSetsData = sets;
+      renderSeriesView(sets);
+      return;
+    }
     allSetsData = sets;
     renderSetsList(sets);
   }catch(e){
@@ -4181,7 +4199,7 @@ function filterSets(query){
   var filtered = query
     ? allSetsData.filter(function(s){return s.name.toLowerCase().includes(query.toLowerCase());})
     : allSetsData;
-  if(!query && currentGame==='pokemon') renderSeriesView(allSetsData);
+  if(!query && (currentGame==='pokemon'||currentGame==='magic'||currentGame==='yugioh')) renderSeriesView(allSetsData);
   else renderSetsList(filtered);
 }
 
@@ -4202,7 +4220,7 @@ async function loadMagicSets(){
   var d = await r.json();
   return ((d.data||[]).filter(function(s){return s.set_type!=='memorabilia'&&s.card_count>0&&s.set_type!=='token'&&s.set_type!=='minigame';})
     .sort(function(a,b){return b.released_at>a.released_at?1:-1;})).map(function(s){
-    return{id:s.code,name:s.name,logo:s.icon_svg_uri||null,
+    return{id:s.code,name:s.name,series:s.block||({'expansion':'Expansion','core':'Core Set','masters':'Masters','draft_innovation':'Draft Innovation','commander':'Commander','starter':'Starter','planechase':'Planechase','archenemy':'Archenemy','memorabilia':'Memorabilia','funny':'Funny','box':'Box Set','promo':'Promo','token':'Token','duel_deck':'Duel Deck','from_the_vault':'From the Vault','spellbook':'Spellbook','premium_deck':'Premium Deck','treasure_chest':'Treasure Chest'}[s.set_type]||s.set_type||'Other'),logo:s.icon_svg_uri||null,
       count:s.card_count||0,released:s.released_at||'',game:'magic'};
   });
 }
@@ -4211,7 +4229,19 @@ async function loadYugiohSets(){
   var r = await fetch('https://db.ygoprodeck.com/api/v7/cardsets.php');
   var d = await r.json();
   return (Array.isArray(d)?d:[]).sort(function(a,b){return (b.tcg_date||'')>(a.tcg_date||'')?1:-1;}).map(function(s){
-    return{id:s.set_code,name:s.set_name,logo:null,
+    // Derive era/type from set_name
+    var ygoSeries='Other';
+    var sn=(s.set_name||'').toLowerCase();
+    if(sn.includes('structure deck')||sn.includes('starter deck'))ygoSeries='Structure & Starter';
+    else if(sn.includes('legendary'))ygoSeries='Legendary';
+    else if(sn.includes('gold')||sn.includes('platinum')||sn.includes('premium'))ygoSeries='Premium';
+    else if(sn.includes('speed duel'))ygoSeries='Speed Duel';
+    else if(sn.includes('battles of legend')||sn.includes('battle of legend'))ygoSeries='Battles of Legend';
+    else if(sn.includes('secret slayers')||sn.includes('secret forces')||sn.includes('secret utility')||sn.includes('secrets of eternity'))ygoSeries='Secrets';
+    else if(sn.includes('tin')||sn.includes('mega-tins')||sn.includes('mega tin'))ygoSeries='Tins';
+    else if(sn.includes('2024')||sn.includes('2023')||sn.includes('2022')||sn.includes('2021'))ygoSeries=sn.match(/20[0-9]{2}/)?sn.match(/20[0-9]{2}/)[0]+' Sets':'Recent Sets';
+    else{var y=s.tcg_date?s.tcg_date.substring(0,4):'';ygoSeries=y?y+' Sets':'Other';}
+    return{id:s.set_code,name:s.set_name,series:ygoSeries,logo:null,
       count:s.num_of_cards||0,released:s.tcg_date||'',game:'yugioh'};
   });
 }
