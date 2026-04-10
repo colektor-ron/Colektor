@@ -3138,10 +3138,21 @@ function rebuildFolderCards(setKey, setCards, fBody, selecting){
     fBody.insertBefore(selBar, fBody.children[1]||null);
   }
 
+  // Apply Todas/Propias/Falta filter
+  var filteredCards = setCards.slice();
+  var filt = window.cardSetFilter||'all';
+  if(filt==='owned'){
+    // Only cards that have a photo (user added manually or from TCG with image)
+    filteredCards = setCards.filter(function(c){return c.photos&&c.photos.length>0;});
+  } else if(filt==='missing'){
+    // Cards without photos — added from TCG API without personal photo
+    filteredCards = setCards.filter(function(c){return !c.photos||!c.photos.length;});
+  }
+
   // Render cards
   if(cardColView==='grid'){
     var cGrid=document.createElement('div');cGrid.className='cards-grid';
-    setCards.forEach(function(item){
+    filteredCards.forEach(function(item){
       var div=document.createElement('div');
       div.className='card-col-item'+(item.favorite?' fav':'')+(selecting?' selecting':'')+(selected.has(item.id)?' selected-card':'');
       var photo=item.photos&&item.photos.length?item.photos[0]:null;
@@ -3171,7 +3182,7 @@ function rebuildFolderCards(setKey, setCards, fBody, selecting){
     fBody.appendChild(cGrid);
   } else {
     var cList=document.createElement('div');cList.className='col-list';
-    setCards.forEach(function(item){cList.appendChild(makeListCard(item));});
+    filteredCards.forEach(function(item){cList.appendChild(makeListCard(item));});
     fBody.appendChild(cList);
   }
 }
