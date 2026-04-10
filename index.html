@@ -184,6 +184,96 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── PRICE ALERTS ── */
+.price-alert-banner{background:#1c1c1e;border:1px solid rgba(255,255,255,0.07);
+  border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;
+  display:flex;align-items:center;gap:10px;transition:background 0.15s;}
+.price-alert-banner:active{background:#252527;}
+.price-alert-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px;}
+.price-alert-info{flex:1;min-width:0;}
+.price-alert-name{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.price-alert-detail{font-size:11px;color:#555;margin-top:2px;}
+.price-alert-change{font-size:13px;font-weight:800;flex-shrink:0;}
+.price-alert-change.up{color:#22c55e;}
+.price-alert-change.down{color:#ef4444;}
+.price-alerts-section{margin-bottom:16px;}
+.price-alerts-header{font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.btn-check-prices{background:rgba(27,109,192,0.15);border:1px solid rgba(27,109,192,0.3);color:#1B6DC0;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;}
+
+
+/* ── BARCODE SCANNER ── */
+.barcode-modal{position:fixed;inset:0;background:#000;z-index:10000;display:flex;flex-direction:column;}
+.barcode-header{display:flex;align-items:center;justify-content:space-between;padding:54px 20px 16px;flex-shrink:0;}
+.barcode-title{font-size:18px;font-weight:800;color:#fff;}
+.barcode-close{background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:99px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer;}
+.barcode-viewport{flex:1;position:relative;overflow:hidden;}
+.barcode-viewport video{width:100%;height:100%;object-fit:cover;}
+.barcode-reticle{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.barcode-reticle-box{width:240px;height:140px;border:2px solid #1B6DC0;border-radius:12px;box-shadow:0 0 0 9999px rgba(0,0,0,0.55);}
+.barcode-reticle-line{position:absolute;width:200px;height:2px;background:linear-gradient(90deg,transparent,#1B6DC0,transparent);animation:bscan 2s linear infinite;}
+@keyframes bscan{0%{top:calc(50% - 60px);}100%{top:calc(50% + 60px);}}
+.barcode-hint{position:absolute;bottom:40px;left:0;right:0;text-align:center;color:rgba(255,255,255,0.6);font-size:13px;}
+.barcode-result{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:10001;display:flex;align-items:flex-end;}
+.barcode-result-sheet{background:#1c1c1e;border-radius:20px 20px 0 0;padding:20px;width:100%;max-height:70vh;overflow-y:auto;}
+.barcode-result-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;}
+.barcode-result-sub{font-size:12px;color:#555;margin-bottom:16px;}
+.barcode-result-img{width:80px;height:80px;object-fit:contain;border-radius:10px;background:#111;float:right;margin:0 0 12px 12px;}
+.barcode-result-desc{font-size:13px;color:#aaa;line-height:1.5;margin-bottom:16px;}
+.barcode-result-btns{display:flex;gap:10px;}
+.barcode-result-btns button{flex:1;padding:13px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:none;}
+.btn-add-barcode{background:#1B6DC0;color:#fff;}
+.btn-scan-again{background:#2a2a2a;color:#aaa;}
+
+
+/* ── COMPARE MODE ── */
+.compare-toggle{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#1c1c1e;
+  border:1px solid rgba(255,255,255,0.07);border-radius:10px;cursor:pointer;margin-bottom:4px;}
+.compare-toggle input[type=checkbox]{width:16px;height:16px;accent-color:#22c55e;cursor:pointer;}
+.compare-toggle-label{font-size:13px;color:#aaa;font-weight:600;cursor:pointer;user-select:none;}
+.compare-bar{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1c1c1e;
+  border:1px solid rgba(255,255,255,0.07);border-radius:12px;margin-bottom:8px;}
+.compare-bar-fill{flex:1;height:6px;background:#2a2a2a;border-radius:99px;overflow:hidden;}
+.compare-bar-prog{height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:99px;transition:width 0.4s;}
+.compare-bar-text{font-size:12px;font-weight:700;color:#22c55e;white-space:nowrap;}
+.set-card-item.owned{outline:2px solid #22c55e;outline-offset:-2px;}
+.set-card-item.owned .set-card-check{background:#22c55e;}
+.set-card-item.missing{opacity:0.35;}
+.compare-legend{display:flex;gap:12px;font-size:11px;color:#555;margin-bottom:8px;}
+.compare-legend span{display:flex;align-items:center;gap:4px;}
+.compare-legend .dot-owned{width:8px;height:8px;border-radius:50%;background:#22c55e;flex-shrink:0;}
+.compare-legend .dot-missing{width:8px;height:8px;border-radius:50%;background:#333;border:1px solid #555;flex-shrink:0;}
+
+
+/* ── SHARE / PUBLIC VIEW ── */
+.btn-share-collection{width:100%;padding:14px;background:linear-gradient(135deg,#1B6DC0,#6366f1);
+  color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;}
+.btn-share-collection:active{opacity:0.85;}
+.share-link-box{background:#1c1c1e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;
+  padding:12px 14px;display:flex;align-items:center;gap:10px;margin-top:10px;}
+.share-link-url{flex:1;font-size:12px;color:#818cf8;word-break:break-all;line-height:1.4;}
+.share-link-copy{background:#1B6DC0;border:none;border-radius:8px;color:#fff;
+  font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.public-view{position:fixed;inset:0;background:#0a0a0a;z-index:9999;overflow-y:auto;padding:20px 16px 40px;}
+.public-header{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.public-avatar{width:52px;height:52px;border-radius:50%;object-fit:cover;background:#1c1c1e;border:2px solid #1B6DC0;}
+.public-username{font-size:18px;font-weight:800;color:#fff;}
+.public-subtitle{font-size:12px;color:#555;margin-top:2px;}
+.public-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px;}
+.public-stat{background:#1c1c1e;border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px;text-align:center;}
+.public-stat-val{font-size:20px;font-weight:800;color:#fff;}
+.public-stat-lbl{font-size:10px;color:#555;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;}
+.public-section{margin-bottom:20px;}
+.public-section-title{font-size:12px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px;}
+.public-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.public-card{background:#1c1c1e;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);}
+.public-card img{width:100%;aspect-ratio:1;object-fit:cover;}
+.public-card-name{font-size:10px;font-weight:600;color:#ccc;padding:6px 7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.public-badge{display:inline-block;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:700;margin:2px;background:rgba(255,255,255,0.06);color:#aaa;}
+.public-powered{text-align:center;font-size:10px;color:#333;margin-top:30px;}
+.public-powered span{color:#1B6DC0;font-weight:700;}
+
+
 /* ── SERIES VIEW ── */
 .series-list{display:flex;flex-direction:column;gap:7px;}
 .series-card{border-radius:12px;cursor:pointer;background:#1c1c1e;border:1px solid rgba(255,255,255,0.07);display:flex;align-items:stretch;height:64px;overflow:hidden;transition:background 0.15s;}
@@ -824,6 +914,7 @@ input[type="file"]{display:none;}
 /* SVG ICONS HELPERS */
 .ico{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.18.6/umd/index.min.js"></script>
 </head>
 <body>
 
@@ -1769,7 +1860,10 @@ function renderPendientes(){
   }else{
     addSec.innerHTML='<div style="display:flex;flex-direction:column;gap:8px;">'
       +'<button class="btn-open-add" style="flex:1;" onclick="showAddP=true;renderPendientes()">'+IC.plus(18)+' Agregar ítem</button>'
-      +'<button class="btn-open-add" style="flex:1;background:rgba(129,140,248,0.1);border-color:#818cf8;color:#818cf8;gap:8px;" onclick="openScanner()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h.01M12 8h.01M17 8h.01M7 11h.01M12 11h.01M17 11h.01"/></svg> Buscar cartas TCG</button>'
+      +'<div style="display:flex;gap:8px;">'
+    +'<button class="btn-open-add" style="flex:1;background:rgba(129,140,248,0.1);border-color:#818cf8;color:#818cf8;gap:8px;" onclick="openScanner()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h.01M12 8h.01M17 8h.01M7 11h.01M12 11h.01M17 11h.01"/></svg> Buscar cartas TCG</button>'
+    +'<button class="btn-open-add" style="background:rgba(34,197,94,0.1);border-color:#22c55e;color:#22c55e;padding:12px 16px;flex-shrink:0;" onclick="openBarcodeScanner()" title="Escanear código de barras"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="10" y1="8" x2="10" y2="16"/><line x1="13" y1="8" x2="13" y2="11"/><line x1="16" y1="8" x2="16" y2="16"/><line x1="13" y1="14" x2="13" y2="16"/></svg></button>'
+    +'</div>'
       +'</div>';
   }
   updateBadges();
@@ -4356,7 +4450,7 @@ function renderSetCards(set, cards){
 
   var grid = document.createElement('div');grid.className='set-cards-grid';
   cards.forEach(function(card){
-    var item = document.createElement('div');item.className='set-card-item';item.dataset.id=card.id;
+    var item = document.createElement('div');item.className='set-card-item';item.dataset.id=card.id;item.dataset.name=card.name||'';item.dataset.num=card.number||'';
     var check = document.createElement('div');check.className='set-card-check';
     check.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
     if(card.image){item.innerHTML='<img src="'+card.image+'" loading="lazy"/>';}
@@ -4392,7 +4486,87 @@ function renderSetCards(set, cards){
   hRow.style.marginBottom='10px';
   btnAll.style.marginBottom='10px';
   selRow.style.marginBottom='8px';
-  view.appendChild(hRow);view.appendChild(btnAll);view.appendChild(selRow);view.appendChild(grid);view.appendChild(btnSel);
+
+  // ── Compare mode toggle ──
+  var compareWrap = document.createElement('div');
+  var compareChk = document.createElement('input');
+  compareChk.type='checkbox'; compareChk.id='compareToggle';
+  var compareLbl = document.createElement('label');
+  compareLbl.htmlFor='compareToggle';
+  compareLbl.className='compare-toggle-label';
+  compareLbl.textContent='Modo comparar (tengo / falta)';
+  compareWrap.className='compare-toggle';
+  compareWrap.appendChild(compareChk);
+  compareWrap.appendChild(compareLbl);
+
+  // Progress bar (shown in compare mode)
+  var compareBar = document.createElement('div');
+  compareBar.className='compare-bar'; compareBar.style.display='none';
+  compareBar.innerHTML='<div class="compare-bar-fill"><div class="compare-bar-prog" id="compareProgBar" style="width:0%"></div></div>'
+    +'<div class="compare-bar-text" id="compareBarText">0 / '+cards.length+'</div>';
+
+  // Legend
+  var compareLegend = document.createElement('div');
+  compareLegend.className='compare-legend'; compareLegend.style.display='none';
+  compareLegend.innerHTML='<span><div class="dot-owned"></div>Tengo</span><span><div class="dot-missing"></div>Me falta</span>';
+
+  compareChk.onchange = function(){
+    var on = compareChk.checked;
+    compareBar.style.display = on ? 'flex' : 'none';
+    compareLegend.style.display = on ? 'flex' : 'none';
+    btnAll.style.display = on ? 'none' : 'flex';
+    selRow.style.display = on ? 'none' : 'flex';
+    btnSel.style.display = 'none';
+    selectedSetCards = {};
+    applyCompareMode(on, cards, set.name);
+  };
+
+  view.appendChild(hRow);
+  view.appendChild(btnAll);
+  view.appendChild(compareWrap);
+  view.appendChild(compareBar);
+  view.appendChild(compareLegend);
+  view.appendChild(selRow);
+  view.appendChild(grid);
+  view.appendChild(btnSel);
+}
+
+function applyCompareMode(on, cards, setName){
+  var items = document.querySelectorAll('.set-card-item');
+  if(!on){
+    items.forEach(function(el){
+      el.classList.remove('owned','missing');
+      var chk = el.querySelector('.set-card-check');
+      if(chk) chk.style.display='none';
+    });
+    return;
+  }
+  // Build owned set: collection cards matching this set by name or set field
+  var ownedNames = {};
+  collection.forEach(function(c){
+    if(c.set===setName || (c.category==='Cartas' && c.set===setName)){
+      ownedNames[c.name.toLowerCase()] = true;
+    }
+    // Also match by card number
+    if(c.edicion) ownedNames['#'+c.edicion] = true;
+  });
+  var ownedCount = 0;
+  items.forEach(function(el){
+    var name = (el.dataset.name||'').toLowerCase();
+    var num = el.dataset.num||'';
+    var have = ownedNames[name] || (num && ownedNames['#'+num]);
+    el.classList.toggle('owned', !!have);
+    el.classList.toggle('missing', !have);
+    var chk = el.querySelector('.set-card-check');
+    if(chk) chk.style.display = have ? 'flex' : 'none';
+    if(have) ownedCount++;
+  });
+  // Update progress bar
+  var pct = cards.length ? Math.round(ownedCount/cards.length*100) : 0;
+  var prog = document.getElementById('compareProgBar');
+  var txt = document.getElementById('compareBarText');
+  if(prog) prog.style.width = pct+'%';
+  if(txt) txt.textContent = ownedCount+' / '+cards.length+' ('+pct+'%)';
 }
 
 function addCardsFromSet(cards){
@@ -4871,8 +5045,407 @@ function renderFolderInnerPicker(){
   body.appendChild(grid);
 }
 
+// ── BARCODE SCANNER ──
+var barcodeStream = null;
+var barcodeReader = null;
+var barcodeScanActive = false;
+
+async function autoCheckPrices(){
+  var lastCheck = localStorage.getItem('lastPriceCheck');
+  var now = Date.now();
+  if(lastCheck && (now - parseInt(lastCheck)) < 24*60*60*1000) return; // Once per day
+  localStorage.setItem('lastPriceCheck', now.toString());
+  // Silent check - just update values without showing toast
+  var cartas = collection.filter(function(i){return i.category==='Cartas'&&i.valorActual>0&&i.set;});
+  if(!cartas.length) return;
+  var changed = 0;
+  for(var ci=0;ci<Math.min(cartas.length,5);ci++){
+    var card = cartas[ci];
+    try{
+      var r = await fetch('https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(card.name)+'"&pageSize=1');
+      var d = await r.json();
+      if(d.data&&d.data[0]){
+        var prices = d.data[0].tcgplayer&&d.data[0].tcgplayer.prices;
+        if(prices){
+          var p=prices.holofoil||prices.normal||{};
+          var usd=p.market||p.mid||0;
+          if(usd>0){
+            var clp=clpFromUSD(usd);
+            var diff=Math.abs(clp-card.valorActual)/card.valorActual;
+            if(diff>=0.05){
+              collection=collection.map(function(c){return c.id===card.id?Object.assign({},c,{valorActual:clp}):c;});
+              changed++;
+            }
+          }
+        }
+      }
+    }catch(e){}
+  }
+  if(changed>0){save();toast(changed+' precio'+(changed>1?'s actualizados':' actualizado')+' automáticamente 💹','#22c55e');}
+}
+
+// ── PRICE ALERTS ──
+var lastPriceCheck = null;
+var priceAlerts = [];
+
+async function checkPriceAlerts(){
+  var btn = document.querySelector('.btn-check-prices');
+  if(btn){btn.textContent = 'Revisando precios...';btn.disabled=true;}
+  try{
+    var cartas = collection.filter(function(i){
+      return i.category==='Cartas' && i.set && i.edicion && i.valorActual > 0;
+    });
+    if(!cartas.length){
+      toast('Agrega cartas con valor para ver alertas','#f59e0b');
+      return;
+    }
+    var alerts = [];
+    // Check up to 10 cards to avoid rate limits
+    var toCheck = cartas.slice(0,10);
+    for(var ci=0;ci<toCheck.length;ci++){
+      var card = toCheck[ci];
+      try{
+        var r = await fetch('https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(card.name)+'" set.name:"'+encodeURIComponent(card.set||'')+'"&pageSize=1');
+        var d = await r.json();
+        if(d.data && d.data[0]){
+          var prices = d.data[0].tcgplayer && d.data[0].tcgplayer.prices;
+          if(prices){
+            var priceObj = prices.holofoil||prices.normal||prices.reverseHolofoil||{};
+            var marketUSD = priceObj.market||priceObj.mid||0;
+            if(marketUSD > 0){
+              var newClp = clpFromUSD(marketUSD);
+              var oldClp = card.valorActual;
+              var diff = newClp - oldClp;
+              var pct = oldClp > 0 ? Math.round((diff/oldClp)*100) : 0;
+              if(Math.abs(pct) >= 5){ // Only show if change >= 5%
+                alerts.push({
+                  id: card.id, name: card.name, set: card.set||'',
+                  oldVal: oldClp, newVal: newClp,
+                  diff: diff, pct: pct
+                });
+                // Auto-update value in collection
+                collection = collection.map(function(c){
+                  if(c.id===card.id) return Object.assign({},c,{valorActual:newClp});
+                  return c;
+                });
+              }
+            }
+          }
+        }
+      }catch(e){}
+    }
+    if(collection) save();
+    priceAlerts = alerts;
+    renderPriceAlerts(alerts);
+    if(!alerts.length){
+      toast('Sin cambios significativos de precio ✓','#22c55e');
+    } else {
+      toast(alerts.length+' cambio'+(alerts.length>1?'s':'')+' de precio detectado'+(alerts.length>1?'s':'')+'!','#f59e0b');
+    }
+  }catch(e){
+    toast('Error revisando precios','#ef4444');
+  }finally{
+    if(btn){btn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Revisar cambios de precio';btn.disabled=false;}
+  }
+}
+
+function renderPriceAlerts(alerts){
+  var container = document.getElementById('priceAlertsContainer');
+  if(!container) return;
+  container.innerHTML = '';
+  if(!alerts.length){
+    container.innerHTML = '<div style="font-size:12px;color:#444;padding:8px 0;">Sin alertas — revisaste los precios recientemente</div>';
+    return;
+  }
+  alerts.forEach(function(alert){
+    var isUp = alert.diff >= 0;
+    var div = document.createElement('div');
+    div.className = 'price-alert-banner';
+    div.innerHTML = '<div class="price-alert-icon" style="background:rgba('+(isUp?'34,197,94':'239,68,68')+',0.1);">'+(isUp?'📈':'📉')+'</div>'
+      +'<div class="price-alert-info">'
+      +'<div class="price-alert-name">'+escH(alert.name)+'</div>'
+      +'<div class="price-alert-detail">'+escH(alert.set||'')+'</div>'
+      +'<div class="price-alert-detail">'+fmt(alert.oldVal)+' → '+fmt(alert.newVal)+'</div>'
+      +'</div>'
+      +'<div class="price-alert-change '+(isUp?'up':'down')+'">'+(isUp?'+':'')+alert.pct+'%</div>';
+    container.appendChild(div);
+  });
+}
+
+function openBarcodeScanner(){
+  var modal = document.createElement('div');
+  modal.className = 'barcode-modal';
+  modal.id = 'barcodeModal';
+  modal.innerHTML = '<div class="barcode-header">'
+    +'<div class="barcode-title">📦 Escanear código</div>'
+    +'<button class="barcode-close" onclick="closeBarcodeScanner()">Cerrar</button>'
+    +'</div>'
+    +'<div class="barcode-viewport">'
+    +'<video id="barcodeVideo" autoplay muted playsinline></video>'
+    +'<div class="barcode-reticle"><div class="barcode-reticle-box"></div><div class="barcode-reticle-line"></div></div>'
+    +'<div class="barcode-hint">Apunta al código de barras del producto</div>'
+    +'</div>';
+  document.body.appendChild(modal);
+  startBarcodeCamera();
+}
+
+async function startBarcodeCamera(){
+  try{
+    barcodeStream = await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}
+    });
+    var video = document.getElementById('barcodeVideo');
+    if(video){video.srcObject = barcodeStream;video.play();}
+    barcodeScanActive = true;
+    scanBarcodeFrame(video);
+  }catch(e){
+    toast('No se pudo acceder a la cámara','#ef4444');
+    closeBarcodeScanner();
+  }
+}
+
+function scanBarcodeFrame(video){
+  if(!barcodeScanActive) return;
+  // Try native BarcodeDetector first (Chrome/Android)
+  if('BarcodeDetector' in window){
+    var detector = new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code']});
+    var scan = function(){
+      if(!barcodeScanActive) return;
+      detector.detect(video).then(function(codes){
+        if(codes.length > 0){
+          barcodeScanActive = false;
+          lookupBarcode(codes[0].rawValue);
+        } else {
+          requestAnimationFrame(scan);
+        }
+      }).catch(function(){requestAnimationFrame(scan);});
+    };
+    video.addEventListener('loadeddata', scan);
+  } else if(typeof ZXing !== 'undefined'){
+    // Fallback: ZXing
+    try{
+      barcodeReader = new ZXing.BrowserMultiFormatReader();
+      barcodeReader.decodeFromVideoDevice(null,'barcodeVideo',function(result,err){
+        if(result && barcodeScanActive){
+          barcodeScanActive = false;
+          barcodeReader.reset();
+          lookupBarcode(result.getText());
+        }
+      });
+    }catch(e){toast('Escaneo no disponible en este dispositivo','#f59e0b');}
+  } else {
+    toast('Escaneo no disponible. Ingresa el código manualmente.','#f59e0b');
+    closeBarcodeScanner();
+  }
+}
+
+async function lookupBarcode(code){
+  toast('Buscando producto...','#1B6DC0');
+  try{
+    // UPC Item DB - free tier, 100 requests/day
+    var r = await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc='+code);
+    var d = await r.json();
+    var item = d.items && d.items[0];
+    if(item && item.title){
+      showBarcodeResult(item, code);
+    } else {
+      // Try Open Food Facts as fallback
+      var r2 = await fetch('https://world.openfoodfacts.org/api/v0/product/'+code+'.json');
+      var d2 = await r2.json();
+      if(d2.product && d2.product.product_name){
+        showBarcodeResult({
+          title: d2.product.product_name,
+          description: d2.product.brands||'',
+          images: d2.product.image_url?[d2.product.image_url]:[]
+        }, code);
+      } else {
+        showBarcodeResult({title: 'Producto #'+code, description:'Código: '+code, images:[]}, code);
+      }
+    }
+  }catch(e){
+    showBarcodeResult({title:'Producto #'+code, description:'Código: '+code, images:[]}, code);
+  }
+}
+
+function showBarcodeResult(item, code){
+  var sheet = document.createElement('div');
+  sheet.className = 'barcode-result';
+  sheet.id = 'barcodeResultSheet';
+  var img = item.images && item.images[0] ? '<img class="barcode-result-img" src="'+item.images[0]+'" />' : '';
+  var cat = detectCategoryFromName(item.title);
+  sheet.innerHTML = '<div class="barcode-result-sheet">'
+    +'<div class="barcode-result-title">'+escH(item.title)+'</div>'
+    +'<div class="barcode-result-sub">Código: '+code+' · Categoría sugerida: '+cat+'</div>'
+    +img
+    +'<div class="barcode-result-desc">'+(item.description?escH(item.description.substring(0,120)):'')+'</div>'
+    +'<div class="barcode-result-btns">'
+    +'<button class="btn-add-barcode" onclick="addFromBarcode(''+escH(item.title).replace(/'/g,"\'")+ '',''+cat+'',''+(item.images&&item.images[0]?item.images[0]:'')+'')">+ Agregar a colección</button>'
+    +'<button class="btn-scan-again" onclick="scanAgain()">Escanear otro</button>'
+    +'</div></div>';
+  document.body.appendChild(sheet);
+}
+
+function detectCategoryFromName(name){
+  var n = (name||'').toLowerCase();
+  if(n.includes('figure')||n.includes('figura')||n.includes('figuart')||n.includes('action')) return 'Figuras';
+  if(n.includes('card')||n.includes('carta')||n.includes('pokemon')||n.includes('magic')||n.includes('yugioh')) return 'Cartas';
+  if(n.includes('game')||n.includes('juego')||n.includes('console')||n.includes('nintendo')||n.includes('playstation')) return 'Gaming';
+  if(n.includes('comic')||n.includes('manga')||n.includes('vol.')||n.includes('volume')) return 'Cómics';
+  return 'Otros';
+}
+
+function addFromBarcode(name, category, imageUrl){
+  var item = {
+    id: Date.now(), name: name, category: category,
+    photos: imageUrl ? [imageUrl] : [],
+    note:'', year: new Date().getFullYear().toString(),
+    rating:0, review:'', favorite:false,
+    estado:'Nuevo', valorActual:0, precioPagado:0,
+    edicion:'', tags:[], addedAt:Date.now()
+  };
+  collection.push(item);
+  save(); updateBadges();
+  toast(name+' agregado a '+category+'!','#22c55e');
+  closeBarcodeScanner();
+  setTimeout(function(){checkAchievements();},500);
+}
+
+function scanAgain(){
+  var sheet = document.getElementById('barcodeResultSheet');
+  if(sheet) sheet.remove();
+  barcodeScanActive = true;
+  var video = document.getElementById('barcodeVideo');
+  if(video) scanBarcodeFrame(video);
+}
+
+function closeBarcodeScanner(){
+  barcodeScanActive = false;
+  if(barcodeStream){barcodeStream.getTracks().forEach(function(t){t.stop();});barcodeStream=null;}
+  if(barcodeReader){try{barcodeReader.reset();}catch(e){}barcodeReader=null;}
+  var modal = document.getElementById('barcodeModal');
+  var sheet = document.getElementById('barcodeResultSheet');
+  if(modal) modal.remove();
+  if(sheet) sheet.remove();
+}
+
+async function shareCollection(){
+  var btn=document.querySelector('.btn-share-collection');
+  if(btn){btn.textContent='Generando link...';btn.disabled=true;}
+  try{
+    var prof=profile||{};
+    var topItems=collection.slice().sort(function(a,b){return (b.valorActual||0)-(a.valorActual||0);}).slice(0,12);
+    var catCount={};
+    collection.forEach(function(i){catCount[i.category]=(catCount[i.category]||0)+1;});
+    var totalVal=collection.reduce(function(s,i){return s+(i.valorActual||0);},0);
+    var payload={
+      v:1,
+      username:prof.username||'Coleccionista',
+      bio:prof.bio||'',
+      avatar:prof.avatar||null,
+      totalItems:collection.length,
+      totalValue:totalVal,
+      categories:catCount,
+      topItems:topItems.map(function(i){return{
+        name:i.name,category:i.category,
+        photo:(i.photos&&i.photos[0])||null,
+        valor:i.valorActual||0,favorite:i.favorite||false
+      };}),
+      generatedAt:new Date().toISOString()
+    };
+    // Use jsonblob.com - free, no auth, CORS
+    var r=await fetch('https://jsonblob.com/api/jsonBlob',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if(!r.ok)throw new Error('Error al generar link');
+    var location=r.headers.get('Location')||'';
+    var blobId=location.split('/').pop();
+    var shareUrl='https://colektor.vercel.app?share='+blobId;
+    // Show link box
+    var box=document.getElementById('shareLinkBox');
+    if(box){
+      box.style.display='flex';
+      box.innerHTML='<div class="share-link-box"><div class="share-link-url">'+shareUrl+'</div>'
+        +'<button class="share-link-copy" onclick="copyShareLink(\''+shareUrl+'\')">Copiar</button></div>';
+    }
+    // Also offer native share
+    if(navigator.share){
+      navigator.share({title:'Mi Colección — ColeKtoR',text:'Mira mi colección en ColeKtoR 🎴',url:shareUrl}).catch(function(){});
+    }
+  }catch(e){
+    toast('Error al generar link. Intenta de nuevo.','#ef4444');
+  }finally{
+    if(btn){btn.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> Compartir mi colección';btn.disabled=false;}
+  }
+}
+
+function copyShareLink(url){
+  navigator.clipboard.writeText(url).then(function(){toast('Link copiado!','#22c55e');}).catch(function(){});
+}
+
+async function checkShareParam(){
+  var params=new URLSearchParams(window.location.search);
+  var shareId=params.get('share');
+  if(!shareId)return;
+  try{
+    var r=await fetch('https://jsonblob.com/api/jsonBlob/'+shareId);
+    if(!r.ok)return;
+    var data=await r.json();
+    renderPublicView(data);
+  }catch(e){}
+}
+
+function renderPublicView(data){
+  var el=document.createElement('div');
+  el.className='public-view';
+  var catColors={'Cartas':'#818cf8','Figuras':'#22c55e','Gaming':'#06b6d4','Cómics':'#f97316','Otros':'#94a3b8'};
+  var catEmojis={'Cartas':'🃏','Figuras':'🏆','Gaming':'🎮','Cómics':'📚','Otros':'📦'};
+  // Header
+  var avatarHTML=data.avatar?'<img class="public-avatar" src="'+data.avatar+'"/>':'<div class="public-avatar" style="display:flex;align-items:center;justify-content:center;font-size:22px;">🎴</div>';
+  el.innerHTML='<div class="public-header">'+avatarHTML
+    +'<div><div class="public-username">'+escH(data.username||'Coleccionista')+'</div>'
+    +'<div class="public-subtitle">'+(data.bio?escH(data.bio):'ColeKtoR Collection')+'</div></div></div>';
+  // Stats
+  var statsDiv=document.createElement('div');statsDiv.className='public-stats';
+  var totalVal=data.totalValue||0;
+  statsDiv.innerHTML='<div class="public-stat"><div class="public-stat-val">'+data.totalItems+'</div><div class="public-stat-lbl">Ítems</div></div>'
+    +'<div class="public-stat"><div class="public-stat-val">'+Object.keys(data.categories||{}).length+'</div><div class="public-stat-lbl">Categorías</div></div>'
+    +'<div class="public-stat"><div class="public-stat-val">'+fmt(totalVal)+'</div><div class="public-stat-lbl">Valor</div></div>';
+  el.appendChild(statsDiv);
+  // Categories badges
+  var catDiv=document.createElement('div');catDiv.className='public-section';
+  var catHTML='<div class="public-section-title">Categorías</div>';
+  Object.keys(data.categories||{}).forEach(function(cat){
+    var color=catColors[cat]||'#555';
+    catHTML+='<span class="public-badge" style="background:'+color+'22;color:'+color+';">'+(catEmojis[cat]||'')+ ' '+cat+' ('+data.categories[cat]+')</span>';
+  });
+  catDiv.innerHTML=catHTML;el.appendChild(catDiv);
+  // Top items grid
+  if(data.topItems&&data.topItems.length){
+    var gridDiv=document.createElement('div');gridDiv.className='public-section';
+    gridDiv.innerHTML='<div class="public-section-title">Colección destacada</div>';
+    var grid=document.createElement('div');grid.className='public-grid';
+    data.topItems.forEach(function(item){
+      var c=document.createElement('div');c.className='public-card';
+      var color=catColors[item.category]||'#555';
+      c.innerHTML=(item.photo?'<img src="'+item.photo+'" loading="lazy"/>'
+        :'<div style="aspect-ratio:1;background:#111;display:flex;align-items:center;justify-content:center;font-size:28px;">'+(catEmojis[item.category]||'🎴')+'</div>')
+        +'<div class="public-card-name" style="border-top:2px solid '+color+';">'+escH(item.name)+'</div>';
+      grid.appendChild(c);
+    });
+    gridDiv.appendChild(grid);el.appendChild(gridDiv);
+  }
+  el.innerHTML+='<div class="public-powered">Creado con <span>ColeKtoR</span> · colektor.vercel.app</div>';
+  document.body.appendChild(el);
+  // Hide main app
+  document.getElementById('app').style.display='none';
+}
+
+function escH(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
-async function init(){await load();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
+async function init(){checkShareParam();await load();autoCheckPrices();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
 </script>
 <script>document.addEventListener("click",function(e){if(sortDropdownOpen&&!e.target.closest("#colToolbar")){sortDropdownOpen=false;var dd=document.getElementById("sortDropdown");if(dd)dd.classList.add("hidden");}});</script>
