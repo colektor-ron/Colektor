@@ -184,6 +184,34 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── MUSIC SCANNER ── */
+.music-modal{position:fixed;inset:0;background:#0a0a0a;z-index:9000;display:flex;flex-direction:column;overflow:hidden;}
+.music-modal-header{display:flex;align-items:center;justify-content:space-between;padding:54px 20px 16px;flex-shrink:0;}
+.music-modal-title{font-size:20px;font-weight:800;color:#fff;}
+.music-modal-close{background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:99px;padding:8px 18px;font-size:14px;font-weight:600;cursor:pointer;}
+.music-format-row{display:flex;gap:8px;padding:0 16px 12px;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.music-format-btn{padding:6px 14px;border-radius:99px;border:1px solid rgba(255,255,255,0.1);background:#1c1c1e;color:#888;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all 0.15s;}
+.music-format-btn.active{background:rgba(236,72,153,0.15);border-color:#ec4899;color:#ec4899;}
+.music-search-bar{display:flex;gap:8px;padding:0 16px 16px;flex-shrink:0;}
+.music-search-input{flex:1;background:#1c1c1e;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-size:15px;outline:none;}
+.music-search-input::placeholder{color:#444;}
+.music-search-btn{background:#ec4899;border:none;border-radius:12px;padding:0 18px;color:#fff;font-size:15px;cursor:pointer;flex-shrink:0;}
+.music-results{flex:1;overflow-y:auto;padding:0 16px 32px;}
+.music-result-item{display:flex;align-items:center;gap:12px;background:#1c1c1e;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:10px;margin-bottom:8px;cursor:pointer;transition:background 0.15s;}
+.music-result-item:active{background:#252527;}
+.music-result-cover{width:60px;height:60px;border-radius:10px;object-fit:cover;background:#111;flex-shrink:0;}
+.music-result-cover-empty{width:60px;height:60px;border-radius:10px;background:#1a1a1a;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:24px;}
+.music-result-info{flex:1;min-width:0;}
+.music-result-title{font-size:13px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.music-result-artist{font-size:11px;color:#888;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.music-result-meta{display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;}
+.music-result-tag{font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(236,72,153,0.1);color:#ec4899;font-weight:600;}
+.music-result-year{font-size:10px;padding:2px 7px;border-radius:99px;background:rgba(255,255,255,0.05);color:#666;}
+.music-add-btn{background:rgba(236,72,153,0.15);border:1px solid rgba(236,72,153,0.3);color:#ec4899;border-radius:10px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;white-space:nowrap;}
+.music-empty{text-align:center;color:#444;padding:60px 20px;font-size:14px;}
+.music-loading{display:flex;flex-direction:column;align-items:center;gap:12px;padding:60px 20px;color:#555;font-size:13px;}
+
+
 /* ── PRICE ALERTS ── */
 .price-alert-banner{background:#1c1c1e;border:1px solid rgba(255,255,255,0.07);
   border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;
@@ -1518,7 +1546,7 @@ const IDB={
 
 const DOT=["#1B6DC0","#ef4444","#818cf8","#22c55e","#eab308","#06b6d4","#ec4899","#a78bfa"];
 const ESTADOS=["Nuevo","Abierto","En vitrina","Dañado"];
-const FIXED_CATS=["Cartas","Figuras","Gaming","Cómics","Otros"];
+const FIXED_CATS=["Cartas","Figuras","Gaming","Cómics","Música","Otros"];
 
 let pendientes=[],categories=[],collection=[],trades=[];
 let pStatusFilter="all",pCatFilter="all",colCatFilter="all",tradeFilter="all";
@@ -1760,7 +1788,7 @@ function renderPendientes(){
 
   // Cat filters - fixed categories only
   var cf=document.getElementById("pCatFilters");cf.innerHTML="";
-  var catColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Cómics":"#f97316","Otros":"#94a3b8"};
+  var catColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Cómics":"#f97316","Música":"#ec4899","Otros":"#94a3b8"};
   var ab=document.createElement("button");ab.className="btn-cat"+(pCatFilter==="all"?" active":"");
   ab.textContent="Todo";ab.onclick=function(){pCatFilter="all";renderPendientes();};cf.appendChild(ab);
   FIXED_CATS.forEach(function(c){
@@ -1930,7 +1958,7 @@ function renderCollection(){
 
   // Filters
   var hasFavs=collection.some(function(c){return c.favorite;});
-  var colCatColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Cómics":"#f97316","Otros":"#94a3b8"};
+  var colCatColors={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Cómics":"#f97316","Música":"#ec4899","Otros":"#94a3b8"};
   var cf=document.getElementById("colFilters");cf.innerHTML="";
   // All + Favs + Fixed cats (only show if has items)
   var filtersToShow=["all"];
@@ -2013,11 +2041,16 @@ function renderCollection(){
 
     // Group by set (use category as fallback group)
     var setGroups={};
+    var individualCards=[]; // Cards without a real set
     sortedCards.forEach(function(item){
-      // Use set name if available, otherwise use category as the group
-      var setKey=item.set&&item.set.trim()?item.set.trim():item.category||'Sin set';
-      if(!setGroups[setKey])setGroups[setKey]=[];
-      setGroups[setKey].push(item);
+      var hasRealSet = item.set && item.set.trim() && item.set.trim()!==item.category && item.set.trim()!=='Cartas';
+      if(hasRealSet){
+        var setKey=item.set.trim();
+        if(!setGroups[setKey])setGroups[setKey]=[];
+        setGroups[setKey].push(item);
+      } else {
+        individualCards.push(item);
+      }
     });
 
     // Sort set groups
@@ -2092,22 +2125,37 @@ function renderCollection(){
         b.textContent=s[1];
         if(s[0]==='owned'&&window.cardSetFilter==='owned'){b.style.background='rgba(34,197,94,0.1)';b.style.borderColor='#22c55e';b.style.color='#22c55e';}
         if(s[0]==='missing'&&window.cardSetFilter==='missing'){b.style.background='rgba(239,68,68,0.1)';b.style.borderColor='#ef4444';b.style.color='#ef4444';}
-        b.onclick=function(e){e.stopPropagation();window.cardSetFilter=s[0];renderCollection();};
+        (function(fk, fb){
+          b.onclick=function(e){
+            e.stopPropagation();
+            window.cardSetFilter=fk;
+            // Update active styles without re-rendering whole collection
+            fb.querySelectorAll('.btn-card-sort').forEach(function(btn){btn.classList.remove('active');});
+            b.classList.add('active');
+            rebuildFolderCards(currentOpenSetKey, currentOpenSetCards, fb.parentElement, false);
+          };
+        })(s[0], fSortBar);
         fSortBar.appendChild(b);
       });
       fBody.appendChild(fSortBar);
       // Cards rendered by rebuildFolderCards
-      (function(sk,sc){rebuildFolderCards(sk,sc,fBody,false);})(setKey,setCards);
+      (function(sk,sc){
+        fCard.addEventListener('click',function(){
+          if(fBody.style.display!=='none'){currentOpenSetKey=sk;currentOpenSetCards=sc;}
+        });
+        rebuildFolderCards(sk,sc,fBody,false);
+      })(setKey,setCards);
 
       // Action buttons (shown when open)
+      // Borrar set - small red icon button in header top-right
+      var btnDelAll=document.createElement('button');
+      btnDelAll.style.cssText='position:absolute;top:10px;right:10px;background:none;border:none;color:rgba(239,68,68,0.5);cursor:pointer;padding:6px;border-radius:8px;z-index:2;';
+      btnDelAll.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
+      btnDelAll.title='Borrar set';
+
       var fActions=document.createElement('div');fActions.className='folder-actions';
       fActions.style.display='none';
-
-      var btnSelect=document.createElement('button');btnSelect.className='btn-folder-select';
-      btnSelect.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/></svg> Seleccionar';
-
-      var btnDelAll=document.createElement('button');btnDelAll.className='btn-folder-delete';
-      btnDelAll.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Borrar set';
+      var btnSelect=document.createElement('button');btnSelect.className='btn-folder-select';btnSelect.style.display='none';
 
       (function(sk, sc){
         btnDelAll.onclick=function(e){
@@ -2134,7 +2182,6 @@ function renderCollection(){
       })(setKey, setCards);
 
       fActions.appendChild(btnSelect);
-      fActions.appendChild(btnDelAll);
 
       // Toggle open/close
       fHeader.onclick=function(){
@@ -2147,11 +2194,44 @@ function renderCollection(){
         }
       };
 
+      folder.style.position='relative';
       folder.appendChild(fHeader);
+      folder.appendChild(btnDelAll);
       folder.appendChild(fActions);
       folder.appendChild(fBody);
       cardsSection.appendChild(folder);
     });
+    // Render individual cards (no set) as flat grid
+    if(individualCards.length){
+      var indivSection=document.createElement('div');
+      indivSection.style.cssText='margin-top:10px;';
+      var indivLabel=document.createElement('div');
+      indivLabel.style.cssText='font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;';
+      indivLabel.textContent='Cartas sueltas ('+individualCards.length+')';
+      indivSection.appendChild(indivLabel);
+      if(cardColView==='grid'){
+        var indivGrid=document.createElement('div');indivGrid.className='cards-grid';
+        individualCards.forEach(function(item){
+          var div=document.createElement('div');
+          div.className='card-col-item'+(item.favorite?' fav':'');
+          var photo=item.photos&&item.photos.length?item.photos[0]:null;
+          if(photo)div.innerHTML='<img src="'+photo+'" loading="lazy"/>';
+          else div.innerHTML='<div class="card-col-item-empty">'+IC.grid(20)+'</div>';
+          div.innerHTML+='<div class="card-col-name">'+item.name+'</div>';
+          if(item.favorite){var fb=document.createElement('div');fb.className='card-col-fav';fb.innerHTML=IC.star(10,'#f59e0b','#f59e0b');div.appendChild(fb);}
+          if(item.tags&&item.tags[0]){var rb=document.createElement('div');rb.className='card-col-rarity '+getRarityClass(item.tags[0]);rb.textContent=item.tags[0].substring(0,3).toUpperCase();div.appendChild(rb);}
+          if(ownedCards[item.id]){var ob=document.createElement('div');ob.style.cssText='position:absolute;top:5px;right:5px;width:20px;height:20px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:3;';ob.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';div.appendChild(ob);}
+          (function(id){div.onclick=function(){openDetail(id);};})(item.id);
+          indivGrid.appendChild(div);
+        });
+        indivSection.appendChild(indivGrid);
+      } else {
+        var indivList=document.createElement('div');indivList.className='col-list';
+        individualCards.forEach(function(item){indivList.appendChild(makeListCard(item));});
+        indivSection.appendChild(indivList);
+      }
+      cardsSection.appendChild(indivSection);
+    }
     content.appendChild(cardsSection);
     // Update displayed to only non-card items
     displayed=nonCardItems;
@@ -2167,7 +2247,9 @@ function renderCollection(){
 
   var figureItems=nonCardItems.filter(function(c){return matchesCat(c,FIGURE_CATS);});
   var gamingItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&matchesCat(c,GAMING_CATS);});
-  var otherItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&!matchesCat(c,GAMING_CATS);});
+  var comicsItems=nonCardItems.filter(function(c){return c.category==='Cómics';});
+  var musicItems=nonCardItems.filter(function(c){return c.category==='Música';});
+  var otherItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&!matchesCat(c,GAMING_CATS)&&c.category!=='Cómics'&&c.category!=='Música';});
   displayed=otherItems;
 
   if(colCatFilter==='all'&&colEstadoFilter==='all'){
@@ -2176,6 +2258,12 @@ function renderCollection(){
     }
     if(gamingItems.length||customFolders.some(function(f){return f.category==='Gaming';})){
       renderCustomFolders(gamingItems,'Gaming','#06b6d4',content);
+    }
+    if(comicsItems.length||customFolders.some(function(f){return f.category==='Cómics';})){
+      renderCustomFolders(comicsItems,'Cómics','#f97316',content);
+    }
+    if(musicItems.length||customFolders.some(function(f){return f.category==='Música';})){
+      renderCustomFolders(musicItems,'Música','#ec4899',content);
     }
     if(otherItems.length||customFolders.some(function(f){return f.category==='Otros';})){
       renderCustomFolders(otherItems,'Otros','#94a3b8',content);
@@ -3133,11 +3221,9 @@ function rebuildFolderCards(setKey, setCards, fBody, selecting){
   var filteredCards = setCards.slice();
   var filt = window.cardSetFilter||'all';
   if(filt==='owned'){
-    // Only cards that have a photo (user added manually or from TCG with image)
-    filteredCards = setCards.filter(function(c){return c.photos&&c.photos.length>0;});
+    filteredCards = setCards.filter(function(c){return ownedCards[c.id];});
   } else if(filt==='missing'){
-    // Cards without photos — added from TCG API without personal photo
-    filteredCards = setCards.filter(function(c){return !c.photos||!c.photos.length;});
+    filteredCards = setCards.filter(function(c){return !ownedCards[c.id];});
   }
 
   // Render cards
@@ -3155,6 +3241,13 @@ function rebuildFolderCards(setKey, setCards, fBody, selecting){
         var rb=document.createElement('div');rb.className='card-col-rarity '+getRarityClass(item.tags[0]);
         rb.textContent=item.tags[0].substring(0,3).toUpperCase();div.appendChild(rb);
       }
+      // Owned checkmark
+      if(ownedCards[item.id]){
+        var ownBadge=document.createElement('div');
+        ownBadge.style.cssText='position:absolute;top:5px;right:5px;width:20px;height:20px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:3;';
+        ownBadge.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+        div.appendChild(ownBadge);
+      }
       if(selecting){
         var chk=document.createElement('div');
         chk.className='card-select-check'+(selected.has(item.id)?' checked':'');
@@ -3166,7 +3259,10 @@ function rebuildFolderCards(setKey, setCards, fBody, selecting){
           rebuildFolderCards(setKey,setCards,fBody,true);
         };
       } else {
-        div.onclick=function(){openDetail(item.id);};
+        (function(cid){
+          div.onclick=function(){openDetail(cid);};
+          div.addEventListener('contextmenu',function(e){e.preventDefault();e.stopPropagation();toggleOwned(cid);});
+        })(item.id);
       }
       cGrid.appendChild(div);
     });
@@ -5352,6 +5448,152 @@ function closeBarcodeScanner(){
   if(sheet) sheet.remove();
 }
 
+// ── MUSIC SCANNER ──
+var musicCurrentFormat = 'all';
+
+function openMusicScanner(){
+  var modal = document.createElement('div');
+  modal.className = 'music-modal';
+  modal.id = 'musicModal';
+
+  var header = document.createElement('div');
+  header.className = 'music-modal-header';
+  header.innerHTML = '<div class="music-modal-title">🎵 Buscar Música</div>'
+    +'<button class="music-modal-close" onclick="closeMusicScanner()">Cerrar</button>';
+  modal.appendChild(header);
+
+  // Format filters
+  var formatRow = document.createElement('div');
+  formatRow.className = 'music-format-row';
+  [['all','Todos'],['Vinyl','Vinilo 🎵'],['CD','CD 💿'],['Cassette','Cassette 📼'],['Box Set','Box Set 📦']].forEach(function(f){
+    var btn = document.createElement('button');
+    btn.className = 'music-format-btn'+(musicCurrentFormat===f[0]?' active':'');
+    btn.textContent = f[1];
+    btn.onclick = function(){
+      musicCurrentFormat = f[0];
+      formatRow.querySelectorAll('.music-format-btn').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+    };
+    formatRow.appendChild(btn);
+  });
+  modal.appendChild(formatRow);
+
+  // Search bar
+  var searchBar = document.createElement('div');
+  searchBar.className = 'music-search-bar';
+  var input = document.createElement('input');
+  input.className = 'music-search-input';
+  input.placeholder = 'Artista, álbum, canción...';
+  input.id = 'musicSearchInput';
+  input.addEventListener('keydown', function(e){ if(e.key==='Enter') searchMusic(); });
+  var searchBtn = document.createElement('button');
+  searchBtn.className = 'music-search-btn';
+  searchBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>';
+  searchBtn.onclick = searchMusic;
+  searchBar.appendChild(input);
+  searchBar.appendChild(searchBtn);
+  modal.appendChild(searchBar);
+
+  // Results area
+  var results = document.createElement('div');
+  results.className = 'music-results';
+  results.id = 'musicResults';
+  results.innerHTML = '<div class="music-empty">Busca un artista o álbum 🎶</div>';
+  modal.appendChild(results);
+
+  document.body.appendChild(modal);
+  setTimeout(function(){ input.focus(); }, 300);
+}
+
+async function searchMusic(){
+  var query = document.getElementById('musicSearchInput').value.trim();
+  if(!query) return;
+  var results = document.getElementById('musicResults');
+  results.innerHTML = '<div class="music-loading"><div class="scanner-spinner"></div>Buscando en Discogs...</div>';
+
+  try{
+    var url = 'https://api.discogs.com/database/search?q='+encodeURIComponent(query)+'&per_page=25&type=release';
+    if(musicCurrentFormat !== 'all') url += '&format='+encodeURIComponent(musicCurrentFormat);
+    var r = await fetch(url, {headers:{'User-Agent':'ColeKtoR/1.0'}});
+    var d = await r.json();
+    var releases = d.results||[];
+    if(!releases.length){
+      results.innerHTML = '<div class="music-empty">Sin resultados para "'+escH(query)+'"</div>';
+      return;
+    }
+    results.innerHTML = '<div style="font-size:11px;color:#444;margin-bottom:10px;">'+releases.length+' resultados</div>';
+    releases.forEach(function(rel){
+      var item = document.createElement('div');
+      item.className = 'music-result-item';
+      var coverHTML = rel.cover_image && !rel.cover_image.includes('spacer')
+        ? '<img class="music-result-cover" src="'+rel.cover_image+'" loading="lazy"/>'
+        : '<div class="music-result-cover-empty">🎵</div>';
+      // Parse title (usually "Artist - Album")
+      var parts = (rel.title||'').split(' - ');
+      var artist = parts.length>1 ? parts[0] : (rel.artist||'');
+      var album = parts.length>1 ? parts.slice(1).join(' - ') : rel.title;
+      var formats = (rel.format||[]).join(', ');
+      var year = rel.year||'';
+      item.innerHTML = coverHTML
+        +'<div class="music-result-info">'
+        +'<div class="music-result-title">'+escH(album)+'</div>'
+        +'<div class="music-result-artist">'+escH(artist)+'</div>'
+        +'<div class="music-result-meta">'
+        +(formats?'<span class="music-result-tag">'+escH(formats.substring(0,20))+'</span>':'')
+        +(year?'<span class="music-result-year">'+year+'</span>':'')
+        +'</div></div>'
+        +'<button class="music-add-btn" onclick="event.stopPropagation()">+ Agregar</button>';
+
+      // Store data
+      var releaseData = {
+        title: album, artist: artist,
+        cover: (rel.cover_image&&!rel.cover_image.includes('spacer'))?rel.cover_image:'',
+        format: formats, year: year,
+        label: (rel.label||[]).join(', '),
+        genre: (rel.genre||[]).join(', ')
+      };
+      item.querySelector('.music-add-btn').onclick = function(e){
+        e.stopPropagation();
+        addMusicItem(releaseData);
+        item.querySelector('.music-add-btn').textContent = '✓ Agregado';
+        item.querySelector('.music-add-btn').style.background = 'rgba(34,197,94,0.1)';
+        item.querySelector('.music-add-btn').style.color = '#22c55e';
+        item.querySelector('.music-add-btn').style.borderColor = '#22c55e';
+        item.querySelector('.music-add-btn').disabled = true;
+      };
+      results.appendChild(item);
+    });
+  }catch(e){
+    results.innerHTML = '<div class="music-empty">Error al buscar. Intenta de nuevo.</div>';
+  }
+}
+
+function addMusicItem(data){
+  var item = {
+    id: Date.now(),
+    name: data.title+(data.artist?' — '+data.artist:''),
+    category: 'Música',
+    photos: data.cover ? [data.cover] : [],
+    note: [data.format, data.label, data.genre].filter(Boolean).join(' · '),
+    year: data.year||new Date().getFullYear().toString(),
+    rating:0, review:'', favorite:false,
+    estado:'Nuevo', valorActual:0, precioPagado:0,
+    edicion: data.format||'',
+    tags: data.genre ? [data.genre.split(',')[0].trim()] : [],
+    set: data.format||'',
+    addedAt: Date.now()
+  };
+  collection.push(item);
+  save(); updateBadges();
+  toast(data.title+' agregado a Música! 🎵','#ec4899');
+  setTimeout(function(){checkAchievements();},500);
+}
+
+function closeMusicScanner(){
+  var modal = document.getElementById('musicModal');
+  if(modal) modal.remove();
+}
+
 async function shareCollection(){
   var btn=document.querySelector('.btn-share-collection');
   if(btn){btn.textContent='Generando link...';btn.disabled=true;}
@@ -5423,7 +5665,7 @@ async function checkShareParam(){
 function renderPublicView(data){
   var el=document.createElement('div');
   el.className='public-view';
-  var catColors={'Cartas':'#818cf8','Figuras':'#22c55e','Gaming':'#06b6d4','Cómics':'#f97316','Otros':'#94a3b8'};
+  var catColors={'Cartas':'#818cf8','Figuras':'#22c55e','Gaming':'#06b6d4','Cómics':'#f97316','Música':'#ec4899','Otros':'#94a3b8'};
   var catEmojis={'Cartas':'🃏','Figuras':'🏆','Gaming':'🎮','Cómics':'📚','Otros':'📦'};
   // Header
   var avatarHTML=data.avatar?'<img class="public-avatar" src="'+data.avatar+'"/>':'<div class="public-avatar" style="display:flex;align-items:center;justify-content:center;font-size:22px;">🎴</div>';
@@ -5467,6 +5709,20 @@ function renderPublicView(data){
 }
 
 function escH(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── CARD OWNERSHIP ──
+var ownedCards = {};
+var currentOpenSetKey = null;
+var currentOpenSetCards = [];
+function loadOwnedCards(){ try{var d=localStorage.getItem('ownedCards');if(d)ownedCards=JSON.parse(d);}catch(e){} }
+function saveOwnedCards(){ try{localStorage.setItem('ownedCards',JSON.stringify(ownedCards));}catch(e){} }
+function toggleOwned(cardId){
+  if(ownedCards[cardId]) delete ownedCards[cardId];
+  else ownedCards[cardId]=true;
+  saveOwnedCards();
+  renderCollection();
+}
+loadOwnedCards();
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
 async function init(){checkShareParam();await load();autoCheckPrices();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
