@@ -2217,7 +2217,7 @@ function renderCollection(){
   var otherItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&!matchesCat(c,GAMING_CATS)&&c.category!=='Cómics'&&c.category!=='Música';});
   displayed=otherItems;
 
-  if(colCatFilter==='all'&&colEstadoFilter==='all'){
+  if(colCatFilter==='all'){
     if(figureItems.length||customFolders.some(function(f){return f.category==='Figuras';})){
       renderCustomFolders(figureItems,'Figuras','#22c55e',content);
     }
@@ -2242,9 +2242,9 @@ function renderCollection(){
 
   var hasFavsNonCard=otherItems.some(function(c){return c.favorite;});
   var showFavSection=colCatFilter==="all"&&hasFavsNonCard&&colViewMode==="grid"&&colEstadoFilter==="all"&&!hasCards&&!figureItems.length&&!gamingItems.length;
-  if(!displayed.length&&!hasCards&&!figureItems.length&&!gamingItems.length){hint.textContent='Sin ítems aquí';return;}
+  if(!displayed.length&&!hasCards&&!figureItems.length&&!gamingItems.length&&!comicsItems.length&&!musicItems.length){hint.textContent='';return;}
   // ── Otros section (remaining non-card non-figure items)
-  if(otherItems.length&&colCatFilter==='all'&&colEstadoFilter==='all'&&figureItems.length>0){
+  if(otherItems.length&&colCatFilter==='all'&&figureItems.length>0){
     var otrosLabel=document.createElement('div');
     otrosLabel.className='section-label muted';
     otrosLabel.textContent='Otros';
@@ -4550,7 +4550,12 @@ function renderSetCards(set, cards){
 
   var btnAll = document.createElement('button');btnAll.className='btn-add-all';
   btnAll.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar set completo ('+cards.length+' cartas)';
-  btnAll.onclick = function(){addCardsFromSet(cards);};
+  btnAll.onclick = function(){
+    if(this._busy)return;
+    this._busy=true;
+    this.disabled=true;
+    addCardsFromSet(cards);
+  };
 
   var btnSel = document.createElement('button');btnSel.className='btn-add-selected';btnSel.id='btnAddSelected';
   btnSel.style.display='none';btnSel.textContent='Agregar cartas seleccionadas';
@@ -5682,7 +5687,7 @@ function toggleOwned(cardId){
 loadOwnedCards();
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
-async function init(){checkShareParam();await load();autoCheckPrices();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
+async function init(){checkShareParam();await load();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
 </script>
 <script>document.addEventListener("click",function(e){if(sortDropdownOpen&&!e.target.closest("#colToolbar")){sortDropdownOpen=false;var dd=document.getElementById("sortDropdown");if(dd)dd.classList.add("hidden");}});</script>
