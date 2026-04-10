@@ -2000,20 +2000,7 @@ function renderCollection(){
     csCount.appendChild(btnG);csCount.appendChild(btnL);
     csHeader.appendChild(csTitle);csHeader.appendChild(csCount);
     cardsSection.appendChild(csHeader);
-    // Filter bar: Todas / Propias / Falta
-    var sortBar=document.createElement('div');sortBar.className='cards-sort-bar';
-    if(!window.cardColFilter) window.cardColFilter='all';
-    [['all','Todas'],['owned','Propias'],['missing','Falta']].forEach(function(s){
-      var b=document.createElement('button');
-      b.className='btn-card-sort'+(window.cardColFilter===s[0]?' active':'');
-      b.textContent=s[1];
-      if(s[0]==='owned') b.style.cssText+='border-color:#22c55e33;';
-      if(s[0]==='missing') b.style.cssText+='border-color:#ef444433;';
-      b.onclick=function(){window.cardColFilter=s[0];renderCollection();};
-      sortBar.appendChild(b);
-    });
-    // Count badge per filter
-    cardsSection.appendChild(sortBar);
+    
     // Filter cards
     var sortedCards=cardItems.slice().sort(function(a,b){
       if(cardColSort==='name')return a.name.localeCompare(b.name);
