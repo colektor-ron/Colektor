@@ -1,13 +1,9 @@
-const CACHE='colektor-v126';
-self.addEventListener('install',e=>{self.skipWaiting();});
-self.addEventListener('activate',e=>{
+// Unregister SW - v126
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys=>Promise.all(keys.map(k=>caches.delete(k))))
-    .then(()=>self.clients.claim())
-    .then(()=>self.clients.matchAll().then(clients=>clients.forEach(c=>c.postMessage({type:'RELOAD'}))))
+    caches.keys().then(k => Promise.all(k.map(n => caches.delete(n))))
+    .then(() => self.clients.claim())
   );
 });
-self.addEventListener('fetch',e=>{
-  // Always network first, no caching
-  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));
-});
+self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
