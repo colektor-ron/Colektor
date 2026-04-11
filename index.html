@@ -1880,25 +1880,29 @@ function renderPendientes(){
   if(!addSec){updateBadges();return;}
   addSec.innerHTML='';
   if(showAddP){
-    addSec.innerHTML='<div class="add-box"><div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:12px">Nuevo ítem</div><label>Nombre</label><input id="newName" placeholder="Ej: Charizard, Dark Side of the Moon..."/><label>Precio / Valor</label><input id="newPrice" type="number" placeholder="Ej: 25000"/><label>Categoría</label><select id="newCat">'+FIXED_CATS.map(function(c){return'<option>'+c+'</option>';}).join('')+'</select><div class="add-row"><button class="btn-primary" onclick="addItem()">Agregar</button><button class="btn-secondary" onclick="showAddP=false;renderPendientes()">Cancelar</button></div></div>';
+    addSec.innerHTML='<div class="add-box"><div style="font-size:13px;font-weight:600;color:#94a3b8;margin-bottom:12px">Nuevo ítem</div><label>Nombre</label><input id="newName" placeholder="Ej: Charizard, Vinilo..."/><label>Precio</label><input id="newPrice" type="number" placeholder="Ej: 25000"/><label>Categoría</label><select id="newCat">'+FIXED_CATS.map(function(x){return'<option>'+x+'</option>';}).join('')+'</select><div class="add-row"><button class="btn-primary" onclick="addItem()">Agregar</button><button class="btn-secondary" onclick="showAddP=false;renderPendientes()">Cancelar</button></div></div>';
   } else {
-    var d=document.createElement('div');d.style.cssText='display:flex;flex-direction:column;gap:8px;';
-    var b1=document.createElement('button');b1.className='btn-open-add';
+    var d=document.createElement('div');
+    d.style.cssText='display:flex;flex-direction:column;gap:8px;';
+    var b1=document.createElement('button');
+    b1.className='btn-open-add';
     b1.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar ítem';
     b1.onclick=function(){showAddP=true;renderPendientes();};
     d.appendChild(b1);
-    var r=document.createElement('div');r.style.cssText='display:flex;gap:8px;';
-    var b2=document.createElement('button');b2.className='btn-open-add';
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;gap:8px;';
+    var b2=document.createElement('button');
+    b2.className='btn-open-add';
     b2.style.cssText='flex:1;background:rgba(129,140,248,0.1);border-color:#818cf8;color:#818cf8;gap:8px;';
     b2.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Buscar cartas TCG';
     b2.onclick=function(){openScanner();};
-    r.appendChild(b2);
+    row.appendChild(b2);
     var b3=document.createElement('button');
     b3.style.cssText='background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.3);color:#ec4899;border-radius:10px;width:44px;height:44px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;';
     b3.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
     b3.onclick=function(){openMusicScanner();};
-    r.appendChild(b3);
-    d.appendChild(r);
+    row.appendChild(b3);
+    d.appendChild(row);
     addSec.appendChild(d);
   }
   updateBadges();
@@ -5005,4 +5009,4 @@ init();
 </script>
 <script>document.addEventListener("click",function(e){if(sortDropdownOpen&&!e.target.closest("#colToolbar")){sortDropdownOpen=false;var dd=document.getElementById("sortDropdown");if(dd)dd.classList.add("hidden");}});</script>
 </body>
-</html>
+</html>if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(s){s.unregister();});}); navigator.serviceWorker.register("/sw2.js");}
