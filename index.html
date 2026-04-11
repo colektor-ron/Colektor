@@ -1548,6 +1548,8 @@ const ESTADOS=["Nuevo","Abierto","En vitrina","Dañado"];
 const FIXED_CATS=["Cartas","Figuras","Gaming","Cómics","Música","Otros"];
 
 let pendientes=[],categories=[],collection=[],trades=[];
+var profile={name:'',handle:'',bio:'',avatar:null};
+var themes={};
 let pStatusFilter="all",pCatFilter="all",colCatFilter="all",tradeFilter="all";
 let showAddP=false,showNewCat=false,expandedId=null;
 let uploadTargetId=null,colPhotoTargetId=null,editTagId=null;
@@ -1948,6 +1950,7 @@ function makeColCard(item){
   card.onclick=function(){openDetail(item.id);};
   return card;
 }
+
 
 function renderCollection(){
   // Update stats
@@ -5004,6 +5007,22 @@ function toggleOwned(cardId){
 loadOwnedCards();
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
+async function loadProfile(){
+  try{var d=await IDB.get('profile');if(d)profile=d;}catch(e){}
+}
+async function loadThemes(){
+  try{var d=await IDB.get('themes');if(d)themes=d;}catch(e){}
+}
+function applyProfile(){
+  try{
+    var el=document.getElementById('headerGreeting');
+    if(el&&profile.name) el.textContent='Hola, '+profile.name+' 👋';
+  }catch(e){}
+}
+function applyThemes(){
+  // themes applied separately, stub for now
+}
+
 async function init(){checkShareParam();await load();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
 </script>
