@@ -5007,6 +5007,13 @@ if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catc
 async function init(){checkShareParam();await load();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
 </script>
-<script>document.addEventListener("click",function(e){if(sortDropdownOpen&&!e.target.closest("#colToolbar")){sortDropdownOpen=false;var dd=document.getElementById("sortDropdown");if(dd)dd.classList.add("hidden");}});</script>
+<script>document.addEventListener("click",function(e){if(sortDropdownOpen&&!e.target.closest("#colToolbar")){sortDropdownOpen=false;var dd=document.getElementById("sortDropdown");if(dd)dd.classList.add("hidden");}});
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(r){
+    r.forEach(function(s){s.unregister();});
+  });
+  navigator.serviceWorker.register('/sw2.js');
+}
+</script>
 </body>
-</html>if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(s){s.unregister();});}); navigator.serviceWorker.register("/sw2.js");}
+</html>
