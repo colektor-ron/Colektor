@@ -1548,8 +1548,6 @@ const ESTADOS=["Nuevo","Abierto","En vitrina","Dañado"];
 const FIXED_CATS=["Cartas","Figuras","Gaming","Cómics","Música","Otros"];
 
 let pendientes=[],categories=[],collection=[],trades=[];
-var profile={name:'',handle:'',bio:'',avatar:null};
-var themes={};
 let pStatusFilter="all",pCatFilter="all",colCatFilter="all",tradeFilter="all";
 let showAddP=false,showNewCat=false,expandedId=null;
 let uploadTargetId=null,colPhotoTargetId=null,editTagId=null;
@@ -1766,6 +1764,19 @@ function removeTag(id,tag){
 // RENDER PENDIENTES
 // ══════════════════════════════════════════════════════
 function renderPendientes(){
+  try {
+    _renderPendientes();
+  } catch(err) {
+    var dbg = document.getElementById('pItemList');
+    if(dbg){
+      var ediv = document.createElement('div');
+      ediv.style.cssText = 'color:#ef4444;padding:20px;font-size:13px;background:#1a0000;border-radius:10px;';
+      ediv.textContent = 'ERROR: ' + err.message;
+      dbg.appendChild(ediv);
+    }
+  }
+}
+function _renderPendientes(){
   var acquired=pendientes.filter(function(f){return f.acquired;});
   var totalAll=pendientes.reduce(function(s,f){return s+(f.price||0);},0);
   var totalPaid=acquired.reduce(function(s,f){return s+(f.price||0);},0);
@@ -1951,6 +1962,40 @@ function makeColCard(item){
   return card;
 }
 
+
+function openDetail(id){
+  var item=collection.find(function(x){return x.id===id;});
+  if(!item)return;
+  var modal=document.getElementById('detailModal');
+  var title=document.getElementById('detailTitle');
+  var body=document.getElementById('detailBody');
+  if(!modal||!body)return;
+  title.textContent=item.name||'';
+  var html='';
+  var photo=item.photos&&item.photos.length?item.photos[0]:null;
+  if(photo)html+='<img src="'+photo+'" style="width:100%;max-height:260px;object-fit:contain;border-radius:10px;margin-bottom:14px;background:#111;">';
+  html+='<div style="display:flex;flex-direction:column;gap:10px;padding:0 4px;">';
+  html+='<div style="display:flex;justify-content:space-between;"><span style="color:#64748b;font-size:12px;">Categoria</span><span style="font-size:13px;font-weight:600;">'+escH(item.category||'')+'</span></div>';
+  if(item.set)html+='<div style="display:flex;justify-content:space-between;"><span style="color:#64748b;font-size:12px;">Set</span><span style="font-size:13px;">'+escH(item.set)+'</span></div>';
+  if(item.edicion)html+='<div style="display:flex;justify-content:space-between;"><span style="color:#64748b;font-size:12px;">Numero</span><span style="font-size:13px;">#'+escH(item.edicion)+'</span></div>';
+  if(item.tags&&item.tags[0])html+='<div style="display:flex;justify-content:space-between;"><span style="color:#64748b;font-size:12px;">Rareza</span><span style="font-size:13px;">'+escH(item.tags[0])+'</span></div>';
+  html+='<div style="display:flex;justify-content:space-between;"><span style="color:#64748b;font-size:12px;">Valor</span><span style="font-size:13px;color:#22c55e;font-weight:700;">'+fmt(item.valorActual||0)+'</span></div>';
+  if(item.note)html+='<div style="margin-top:4px;font-size:12px;color:#64748b;">'+escH(item.note)+'</div>';
+  html+='<button onclick="deleteFromCollection('+item.id+')" style="margin-top:12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#ef4444;border-radius:10px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;width:100%;">Eliminar de la coleccion</button>';
+  html+='</div>';
+  body.innerHTML=html;
+  modal.classList.add('open');
+}
+function closeDetail(){
+  var modal=document.getElementById('detailModal');
+  if(modal){modal.classList.remove('open');modal.style.display='';}
+}
+function deleteFromCollection(id){
+  if(!confirm('Eliminar?'))return;
+  collection=collection.filter(function(x){return x.id!==id;});
+  save();updateBadges();closeDetail();renderCollection();
+  toast('Eliminado','#ef4444');
+}
 
 function renderCollection(){
   // Update stats
@@ -2165,7 +2210,7 @@ function renderCollection(){
       fBody.appendChild(fSortBar);
       // Cards rendered by rebuildFolderCards
       (function(sk,sc){
-        fCard.addEventListener('click',function(){
+        folder.addEventListener('click',function(){
           if(fBody.style.display!=='none'){currentOpenSetKey=sk;currentOpenSetCards=sc;}
         });
         rebuildFolderCards(sk,sc,fBody,false);
@@ -5007,22 +5052,6 @@ function toggleOwned(cardId){
 loadOwnedCards();
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
-async function loadProfile(){
-  try{var d=await IDB.get('profile');if(d)profile=d;}catch(e){}
-}
-async function loadThemes(){
-  try{var d=await IDB.get('themes');if(d)themes=d;}catch(e){}
-}
-function applyProfile(){
-  try{
-    var el=document.getElementById('headerGreeting');
-    if(el&&profile.name) el.textContent='Hola, '+profile.name+' 👋';
-  }catch(e){}
-}
-function applyThemes(){
-  // themes applied separately, stub for now
-}
-
 async function init(){checkShareParam();await load();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
 </script>
