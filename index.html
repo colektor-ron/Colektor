@@ -188,7 +188,7 @@ input[type="file"]{display:none;}
 .folder-inner-view{display:none;position:fixed;inset:0;background:#181818;z-index:350;flex-direction:column;overflow:hidden;}
 .folder-inner-view.open{display:flex;}
 .folder-inner-header{padding:54px 16px 14px;display:flex;align-items:center;gap:12px;background:#181818;border-bottom:1px solid #1e1e1e;}
-.folder-inner-top{display:flex;align-items:center;justify-content:space-between;padding:54px 16px 12px;position:absolute;top:0;left:0;right:0;z-index:2;}
+.folder-inner-top{position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;align-items:center;z-index:3;}
 .folder-inner-cover{position:relative;width:100%;height:200px;background:#111;flex-shrink:0;overflow:hidden;}
 .folder-inner-cover img{width:100%;height:100%;object-fit:cover;}
 .folder-inner-cover-gradient{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.4) 0%,transparent 40%,rgba(0,0,0,0.7) 100%);}
@@ -1342,11 +1342,9 @@ input[type="file"]{display:none;}
       <div class="folder-cover-hint">Toca para agregar foto de portada</div>
     </div>
     <input type="text" class="folder-name-input" id="folderNameInput" placeholder="Nombre de la carpeta..."/>
-    <select class="folder-cat-select" id="folderCatSelect">
+    <select class="folder-cat-select" id="folderCatSelect" style="display:none;">
       <option value="Figuras">Figuras</option>
       <option value="Gaming">Gaming</option>
-      <option value="Cómics">Cómics</option>
-      <option value="Música">Música</option>
       <option value="Otros">Otros</option>
     </select>
     <div class="folder-create-actions">
@@ -1367,7 +1365,10 @@ input[type="file"]{display:none;}
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         Volver
       </button>
+      <div style="display:flex;gap:8px;align-items:center;">
+      <button id="folderInnerDelBtn" onclick="deleteFolderFromInner()" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#ef4444;border-radius:10px;padding:7px 10px;cursor:pointer;display:flex;align-items:center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
       <button class="btn-folder-edit-inner" id="folderInnerEditBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Editar</button>
+      </div>
     </div>
     <div class="folder-inner-cover-info">
       <div class="folder-inner-title" id="folderInnerTitle"></div>
@@ -1961,7 +1962,15 @@ function renderCollection(){
     csTitle.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Cartas ('+cardItems.length+')';
     var csCount=document.createElement('div');csCount.className='cards-view-toggle';
     // View toggle
+    // Grid/List toggle for cards
+    var csViewToggle=document.createElement('button');
+    csViewToggle.style.cssText='background:none;border:none;color:#94a3b8;cursor:pointer;padding:4px;';
+    csViewToggle.innerHTML=colViewMode==='list'
+      ?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>'
+      :'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
+    csViewToggle.onclick=function(){colViewMode=colViewMode==='grid'?'list':'grid';renderCollection();};
     csHeader.appendChild(csTitle);
+    csHeader.appendChild(csViewToggle);
     // Add folder button like other sections
     var csBtnFolder=document.createElement('button');csBtnFolder.className='btn-new-folder';
     csBtnFolder.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Carpeta';
@@ -2001,21 +2010,16 @@ function renderCollection(){
       });
     }
 
-    // Render cards as a simple grid (no set folders)
-    sortedCards.forEach(function(item){
-      var cardDiv = document.createElement('div');
-      cardDiv.className = 'collection-card';
-      var imgHTML = item.photos&&item.photos[0]
-        ? '<div class="card-img"><img src="'+item.photos[0]+'" loading="lazy"></div>'
-        : '<div class="card-img card-img-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.2"><rect x="2" y="3" width="14" height="18" rx="2"/><path d="M8 7h4M8 11h4M8 15h2"/></svg></div>';
-      cardDiv.innerHTML = imgHTML
-        + '<div class="card-info">'
-        + '<div class="card-name">'+item.name+'</div>'
-        + '<div class="card-meta">'+(item.set||item.category||'')+'</div>'
-        + '</div>';
-      cardDiv.onclick = function(){ openDetail(item); };
-      cardsSection.appendChild(cardDiv);
-    });
+    // Render cards respecting colViewMode
+    if(colViewMode==='list'){
+      var cardsList=document.createElement('div');cardsList.className='col-list';
+      sortedCards.forEach(function(item){cardsList.appendChild(makeListCard(item));});
+      cardsSection.appendChild(cardsList);
+    } else {
+      var cardsGrid=document.createElement('div');cardsGrid.className='col-grid';
+      sortedCards.forEach(function(item){cardsGrid.appendChild(makeColCard(item));});
+      cardsSection.appendChild(cardsGrid);
+    }
     content.appendChild(cardsSection);
         // Update displayed to only non-card items
     displayed=nonCardItems;
@@ -4592,6 +4596,8 @@ function openFolderInner(folderId, allCatItems){
 
   var editBtn = document.getElementById('folderInnerEditBtn');
   editBtn.onclick = function(){openEditFolderModal(folderId);};
+  var delBtn = document.getElementById('folderInnerDelBtn');
+  if(delBtn) delBtn.onclick = function(){deleteFolderFromInner();};
 
   var addBtn = document.getElementById('folderInnerAddBtn');
   addBtn.onclick = function(){renderFolderInnerPicker();};
