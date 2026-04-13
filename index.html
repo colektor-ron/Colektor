@@ -1958,22 +1958,9 @@ function renderCollection(){
     csTitle.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Cartas ('+cardItems.length+')';
     var csCount=document.createElement('div');csCount.className='cards-view-toggle';
     // View toggle
-    var btnG=document.createElement('button');btnG.className='btn-cards-view'+(cardColView==='grid'?' active':'');
-    btnG.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>';
-    var btnL=document.createElement('button');btnL.className='btn-cards-view'+(cardColView==='list'?' active':'');
-    btnL.innerHTML='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>';
-    btnG.onclick=function(){cardColView='grid';renderCollection();};
-    btnL.onclick=function(){cardColView='list';renderCollection();};
-    csCount.appendChild(btnG);csCount.appendChild(btnL);
-    csHeader.appendChild(csTitle);csHeader.appendChild(csCount);
+    csHeader.appendChild(csTitle);
+    csHeader.appendChild(csCount);
     cardsSection.appendChild(csHeader);
-    // Sort bar
-    var sortBar=document.createElement('div');sortBar.className='cards-sort-bar';
-    [['name','Nombre'],['set','Set'],['rarity','Rareza'],['value','Valor'],['date','Reciente']].forEach(function(s){
-      var b=document.createElement('button');b.className='btn-card-sort'+(cardColSort===s[0]?' active':'');
-      b.textContent=s[1];b.onclick=function(){cardColSort=s[0];renderCollection();};sortBar.appendChild(b);
-    });
-    cardsSection.appendChild(sortBar);
     // Sort cards
     var sortedCards=cardItems.slice().sort(function(a,b){
       if(cardColSort==='name')return a.name.localeCompare(b.name);
