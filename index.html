@@ -1959,7 +1959,12 @@ function renderCollection(){
     var csCount=document.createElement('div');csCount.className='cards-view-toggle';
     // View toggle
     csHeader.appendChild(csTitle);
+    // Add folder button like other sections
+    var csBtnFolder=document.createElement('button');csBtnFolder.className='btn-add-folder';
+    csBtnFolder.innerHTML='+ Carpeta';
+    csBtnFolder.onclick=function(e){e.stopPropagation();openAddFolderModal('Cartas');};
     csHeader.appendChild(csCount);
+    csHeader.appendChild(csBtnFolder);
     cardsSection.appendChild(csHeader);
     // Sort cards
     var sortedCards=cardItems.slice().sort(function(a,b){
@@ -2030,24 +2035,28 @@ function renderCollection(){
   var comicsItems=nonCardItems.filter(function(c){return c.category==='Cómics';});
   var musicaItems=nonCardItems.filter(function(c){return c.category==='Música';});
 
-  if(colCatFilter==='all'&&colEstadoFilter==='all'){
-    if(figureItems.length||customFolders.some(function(f){return f.category==='Figuras';})){
-      renderCustomFolders(figureItems,'Figuras','#22c55e',content);
-    }
-    if(gamingItems.length||customFolders.some(function(f){return f.category==='Gaming';})){
-      renderCustomFolders(gamingItems,'Gaming','#06b6d4',content);
-    }
-    if(comicsItems.length||customFolders.some(function(f){return f.category==='Cómics';})){
-      renderCustomFolders(comicsItems,'Cómics','#f97316',content);
-    }
-    if(musicaItems.length||customFolders.some(function(f){return f.category==='Música';})){
-      renderCustomFolders(musicaItems,'Música','#ec4899',content);
-    }
-    if(otherItems.length||customFolders.some(function(f){return f.category==='Otros';})){
-      renderCustomFolders(otherItems,'Otros','#94a3b8',content);
-      displayed=[];
+  var catRenderMap = [
+    {key:'Figuras', items:figureItems, color:'#22c55e'},
+    {key:'Gaming',  items:gamingItems, color:'#06b6d4'},
+    {key:'Cómics',  items:comicsItems, color:'#f97316'},
+    {key:'Música',  items:musicaItems, color:'#ec4899'},
+    {key:'Otros',   items:otherItems,  color:'#94a3b8'}
+  ];
+  if(colCatFilter==='all'){
+    catRenderMap.forEach(function(m){
+      if(m.items.length||customFolders.some(function(f){return f.category===m.key;})){
+        renderCustomFolders(m.items,m.key,m.color,content);
+        if(m.key==='Otros') displayed=[];
+      }
+    });
+  } else {
+    var found=catRenderMap.find(function(m){return m.key===colCatFilter;});
+    if(found){
+      renderCustomFolders(found.items,found.key,found.color,content);
+      displayed=found.items;
     }
   }
+
 
   var hasFavsNonCard=otherItems.some(function(c){return c.favorite;});
   var showFavSection=colCatFilter==="all"&&hasFavsNonCard&&colViewMode==="grid"&&colEstadoFilter==="all"&&!hasCards&&!figureItems.length&&!gamingItems.length;
