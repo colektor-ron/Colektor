@@ -1303,7 +1303,6 @@ input[type="file"]{display:none;}
   <div class="scanner-body">
     <div class="scanner-tabs">
       <div class="scanner-tab active" id="scanTab-search" onclick="setScannerTab('search')">Buscar carta</div>
-      <div class="scanner-tab" id="scanTab-sets" onclick="setScannerTab('sets')">Sets completos</div>
     </div>
     <div id="scannerSearchView">
       <div>
@@ -2010,123 +2009,23 @@ function renderCollection(){
       });
     }
 
-    // Render each set as a folder
-    setKeys.forEach(function(setKey){
-      var setCards=setGroups[setKey];
-
-      // Determine game label for badge
-      var gameClass='folder-game-other';
-      var gameName='';
-      if(setCards[0]){
-        var cat=setCards[0].category||'';
-        if(cat==='Pokémon TCG'){gameClass='folder-game-pokemon';gameName='Pokémon';}
-        else if(cat==='Magic: The Gathering'){gameClass='folder-game-magic';gameName='Magic';}
-        else if(cat==="Yu-Gi-Oh!"){gameClass='folder-game-yugioh';gameName='Yu-Gi-Oh';}
-      }
-
-      // Cover: set logo if available, else 2x2 card grid
-      var setLogoUrl=setCards[0]&&setCards[0].setLogo?setCards[0].setLogo:null;
-      var coverHTML='';
-      if(setLogoUrl){
-        // Show set logo centered
-        coverHTML='<img src="'+setLogoUrl+'" loading="lazy" style="grid-column:span 2;grid-row:span 2;object-fit:contain;width:100%;height:100%;padding:6px;background:#111;"/>';
-      } else {
-        var coverPhotos=[];
-        setCards.forEach(function(c){
-          if(coverPhotos.length<4&&c.photos&&c.photos.length) coverPhotos.push(c.photos[0]);
-        });
-        for(var ci=0;ci<4;ci++){
-          if(coverPhotos[ci]) coverHTML+='<img src="'+coverPhotos[ci]+'" loading="lazy"/>';
-          else coverHTML+='<div class="card-folder-cover-empty">'+IC.grid(10)+'</div>';
-        }
-      }
-
-      var folder=document.createElement('div');folder.className='card-folder';
-
-      // Header
-      var fHeader=document.createElement('div');fHeader.className='card-folder-header';
-      fHeader.innerHTML=
-        '<div class="card-folder-cover">'+coverHTML+'</div>'
-        +'<div class="card-folder-info">'
-        +'<div class="card-folder-name">'+setKey+'</div>'
-        +'<div class="card-folder-meta">'
-        +(gameName?'<span class="card-folder-game '+gameClass+'">'+gameName+'</span>':'')
-        +'<span>'+setCards.filter(function(c){return c.favorite;}).length+' fav</span>'
-        +'</div></div>'
-        +'<div class="card-folder-count">'+setCards.length+'</div>'
-        +'<div class="card-folder-arrow">›</div>';
-
-      // Body (hidden by default)
-      var fBody=document.createElement('div');fBody.className='card-folder-body';
-
-      // Sort bar inside folder
-      var fSortBar=document.createElement('div');
-      fSortBar.style.cssText='display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;scrollbar-width:none;';
-      [['name','Nombre'],['rarity','Rareza'],['value','Valor']].forEach(function(s){
-        var b=document.createElement('button');b.className='btn-card-sort'+(cardColSort===s[0]?' active':'');
-        b.textContent=s[1];
-        b.onclick=function(e){e.stopPropagation();cardColSort=s[0];renderCollection();};
-        fSortBar.appendChild(b);
-      });
-      fBody.appendChild(fSortBar);
-      // Cards rendered by rebuildFolderCards
-      (function(sk,sc){rebuildFolderCards(sk,sc,fBody,false);})(setKey,setCards);
-
-      // Action buttons (shown when open)
-      var fActions=document.createElement('div');fActions.className='folder-actions';
-      fActions.style.display='none';
-
-      var btnSelect=document.createElement('button');btnSelect.className='btn-folder-select';
-      btnSelect.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/></svg> Seleccionar';
-
-      var btnDelAll=document.createElement('button');btnDelAll.className='btn-folder-delete';
-      btnDelAll.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg> Borrar set';
-
-      (function(sk, sc){
-        btnDelAll.onclick=function(e){
-          e.stopPropagation();
-          if(!confirm('¿Eliminar las '+sc.length+' cartas de "'+sk+'"?'))return;
-          collection=collection.filter(function(c){
-            var cSetKey=c.set&&c.set.trim()?c.set.trim():c.category||'Sin set';
-            return cSetKey!==sk;
-          });
-          save();updateBadges();renderCollection();
-          toast('Set eliminado','#ef4444');
-        };
-        btnSelect.onclick=function(e){
-          e.stopPropagation();
-          cardSelecting[sk]=!cardSelecting[sk];
-          if(!cardSelecting[sk])delete cardSelectionMode[sk];
-          else cardSelectionMode[sk]=new Set();
-          btnSelect.innerHTML=cardSelecting[sk]
-            ?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Listo'
-            :'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/></svg> Seleccionar';
-          // Rebuild cards with selection mode
-          rebuildFolderCards(sk,sc,fBody,cardSelecting[sk]);
-        };
-      })(setKey, setCards);
-
-      fActions.appendChild(btnSelect);
-      fActions.appendChild(btnDelAll);
-
-      // Toggle open/close
-      fHeader.onclick=function(){
-        var isOpen=folder.classList.toggle('open');
-        fActions.style.display=isOpen?'flex':'none';
-        if(!isOpen){
-          // Reset selection when closing
-          delete cardSelecting[setKey];
-          delete cardSelectionMode[setKey];
-        }
-      };
-
-      folder.appendChild(fHeader);
-      folder.appendChild(fActions);
-      folder.appendChild(fBody);
-      cardsSection.appendChild(folder);
+    // Render cards as a simple grid (no set folders)
+    sortedCards.forEach(function(item){
+      var cardDiv = document.createElement('div');
+      cardDiv.className = 'collection-card';
+      var imgHTML = item.photos&&item.photos[0]
+        ? '<div class="card-img"><img src="'+item.photos[0]+'" loading="lazy"></div>'
+        : '<div class="card-img card-img-empty"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.2"><rect x="2" y="3" width="14" height="18" rx="2"/><path d="M8 7h4M8 11h4M8 15h2"/></svg></div>';
+      cardDiv.innerHTML = imgHTML
+        + '<div class="card-info">'
+        + '<div class="card-name">'+item.name+'</div>'
+        + '<div class="card-meta">'+(item.set||item.category||'')+'</div>'
+        + '</div>';
+      cardDiv.onclick = function(){ openDetail(item); };
+      cardsSection.appendChild(cardDiv);
     });
     content.appendChild(cardsSection);
-    // Update displayed to only non-card items
+        // Update displayed to only non-card items
     displayed=nonCardItems;
   }
 
@@ -4078,22 +3977,12 @@ var selectedSetCards = {};
 var currentSetData = null;
 
 function setScannerTab(tab){
-  currentScanTab = tab;
+  currentScanTab = 'search';
   var searchView = document.getElementById('scannerSearchView');
   var setsView = document.getElementById('scannerSetsView');
-  var tabSearch = document.getElementById('scanTab-search');
-  var tabSets = document.getElementById('scanTab-sets');
-  if(tabSearch) tabSearch.classList.toggle('active', tab==='search');
-  if(tabSets) tabSets.classList.toggle('active', tab==='sets');
-  if(searchView) searchView.style.display = tab==='search' ? 'block' : 'none';
-  if(setsView){
-    setsView.style.display = tab==='sets' ? 'flex' : 'none';
-    setsView.style.flexDirection = 'column';
-    setsView.style.gap = '10px';
-  }
-  if(tab==='sets') renderSetsTab();
+  if(searchView) searchView.style.display='block';
+  if(setsView) setsView.style.display='none';
 }
-
 function renderSetsTab(){
   var view = document.getElementById('scannerSetsView');
   if(!view) return;
