@@ -1414,7 +1414,7 @@ const DOT=["#1B6DC0","#ef4444","#818cf8","#22c55e","#eab308","#06b6d4","#ec4899"
 const ESTADOS=["Nuevo","Abierto","En vitrina","Dañado"];
 const FIXED_CATS=["Cartas","Figuras","Gaming","Cómics","Música","Otros"];
 
-let pendientes=[],categories=[],collection=[],trades=[],ownedCards={};
+let pendientes=[],categories=[],collection=[],trades=[];
 let pStatusFilter="all",pCatFilter="all",colCatFilter="all",tradeFilter="all";
 let showAddP=false,showNewCat=false,expandedId=null;
 let uploadTargetId=null,colPhotoTargetId=null,editTagId=null;
@@ -1424,7 +1424,6 @@ async function load(){
   try{categories=(await IDB.get('categories'))||[];}catch(e){categories=[];}
   try{collection=(await IDB.get('collection'))||[];}catch(e){collection=[];}
   try{trades=(await IDB.get('trades'))||[];}catch(e){trades=[];}
-  try{ownedCards=(await IDB.get('ownedCards'))||{};}catch(e){ownedCards={};}
   // migrate old data if exists
   try{
     const oldFigs=await IDB.get('figures');
@@ -1444,7 +1443,6 @@ function save(){
   IDB.set('categories',categories).catch(()=>{});
   IDB.set('collection',collection).catch(()=>{});
   IDB.set('trades',trades).catch(()=>{});
-  IDB.set('ownedCards',ownedCards).catch(()=>{});
 }
 
 function fmt(n){if(!n&&n!==0)return'—';return"$"+Number(n).toLocaleString("es-CL");}
@@ -3819,7 +3817,7 @@ function listenForUpdates(){
 
 // ── CARD SCANNER ───────────────────────────────────────
 var currentGame = 'pokemon';
-var CARD_CATEGORIES = ['Cartas','Pokémon TCG','Magic: The Gathering','Yu-Gi-Oh!'];
+var CARD_CATEGORIES = ['Pokémon TCG','Magic: The Gathering','Yu-Gi-Oh!'];
 var cardColView = 'grid';
 var cardColSort = 'name';
 var cardSelectionMode = {}; // setKey -> Set of selected item ids
@@ -4142,19 +4140,10 @@ function renderSetsList(sets){
       ?'<div class="set-logo"><img src="'+set.logo+'" loading="lazy"/></div>'
       :'<div class="set-logo">'+IC.grid(22)+'</div>';
     var date = set.released?set.released.substring(0,4):'';
-    var setOwned = ownedCards[set.id]||{};
-    var ownedN = Object.keys(setOwned).length;
-    var progressHTML = ownedN>0
-      ? '<div style="margin-top:5px;background:#1e1e1e;border-radius:99px;height:3px;width:100%;"><div style="height:100%;background:#52B848;border-radius:99px;width:'+Math.round(ownedN/set.count*100)+'%;"></div></div>'
-      : '';
     item.innerHTML = logoHTML
       +'<div class="set-info"><div class="set-name">'+set.name+'</div>'
-      +'<div class="set-meta">'+['Pokémon TCG','Magic: The Gathering','Yu-Gi-Oh!'][['pokemon','magic','yugioh'].indexOf(set.game)]+(date?' · '+date:'')+'</div>'
-      +progressHTML+'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;">'
-      +'<div class="set-count">'+set.count+' cartas</div>'
-      +(ownedN>0?'<div style="font-size:10px;font-weight:700;color:#52B848;">'+ownedN+' ✓</div>':'')
-      +'</div>';
+      +'<div class="set-meta">'+['Pokémon TCG','Magic: The Gathering','Yu-Gi-Oh!'][['pokemon','magic','yugioh'].indexOf(set.game)]+(date?' · '+date:'')+'</div></div>'
+      +'<div class="set-count">'+set.count+' cartas</div>';
     item.onclick = function(){openSetCards(set);};
     list.appendChild(item);
   });
@@ -4211,115 +4200,68 @@ function renderSetCards(set, cards){
   view.innerHTML = '';
   selectedSetCards = {};
 
-  // ── Checklist mode (Pokédex style) ──
-  var setKey = set.id;
-  var owned = ownedCards[setKey] || {};
-  var ownedCount = Object.keys(owned).length;
-
-  // Header
+  var header = document.createElement('div');header.className='set-cards-view';
   var hRow = document.createElement('div');hRow.className='set-cards-header';
-  hRow.style.marginBottom='12px';
   var backBtn = document.createElement('button');backBtn.className='btn-back-sets';
   backBtn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Sets';
   backBtn.onclick = function(){var inp=document.getElementById('setsSearchInput');if(inp)inp.value='';renderSetsList(allSetsData);};
-  var titleWrap = document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;';
-  titleWrap.innerHTML='<div class="set-cards-title">'+set.name+'</div>';
-  hRow.appendChild(backBtn);hRow.appendChild(titleWrap);
-  view.appendChild(hRow);
+  var title = document.createElement('div');title.className='set-cards-title';title.textContent=set.name;
+  hRow.appendChild(backBtn);hRow.appendChild(title);
 
-  // Progress bar
-  var pct = cards.length ? Math.round(ownedCount/cards.length*100) : 0;
-  var progWrap = document.createElement('div');
-  progWrap.style.cssText='background:#2a2a2a;border-radius:12px;padding:12px 14px;margin-bottom:12px;';
-  progWrap.innerHTML='<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;">'
-    +'<span style="color:#94a3b8;">Progreso del set</span>'
-    +'<span id="checklistCount" style="color:#52B848;font-weight:700;">'+ownedCount+' / '+cards.length+' ('+pct+'%)</span>'
-    +'</div>'
-    +'<div style="background:#1e1e1e;border-radius:99px;height:6px;overflow:hidden;">'
-    +'<div id="checklistBar" style="height:100%;background:linear-gradient(90deg,#52B848,#22c55e);border-radius:99px;transition:width 0.3s;width:'+pct+'%;"></div>'
-    +'</div>';
-  view.appendChild(progWrap);
-
-  // Filter buttons
-  var filterRow = document.createElement('div');
-  filterRow.style.cssText='display:flex;gap:8px;margin-bottom:12px;';
-  var filterState = {mode:'all'};
-  ['all','owned','missing'].forEach(function(f){
-    var b=document.createElement('button');
-    b.style.cssText='padding:5px 12px;font-size:11px;font-weight:600;border-radius:99px;cursor:pointer;font-family:inherit;border:1px solid '+(f==='all'?'#52B848':'#3a3a3a')+';background:'+(f==='all'?'rgba(82,184,72,0.15)':'transparent')+';color:'+(f==='all'?'#52B848':'#64748b')+';';
-    b.textContent=f==='all'?'Todas':f==='owned'?'Tengo':'Falta';
-    b.onclick=function(){
-      filterState.mode=f;
-      filterRow.querySelectorAll('button').forEach(function(x){
-        x.style.borderColor='#3a3a3a';x.style.background='transparent';x.style.color='#64748b';
-      });
-      b.style.borderColor='#52B848';b.style.background='rgba(82,184,72,0.15)';b.style.color='#52B848';
-      rebuildChecklist();
-    };
-    filterRow.appendChild(b);
-  });
-  view.appendChild(filterRow);
-
-  // Cards grid container
-  var gridWrap = document.createElement('div');
-  gridWrap.id='checklistGrid';
-  view.appendChild(gridWrap);
-
-  function rebuildChecklist(){
-    var owned = ownedCards[setKey]||{};
-    var toShow = cards.filter(function(c){
-      if(filterState.mode==='owned') return !!owned[c.id];
-      if(filterState.mode==='missing') return !owned[c.id];
-      return true;
-    });
-    gridWrap.innerHTML='';
-    var grid=document.createElement('div');grid.className='set-cards-grid';
-    toShow.forEach(function(card){
-      var isOwned = !!owned[card.id];
-      var item=document.createElement('div');
-      item.className='set-card-item'+(isOwned?' selected':'');
-      item.style.cssText='position:relative;transition:all 0.15s;'+(isOwned?'opacity:1;':'opacity:0.45;');
-      if(card.image)item.innerHTML='<img src="'+card.image+'" loading="lazy"/>';
-      else item.innerHTML='<div style="aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:#111;">'+IC.grid(16)+'</div>';
-      item.innerHTML+='<div class="set-card-name">'+card.name+'</div>';
-      // Check badge
-      var chk=document.createElement('div');
-      chk.className='set-card-check';
-      chk.style.cssText='position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;'+(isOwned?'background:#52B848;border:none;':'background:rgba(0,0,0,0.4);border:1.5px solid rgba(255,255,255,0.2);')+';display:flex;align-items:center;justify-content:center;';
-      if(isOwned)chk.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-      item.appendChild(chk);
-      // Number badge
-      if(card.number){
-        var num=document.createElement('div');
-        num.style.cssText='position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.6);color:rgba(255,255,255,0.5);font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;';
-        num.textContent='#'+card.number;
-        item.appendChild(num);
-      }
-      item.onclick=function(){
-        if(!ownedCards[setKey])ownedCards[setKey]={};
-        if(ownedCards[setKey][card.id]){delete ownedCards[setKey][card.id];}
-        else{ownedCards[setKey][card.id]=true;}
-        IDB.set('ownedCards',ownedCards).catch(function(){});
-        // Update progress
-        var newOwned=Object.keys(ownedCards[setKey]||{}).length;
-        var newPct=cards.length?Math.round(newOwned/cards.length*100):0;
-        var countEl=document.getElementById('checklistCount');
-        var barEl=document.getElementById('checklistBar');
-        if(countEl)countEl.textContent=newOwned+' / '+cards.length+' ('+newPct+'%)';
-        if(barEl)barEl.style.width=newPct+'%';
-        rebuildChecklist();
-      };
-      grid.appendChild(item);
-    });
-    if(!toShow.length){
-      var emp=document.createElement('div');
-      emp.style.cssText='text-align:center;padding:40px;color:#555;font-size:13px;';
-      emp.textContent=filterState.mode==='owned'?'Aún no marcaste ninguna carta':'Ya tienes todas las cartas! 🎉';
-      grid.appendChild(emp);
+  var selRow = document.createElement('div');selRow.className='select-all-row';
+  var selAll = document.createElement('button');selAll.className='select-all-btn';selAll.textContent='Seleccionar todo';
+  var selCount = document.createElement('span');selCount.className='selected-count';selCount.id='selCount';selCount.textContent='';
+  selAll.onclick = function(){
+    var allSelected = Object.keys(selectedSetCards).length === cards.length;
+    if(allSelected){
+      selectedSetCards={};selAll.textContent='Seleccionar todo';
+    } else {
+      cards.forEach(function(c){selectedSetCards[c.id]=c;});
+      selAll.textContent='Deseleccionar todo';
     }
-    gridWrap.appendChild(grid);
+    document.querySelectorAll('.set-card-item').forEach(function(el){
+      el.classList.toggle('selected', !!selectedSetCards[el.dataset.id]);
+    });
+    updateSelCount();
+  };
+  selRow.appendChild(selAll);selRow.appendChild(selCount);
+
+  var grid = document.createElement('div');grid.className='set-cards-grid';
+  cards.forEach(function(card){
+    var item = document.createElement('div');item.className='set-card-item';item.dataset.id=card.id;
+    var check = document.createElement('div');check.className='set-card-check';
+    check.innerHTML='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    if(card.image){item.innerHTML='<img src="'+card.image+'" loading="lazy"/>';}
+    else{item.innerHTML='<div style="aspect-ratio:2/3;display:flex;align-items:center;justify-content:center;background:#111;">'+IC.grid(16)+'</div>';}
+    item.innerHTML+='<div class="set-card-name">'+card.name+'</div>';
+    item.appendChild(check);
+    item.onclick = function(){
+      if(selectedSetCards[card.id]){delete selectedSetCards[card.id];}
+      else{selectedSetCards[card.id]=card;}
+      item.classList.toggle('selected', !!selectedSetCards[card.id]);
+      updateSelCount();
+    };
+    grid.appendChild(item);
+  });
+
+  function updateSelCount(){
+    var n = Object.keys(selectedSetCards).length;
+    var el=document.getElementById('selCount');
+    if(el)el.textContent = n>0?n+' seleccionadas':'';
+    var addSelBtn=document.getElementById('btnAddSelected');
+    if(addSelBtn)addSelBtn.textContent='Agregar '+n+' cartas seleccionadas';
+    addSelBtn&&(addSelBtn.style.display=n>0?'flex':'none');
   }
-  rebuildChecklist();
+
+  var btnAll = document.createElement('button');btnAll.className='btn-add-all';
+  btnAll.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Agregar set completo ('+cards.length+' cartas)';
+  btnAll.onclick = function(){addCardsFromSet(cards);};
+
+  var btnSel = document.createElement('button');btnSel.className='btn-add-selected';btnSel.id='btnAddSelected';
+  btnSel.style.display='none';btnSel.textContent='Agregar cartas seleccionadas';
+  btnSel.onclick = function(){addCardsFromSet(Object.values(selectedSetCards));};
+
+  view.appendChild(hRow);view.appendChild(selRow);view.appendChild(grid);view.appendChild(btnAll);view.appendChild(btnSel);
 }
 
 function addCardsFromSet(cards){
