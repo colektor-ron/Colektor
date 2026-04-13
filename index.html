@@ -1430,7 +1430,6 @@ async function load(){
   try{collection=(await IDB.get('collection'))||[];}catch(e){collection=[];}
   try{trades=(await IDB.get('trades'))||[];}catch(e){trades=[];}
   try{ownedCards=(await IDB.get('ownedCards'))||{};}catch(e){ownedCards={};}
-  tcgSets = (await IDB.get('tcgSets'))||[];
   // migrate old data if exists
   try{
     const oldFigs=await IDB.get('figures');
@@ -1451,7 +1450,6 @@ function save(){
   IDB.set('collection',collection).catch(()=>{});
   IDB.set('trades',trades).catch(()=>{});
   IDB.set('ownedCards',ownedCards).catch(()=>{});
-  IDB.set('tcgSets',tcgSets).catch(()=>{});
 }
 
 function fmt(n){if(!n&&n!==0)return'—';return"$"+Number(n).toLocaleString("es-CL");}
@@ -1884,116 +1882,6 @@ function makeColCard(item){
   return card;
 }
 
-
-function buildColSetBody(set, body){
-  body.innerHTML = '';
-  body.style.cssText = 'padding:0 10px 12px;';
-  var owned = ownedCards[set.id]||{};
-  // Filter chips
-  var filterVal = body._filter || 'all';
-  var fRow = document.createElement('div');
-  fRow.style.cssText = 'display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px;';
-  [['all','Todas'],['owned','Tengo'],['missing','Falta']].forEach(function(o){
-    var b = document.createElement('button');
-    b.style.cssText = 'padding:5px 12px;border-radius:99px;border:1px solid '+(filterVal===o[0]?'#818cf8':'#2a2a2a')+';background:'+(filterVal===o[0]?'rgba(129,140,248,.12)':'#1c1c1e')+';color:'+(filterVal===o[0]?'#818cf8':'#555')+';font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit;';
-    b.textContent = o[1];
-    b.onclick = function(){ body._filter=o[0]; buildColSetBody(set,body); };
-    fRow.appendChild(b);
-  });
-  body.appendChild(fRow);
-  // Card grid
-  var grid = document.createElement('div');
-  grid.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:6px;';
-  var shown = set.cards.filter(function(card){
-    if(filterVal==='owned') return owned[card.id];
-    if(filterVal==='missing') return !owned[card.id];
-    return true;
-  });
-  if(!shown.length){
-    var empty = document.createElement('div');
-    empty.style.cssText = 'grid-column:span 3;text-align:center;padding:20px;color:#333;font-size:12px;';
-    empty.textContent = filterVal==='owned' ? 'Marca cartas con long press' : 'Sin cartas';
-    grid.appendChild(empty);
-  } else {
-    shown.forEach(function(card){
-      var div = document.createElement('div');
-      div.style.cssText = 'border-radius:10px;overflow:hidden;background:#181818;cursor:pointer;position:relative;aspect-ratio:0.72;';
-      if(card.image){
-        div.innerHTML = '<img src="'+card.image+'" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">';
-      } else {
-        div.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#1a1a1a;color:#333;font-size:22px;">🃏</div>';
-      }
-      div.innerHTML += '<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:12px 5px 4px;font-size:9px;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+card.name+'</div>';
-      div.innerHTML += '<div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);border-radius:4px;padding:1px 5px;font-size:9px;color:#aaa;font-weight:700;">#'+( card.number||'?')+'</div>';
-      if(owned[card.id]){
-        div.innerHTML += '<div style="position:absolute;top:4px;right:4px;width:18px;height:18px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.4);"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>';
-      }
-      // Long press to toggle owned
-      var pt;
-      div.addEventListener('touchstart',function(){pt=setTimeout(function(){ toggleColOwned(set,card.id,body); },500);},{passive:true});
-      div.addEventListener('touchend',function(){clearTimeout(pt);});
-      div.addEventListener('touchmove',function(){clearTimeout(pt);},{passive:true});
-      div.addEventListener('contextmenu',function(e){e.preventDefault();toggleColOwned(set,card.id,body);});
-      grid.appendChild(div);
-    });
-  }
-  body.appendChild(grid);
-  // Remove set button
-  var delBtn = document.createElement('button');
-  delBtn.style.cssText = 'margin-top:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#ef4444;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;';
-  delBtn.textContent = 'Eliminar set de Colección';
-  delBtn.onclick = function(){
-    if(!confirm('Eliminar "'+set.name+'" de tu colección?')) return;
-    tcgSets = tcgSets.filter(function(s){return s.id!==set.id;});
-    save(); updateBadges(); renderCollection(); toast('Set eliminado','#ef4444');
-  };
-  body.appendChild(delBtn);
-}
-
-function toggleColOwned(set, cardId, body){
-  if(!ownedCards[set.id]) ownedCards[set.id]={};
-  if(ownedCards[set.id][cardId]){ delete ownedCards[set.id][cardId]; toast('Desmarcada','#555'); }
-  else { ownedCards[set.id][cardId]=true; toast('Marcada como propia ✓','#22c55e'); }
-  IDB.set('ownedCards',ownedCards).catch(()=>{});
-  // Rebuild body
-  body._built = false;
-  buildColSetBody(set, body);
-  // Update progress in folder header
-  var folder = body.closest('.set-folder-col');
-  if(folder){
-    var owned = ownedCards[set.id]||{};
-    var ownedN = Object.keys(owned).length;
-    var total = set.cards.length;
-    var pct = total ? Math.round(ownedN/total*100) : 0;
-    var infoEl = folder.querySelector('[style*="flex:1"]');
-    if(infoEl) infoEl.innerHTML = '<div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+set.name+'</div>'
-      +'<div style="font-size:11px;color:#555;margin-top:2px;display:flex;align-items:center;gap:6px;"><span style="color:#818cf8;font-weight:700;">'+ownedN+'/'+total+'</span> cartas · '+pct+'%</div>';
-    var fill = folder.querySelector('[style*="background:linear-gradient(90deg,#818cf8"]');
-    if(fill) fill.style.width = pct+'%';
-  }
-}
-
-function addSetToCollection(set, cards){
-  // Remove if already exists (replace)
-  tcgSets = tcgSets.filter(function(s){return s.id!==set.id;});
-  tcgSets.push({
-    id: set.id,
-    name: set.name,
-    game: set.game,
-    logo: set.logo||null,
-    count: set.count||cards.length,
-    released: set.released||'',
-    cards: cards.map(function(card){
-      return {id:card.id,name:card.name,number:card.number||'',
-        rarity:card.rarity||'',image:card.image||null,
-        priceUSD:card.priceUSD||0};
-    })
-  });
-  save();
-  updateBadges();
-  toast(set.name+' agregado a tu Colección 🎉','#818cf8');
-}
-
 function renderCollection(){
   // Update stats
   var total=collection.length;
@@ -2059,67 +1947,6 @@ function renderCollection(){
       +'<div class="empty-state-title">Sin resultados</div>'
       +'<div class="empty-state-sub">No hay ítems con este filtro</div>';
     content.appendChild(es2);return;
-  }
-
-  // ── TCG Sets section (saved full sets) ──
-  var filteredSets = tcgSets.filter(function(s){
-    return !q || s.name.toLowerCase().includes(q.toLowerCase());
-  });
-  if(filteredSets.length && (colCatFilter==='all'||colCatFilter==='Cartas'||colCatFilter==='')) {
-    var setsSection = document.createElement('div');
-    setsSection.className = 'col-section';
-    var setsHeader = document.createElement('div');
-    setsHeader.className = 'col-section-header';
-    setsHeader.innerHTML = '<div class="col-section-title"><span class="cat-dot" style="background:#818cf8"></span>Sets TCG</div>'
-      +'<span style="font-size:11px;color:#555;font-weight:600;">'+filteredSets.length+' sets</span>';
-    setsSection.appendChild(setsHeader);
-
-    filteredSets.forEach(function(set){
-      var owned = ownedCards[set.id]||{};
-      var ownedN = Object.keys(owned).length;
-      var total = set.cards.length;
-      var pct = total ? Math.round(ownedN/total*100) : 0;
-
-      var folder = document.createElement('div');
-      folder.className = 'set-folder-col';
-      folder.style.cssText = 'background:#1c1c1e;border:1px solid #2a2a2a;border-radius:14px;margin-bottom:10px;overflow:hidden;';
-
-      var hd = document.createElement('div');
-      hd.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px;cursor:pointer;';
-      var logo = document.createElement('div');
-      logo.style.cssText = 'width:60px;height:42px;border-radius:8px;background:#181818;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;';
-      if(set.logo) logo.innerHTML='<img src="'+set.logo+'" loading="lazy" style="max-width:100%;max-height:100%;object-fit:contain;">';
-      var info = document.createElement('div');
-      info.style.cssText = 'flex:1;min-width:0;';
-      info.innerHTML = '<div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+set.name+'</div>'
-        +'<div style="font-size:11px;color:#555;margin-top:2px;display:flex;align-items:center;gap:6px;">'
-        +'<span style="color:#818cf8;font-weight:700;">'+ownedN+'/'+total+'</span>'
-        +' cartas · '+pct+'%</div>';
-      var prog = document.createElement('div');
-      prog.style.cssText = 'width:44px;text-align:right;flex-shrink:0;';
-      prog.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>';
-      hd.appendChild(logo); hd.appendChild(info); hd.appendChild(prog);
-
-      var progBar = document.createElement('div');
-      progBar.style.cssText = 'margin:0 12px 10px;background:#222;border-radius:99px;height:3px;overflow:hidden;';
-      progBar.innerHTML = '<div style="height:100%;background:linear-gradient(90deg,#818cf8,#6366f1);border-radius:99px;width:'+pct+'%;transition:width .4s;"></div>';
-
-      var body = document.createElement('div');
-      body.style.display = 'none';
-
-      hd.onclick = function(){
-        var isOpen = body.style.display !== 'none';
-        body.style.display = isOpen ? 'none' : 'block';
-        prog.querySelector('svg').style.transform = isOpen ? '' : 'rotate(90deg)';
-        if(!isOpen && !body._built) { buildColSetBody(set, body); body._built=true; }
-      };
-
-      folder.appendChild(hd);
-      folder.appendChild(progBar);
-      folder.appendChild(body);
-      setsSection.appendChild(folder);
-    });
-    content.appendChild(setsSection);
   }
 
   // ── Cards section (TCG items grouped separately)
@@ -4472,20 +4299,6 @@ function renderSetCards(set, cards){
   var titleWrap = document.createElement('div');titleWrap.style.cssText='flex:1;min-width:0;';
   titleWrap.innerHTML='<div class="set-cards-title">'+set.name+'</div>';
   hRow.appendChild(backBtn);hRow.appendChild(titleWrap);
-  // "Add to Collection" button
-  var alreadyInCol = tcgSets.some(function(s){return s.id===set.id;});
-  var addColBtn = document.createElement('button');
-  addColBtn.style.cssText='background:'+(alreadyInCol?'rgba(34,197,94,.12)':'rgba(99,102,241,.12)')+';border:1px solid '+(alreadyInCol?'rgba(34,197,94,.3)':'rgba(99,102,241,.3)')+';color:'+(alreadyInCol?'#22c55e':'#818cf8')+';border-radius:10px;padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;flex-shrink:0;';
-  addColBtn.textContent = alreadyInCol ? '✓ En Colección' : '+ Mi Colección';
-  addColBtn.onclick = function(){
-    if(alreadyInCol){toast('Ya está en tu colección','#22c55e');return;}
-    addSetToCollection(set, cards);
-    addColBtn.style.background='rgba(34,197,94,.12)';
-    addColBtn.style.borderColor='rgba(34,197,94,.3)';
-    addColBtn.style.color='#22c55e';
-    addColBtn.textContent='✓ En Colección';
-  };
-  hRow.appendChild(addColBtn);
   view.appendChild(hRow);
 
   // Progress bar
