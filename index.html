@@ -1761,9 +1761,12 @@ function renderPendientes(){
       +'<div class="add-row"><button class="btn-primary" onclick="addItem()">Agregar</button>'
       +'<button class="btn-secondary" onclick="showAddP=false;renderPendientes()">Cancelar</button></div></div>';
   }else{
-    addSec.innerHTML='<div style="display:flex;gap:8px;">'
-      +'<button class="btn-open-add" style="flex:1;" onclick="showAddP=true;renderPendientes()">'+IC.plus(18)+' Agregar ítem</button>'
-      +'<button class="btn-open-add" style="flex:0;padding:12px 14px;border-color:#818cf8;color:#818cf8;" onclick="openScanner()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h.01M12 8h.01M17 8h.01M7 11h.01M12 11h.01M17 11h.01"/></svg></button>'
+    addSec.innerHTML='<div style="display:flex;flex-direction:column;gap:8px;">'
+      +'<button class="btn-open-add" style="width:100%;" onclick="showAddP=true;renderPendientes()">'+IC.plus(18)+' Agregar ítem</button>'
+      +'<div style="display:flex;gap:8px;">'
+      +'<button class="btn-open-add" style="flex:1;background:rgba(129,140,248,0.1);border-color:#818cf8;color:#818cf8;" onclick="openScanner()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h.01M12 8h.01M17 8h.01M7 11h.01M12 11h.01M17 11h.01"/></svg> Buscar carta</button>'
+      +'<button style="background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.3);color:#ec4899;border-radius:10px;width:44px;height:44px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="openMusicScanner()" title="Buscar música"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></button>'
+      +'</div>'
       +'</div>';
   }
   updateBadges();
@@ -1948,9 +1951,9 @@ function renderCollection(){
   // ── Cards section (TCG items grouped separately)
   var cardItems=displayed.filter(function(c){return CARD_CATEGORIES.includes(c.category);});
   var nonCardItems=displayed.filter(function(c){return !CARD_CATEGORIES.includes(c.category);});
-  var hasCards=cardItems.length>0&&colCatFilter==='all'&&colEstadoFilter==='all';
+  var hasCards=cardItems.length>0;
 
-  if(hasCards){
+  if(hasCards&&(colCatFilter==='all'||colCatFilter==='Cartas')){
     var cardsSection=document.createElement('div');cardsSection.className='cards-section';
     // Header
     var csHeader=document.createElement('div');csHeader.className='cards-section-header';
