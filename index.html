@@ -1301,9 +1301,6 @@ input[type="file"]{display:none;}
     <button class="scanner-close" onclick="closeScanner()">Cerrar</button>
   </div>
   <div class="scanner-body">
-    <div class="scanner-tabs">
-      <div class="scanner-tab active" id="scanTab-search" onclick="setScannerTab('search')">Buscar carta</div>
-    </div>
     <div id="scannerSearchView">
       <div>
         <div class="scanner-game-label">Juego</div>
@@ -3840,7 +3837,7 @@ async function searchCards(){
 }
 
 async function searchPokemon(query){
-  var url='https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(query)+'"&pageSize=12&orderBy=-set.releaseDate';
+  var url='https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(query)+'"&pageSize=250&orderBy=-set.releaseDate';
   var r=await fetch(url);var d=await r.json();
   return (d.data||[]).map(function(c){
     var price=c.tcgplayer&&c.tcgplayer.prices?
@@ -3863,7 +3860,7 @@ async function searchPokemon(query){
 async function searchMagic(query){
   var url='https://api.scryfall.com/cards/search?q='+encodeURIComponent(query)+'&unique=prints&order=released&dir=desc';
   var r=await fetch(url);var d=await r.json();
-  return ((d.data||[]).slice(0,12)).map(function(c){
+  return ((d.data||[])).map(function(c){
     var price=parseFloat(c.prices&&c.prices.usd?c.prices.usd:0)||0;
     return{
       id:c.id,name:c.name,
@@ -3879,9 +3876,9 @@ async function searchMagic(query){
 }
 
 async function searchYugioh(query){
-  var url='https://db.ygoprodeck.com/api/v7/cardinfo.php?fname='+encodeURIComponent(query)+'&num=12&offset=0';
+  var url='https://db.ygoprodeck.com/api/v7/cardinfo.php?fname='+encodeURIComponent(query)+'';
   var r=await fetch(url);var d=await r.json();
-  return ((d.data||[]).slice(0,12)).map(function(c){
+  return ((d.data||[])).map(function(c){
     var price=c.card_prices&&c.card_prices[0]?parseFloat(c.card_prices[0].tcgplayer_price||0):0;
     return{
       id:c.id,name:c.name,
