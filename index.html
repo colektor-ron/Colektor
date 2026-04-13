@@ -5058,7 +5058,11 @@ function applyProfile(){
 function applyThemes(){}
 function checkOnboarding(){
   try{
-    if(!profile||!profile.name){
+    // Only show onboarding if truly first visit (no data at all)
+    var seen = localStorage.getItem('colektor_onboarding_done');
+    if(seen) return;
+    if(collection.length > 0 || pendientes.length > 0) return;
+    if(!profile || !profile.name){
       var ob=document.getElementById("onboarding");
       if(ob) ob.classList.add("open");
     }
