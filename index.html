@@ -4285,6 +4285,7 @@ function addCardsFromSet(cards){
 var customFolders = []; // [{id, name, category, cover, itemIds, addedAt}]
 var editingFolderId = null;
 var folderCoverTemp = null;
+var pendingFolderCat = 'Figuras';
 
 async function loadCustomFolders(){
   try{var f=await IDB.get('customFolders');if(f)customFolders=f;}catch(e){}
@@ -4294,6 +4295,7 @@ function saveCustomFolders(){IDB.set('customFolders',customFolders).catch(functi
 function openNewFolderModal(cat){
   editingFolderId = null;
   folderCoverTemp = null;
+  pendingFolderCat = cat || 'Figuras';
   document.getElementById('folderModalTitle').textContent = 'Nueva carpeta';
   document.getElementById('folderNameInput').value = '';
   document.getElementById('folderCoverPreview').style.display='none';
@@ -4336,7 +4338,7 @@ function handleFolderCover(e){
 
 function saveCustomFolder(){
   var name=document.getElementById('folderNameInput').value.trim();
-  var cat=document.getElementById('folderCatSelect').value;
+  var cat=editingFolderId ? document.getElementById('folderCatSelect').value : pendingFolderCat;
   if(!name){toast('Escribe un nombre','#f59e0b');return;}
   if(editingFolderId){
     customFolders=customFolders.map(function(f){
