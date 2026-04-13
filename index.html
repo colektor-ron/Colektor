@@ -1763,20 +1763,8 @@ function removeTag(id,tag){
 // ══════════════════════════════════════════════════════
 // RENDER PENDIENTES
 // ══════════════════════════════════════════════════════
+
 function renderPendientes(){
-  try {
-    _renderPendientes();
-  } catch(err) {
-    var dbg = document.getElementById('pItemList');
-    if(dbg){
-      var ediv = document.createElement('div');
-      ediv.style.cssText = 'color:#ef4444;padding:20px;font-size:13px;background:#1a0000;border-radius:10px;';
-      ediv.textContent = 'ERROR: ' + err.message;
-      dbg.appendChild(ediv);
-    }
-  }
-}
-function _renderPendientes(){
   var acquired=pendientes.filter(function(f){return f.acquired;});
   var totalAll=pendientes.reduce(function(s,f){return s+(f.price||0);},0);
   var totalPaid=acquired.reduce(function(s,f){return s+(f.price||0);},0);
