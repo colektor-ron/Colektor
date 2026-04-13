@@ -1914,6 +1914,7 @@ function renderCollection(){
 
   var content=document.getElementById("colContent");content.innerHTML="";
   renderDailySection();
+  renderColAddSection();
   var hint=document.getElementById("colHint");
   if(!collection.length){
     hint.textContent='';
