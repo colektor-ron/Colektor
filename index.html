@@ -1960,9 +1960,9 @@ function renderCollection(){
     // View toggle
     csHeader.appendChild(csTitle);
     // Add folder button like other sections
-    var csBtnFolder=document.createElement('button');csBtnFolder.className='btn-add-folder';
-    csBtnFolder.innerHTML='+ Carpeta';
-    csBtnFolder.onclick=function(e){e.stopPropagation();openAddFolderModal('Cartas');};
+    var csBtnFolder=document.createElement('button');csBtnFolder.className='btn-new-folder';
+    csBtnFolder.innerHTML='<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Carpeta';
+    csBtnFolder.onclick=function(e){e.stopPropagation();openNewFolderModal('Cartas');};
     csHeader.appendChild(csCount);
     csHeader.appendChild(csBtnFolder);
     cardsSection.appendChild(csHeader);
@@ -2058,39 +2058,8 @@ function renderCollection(){
   }
 
 
-  var hasFavsNonCard=otherItems.some(function(c){return c.favorite;});
-  var showFavSection=colCatFilter==="all"&&hasFavsNonCard&&colViewMode==="grid"&&colEstadoFilter==="all"&&!hasCards&&!figureItems.length&&!gamingItems.length;
-  if(!displayed.length&&!hasCards&&!figureItems.length&&!gamingItems.length){hint.textContent='Sin ítems aquí';return;}
-  // ── Otros section (remaining non-card non-figure items)
-  if(otherItems.length&&colCatFilter==='all'&&colEstadoFilter==='all'&&figureItems.length>0){
-    var otrosLabel=document.createElement('div');
-    otrosLabel.className='section-label muted';
-    otrosLabel.textContent='Otros';
-    content.appendChild(otrosLabel);
-  }
-
-  if(showFavSection){
-    var favs=displayed.filter(function(c){return c.favorite;});
-    var rest=displayed.filter(function(c){return !c.favorite;});
-    if(favs.length){
-      var favLbl=document.createElement("div");favLbl.className="section-label gold";
-      favLbl.innerHTML=IC.star(13,"#f59e0b","#f59e0b")+" Favoritos";content.appendChild(favLbl);
-      var fg=document.createElement("div");fg.className="col-grid";
-      favs.forEach(function(i){fg.appendChild(makeColCard(i));});content.appendChild(fg);
-    }
-    if(rest.length){
-      var rl=document.createElement("div");rl.className="section-label muted";rl.textContent="Colección completa";content.appendChild(rl);
-      var rg=document.createElement("div");rg.className="col-grid";
-      rest.forEach(function(i){rg.appendChild(makeColCard(i));});content.appendChild(rg);
-    }
-  }else{
-    if(colViewMode==="list"){
-      var lv=document.createElement("div");lv.className="col-list";
-      displayed.forEach(function(i){lv.appendChild(makeListCard(i));});content.appendChild(lv);
-    }else{
-      var g=document.createElement("div");g.className="col-grid";
-      displayed.forEach(function(i){g.appendChild(makeColCard(i));});content.appendChild(g);
-    }
+  if(!displayed.length&&!hasCards&&!figureItems.length&&!gamingItems.length&&!comicsItems.length&&!musicaItems.length){
+    hint.textContent='Sin ítems aquí';
   }
 }
 
