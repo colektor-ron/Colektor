@@ -5040,6 +5040,31 @@ function toggleOwned(cardId){
 loadOwnedCards();
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
+// ── PROFILE & THEMES (restored stubs) ──
+var profile = profile || {name:"",handle:"",bio:"",avatar:null};
+
+async function loadProfile(){
+  try{ var d=await IDB.get("profile"); if(d) profile=d; }catch(e){}
+}
+async function loadThemes(){
+  try{ var d=await IDB.get("themes"); }catch(e){}
+}
+function applyProfile(){
+  try{
+    var el=document.getElementById("headerGreeting");
+    if(el) el.textContent = profile.name ? "Hola, "+profile.name+" !" : "";
+  }catch(e){}
+}
+function applyThemes(){}
+function checkOnboarding(){
+  try{
+    if(!profile||!profile.name){
+      var ob=document.getElementById("onboarding");
+      if(ob) ob.classList.add("open");
+    }
+  }catch(e){}
+}
+
 async function init(){checkShareParam();await load();await loadCustomFolders();await loadProfile();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
 </script>
