@@ -812,6 +812,10 @@ input[type="file"]{display:none;}
 
 /* SVG ICONS HELPERS */
 .ico{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+.cat-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.cat-pick-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:12px;border:1px solid #2a2a2a;background:#1c1c1e;color:#555;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;transition:all 0.15s;}
+.cat-pick-btn.active{border-color:var(--cat-color);color:var(--cat-color);background:rgba(255,255,255,0.04);}
 </style>
 </head>
 <body>
@@ -1343,11 +1347,11 @@ input[type="file"]{display:none;}
     </div>
     <input type="text" class="folder-name-input" id="folderNameInput" placeholder="Nombre de la carpeta..."/>
     <select class="folder-cat-select" id="folderCatSelect">
-      <option value="Figuras">🏆 Figuras</option>
-      <option value="Gaming">🎮 Gaming</option>
-      <option value="Cómics">📚 Cómics</option>
-      <option value="Música">🎵 Música</option>
-      <option value="Otros">📦 Otros</option>
+      <option value="Figuras">Figuras</option>
+      <option value="Gaming">Gaming</option>
+      <option value="Cómics">Cómics</option>
+      <option value="Música">Música</option>
+      <option value="Otros">Otros</option>
     </select>
     <div class="folder-create-actions">
       <button class="btn-folder-create" onclick="saveCustomFolder()">Guardar carpeta</button>
@@ -4850,6 +4854,14 @@ function renderFolderInnerPicker(){
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
+
+
+function pickCat(btn){
+  var picker = btn.closest('.cat-picker');
+  if(!picker) return;
+  picker.querySelectorAll('.cat-pick-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+}
 
 function catIcon(cat,size){
   var s='width="'+(size||18)+'" height="'+(size||18)+'"';
