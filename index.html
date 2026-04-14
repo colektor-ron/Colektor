@@ -3863,7 +3863,7 @@ async function searchPokemon(query){
 }
 
 async function searchDigimon(query){
-  var url='https://digimoncard.io/api-public/search.php?n='+encodeURIComponent(query)+'&series=Digimon+Card+Game&sort=name&sortdirection=asc&num=100';
+  var url='https://digimoncard.io/api-public/search?n='+encodeURIComponent(query)+'&series=Digimon+Card+Game&sort=name&sortdirection=asc&num=100';
   var r=await fetch(url);
   if(!r.ok) throw new Error('Digimon API error');
   var d=await r.json();
