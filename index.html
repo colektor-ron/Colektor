@@ -1426,25 +1426,8 @@ input[type="file"]{display:none;}
     <button class="scanner-close" onclick="closeMusicScanner()">Cerrar</button>
   </div>
   <div class="scanner-body">
-    <div>
-      <div class="scanner-game-label">Formato</div>
-      <div class="music-format-selector">
-        <div class="music-format-btn active" id="fmtBtn-vinyl" onclick="setMusicFormat('vinyl')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:3px;display:block;margin:0 auto 3px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6" stroke-dasharray="2 3"/></svg>
-          Vinilo
-        </div>
-        <div class="music-format-btn" id="fmtBtn-cd" onclick="setMusicFormat('cd')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:3px;display:block;margin:0 auto 3px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg>
-          CD
-        </div>
-        <div class="music-format-btn" id="fmtBtn-cassette" onclick="setMusicFormat('cassette')">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:3px;display:block;margin:0 auto 3px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
-          Cassette
-        </div>
-      </div>
-    </div>
     <div class="scanner-search-wrap">
-      <input class="scanner-search" id="musicSearch" placeholder="Artista, álbum o canción..." onkeydown="if(event.key==='Enter')searchMusic()" style="height:48px;"/>
+      <input class="scanner-search" id="musicSearch" placeholder="Artista o nombre del disco..." onkeydown="if(event.key==='Enter')searchMusic()" style="height:48px;"/>
       <button class="scanner-search-btn" onclick="searchMusic()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
@@ -5064,31 +5047,34 @@ function renderMusicResults(albums){
     results.innerHTML = '<div class="scanner-empty">Sin resultados. Prueba con otro nombre.</div>';
     return;
   }
+
+  // Deduplicate by title+artist
+  var seen = {};
+  var unique = albums.filter(function(a){
+    var key = (a.collectionName||'').toLowerCase().trim() + '|' + (a.artistName||'').toLowerCase().trim();
+    if(seen[key]) return false;
+    seen[key] = true;
+    return true;
+  });
+
   var count = document.createElement('div');
-  count.style.cssText = 'font-size:11px;color:#555;margin-bottom:4px;';
-  count.textContent = albums.length + ' resultado' + (albums.length!==1?'s':'');
+  count.style.cssText = 'font-size:11px;color:#555;margin-bottom:8px;';
+  count.textContent = unique.length + ' resultado' + (unique.length!==1?'s':'');
   results.appendChild(count);
 
-  albums.forEach(function(album){
+  unique.forEach(function(album){
     var div = document.createElement('div');div.className = 'music-result';
-    var cover = album.artworkUrl100
-      ? album.artworkUrl100.replace('100x100','300x300')
-      : null;
-    var year = album.releaseDate ? album.releaseDate.substring(0,4) : '';
-    var tracks = album.trackCount ? album.trackCount + ' pistas' : '';
+    var cover = album.artworkUrl100 || null;
+    var year = album.releaseDate ? String(album.releaseDate).substring(0,4) : '';
 
-    var emptyThumb = '<div class="music-result-cover-empty"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>';
-    div.innerHTML = (cover
-      ? '<img class="music-result-cover" src="'+cover+'" loading="lazy" onerror="this.parentNode.innerHTML=\''+emptyThumb+'\'"/>'
-      : emptyThumb)
+    div.innerHTML =
+      (cover ? '<img class="music-result-cover" src="'+cover+'" loading="lazy"/>'
+             : '<div class="music-result-cover-empty"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>')
     + '<div class="music-result-info">'
-    + '<div class="music-result-title">'+(album.collectionName||album.trackName||'Álbum')+'</div>'
-    + '<div class="music-result-artist">'+album.artistName+'</div>'
-    + '<div class="music-result-meta">'
-    + (album.primaryGenreName?'<span class="music-result-genre">'+album.primaryGenreName+'</span>':'')
-    + (year?'<span>'+year+'</span>':'')
-    + (tracks?'<span>'+tracks+'</span>':'')
-    + '</div></div>';
+    + '<div class="music-result-title">'+(album.collectionName||'Álbum')+'</div>'
+    + '<div class="music-result-artist">'+(album.artistName||'')+'</div>'
+    + (year ? '<div class="music-result-meta"><span>'+year+'</span></div>' : '')
+    + '</div>';
 
     div.onclick = function(){addMusicToCollection(album, cover);};
     results.appendChild(div);
@@ -5096,7 +5082,7 @@ function renderMusicResults(albums){
 }
 
 function addMusicToCollection(album, cover){
-  var formatLabel = {vinyl:'Vinilo',cd:'CD',cassette:'Cassette'}[currentMusicFormat]||'Música';
+  var formatLabel = 'Música';
   var title = album.collectionName || album.trackName || 'Álbum';
   var artist = album.artistName || '';
   var year = album.releaseDate ? album.releaseDate.substring(0,4) : new Date().getFullYear().toString();
