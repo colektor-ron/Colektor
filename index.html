@@ -2003,15 +2003,23 @@ function renderCollection(){
       });
     }
 
-    // Render cards respecting colViewMode
-    if(colViewMode==='list'){
-      var cardsList=document.createElement('div');cardsList.className='col-list';
-      sortedCards.forEach(function(item){cardsList.appendChild(makeListCard(item));});
-      cardsSection.appendChild(cardsList);
-    } else {
-      var cardsGrid=document.createElement('div');cardsGrid.className='col-grid';
-      sortedCards.forEach(function(item){cardsGrid.appendChild(makeColCard(item));});
-      cardsSection.appendChild(cardsGrid);
+    // Exclude cards already in a Cartas folder
+    var cartasFolderIds=[];
+    customFolders.filter(function(f){return f.category==='Cartas';})
+      .forEach(function(f){(f.itemIds||[]).forEach(function(id){cartasFolderIds.push(id);});});
+    var unfolderedCards=sortedCards.filter(function(item){return !cartasFolderIds.includes(item.id);});
+
+    // Render cards respecting colViewMode (only unfoldered cards)
+    if(unfolderedCards.length){
+      if(colViewMode==='list'){
+        var cardsList=document.createElement('div');cardsList.className='col-list';
+        unfolderedCards.forEach(function(item){cardsList.appendChild(makeListCard(item));});
+        cardsSection.appendChild(cardsList);
+      } else {
+        var cardsGrid=document.createElement('div');cardsGrid.className='col-grid';
+        unfolderedCards.forEach(function(item){cardsGrid.appendChild(makeColCard(item));});
+        cardsSection.appendChild(cardsGrid);
+      }
     }
     // Render Cartas folders
     var cartasFolders=customFolders.filter(function(f){return f.category==='Cartas';});
