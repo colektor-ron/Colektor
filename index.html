@@ -1312,10 +1312,14 @@ input[type="file"]{display:none;}
     <div id="scannerSearchView">
       <div>
         <div class="scanner-game-label">Juego</div>
-        <div class="game-selector">
+        <div class="game-selector" style="grid-template-columns:repeat(2,1fr);">
           <div class="game-btn active" id="gameBtn-pokemon" onclick="setGame('pokemon')">
             <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div>
             <div class="game-btn-name">Pokémon</div>
+          </div>
+          <div class="game-btn" id="gameBtn-digimon" onclick="setGame('digimon')">
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"/><circle cx="12" cy="12" r="2"/></svg></div>
+            <div class="game-btn-name">Digimon</div>
           </div>
           <div class="game-btn" id="gameBtn-magic" onclick="setGame('magic')">
             <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div>
@@ -3805,13 +3809,14 @@ function closeScanner(){document.getElementById('scannerModal').classList.remove
 
 function setGame(game){
   currentGame=game;
-  ['pokemon','magic','yugioh'].forEach(function(g){
+  ['pokemon','digimon','magic','yugioh'].forEach(function(g){
     var btn=document.getElementById('gameBtn-'+g);
     if(btn)btn.classList.toggle('active',g===game);
   });
   document.getElementById('scannerResults').innerHTML='';
   var placeholders={
     pokemon:'Ej: Charizard, Pikachu, Mewtwo...',
+    digimon:'Ej: Agumon, Gabumon, Omnimon...',
     magic:'Ej: Black Lotus, Lightning Bolt...',
     yugioh:'Ej: Blue-Eyes White Dragon...'
   };
@@ -3827,6 +3832,7 @@ async function searchCards(){
   try{
     var cards=[];
     if(currentGame==='pokemon') cards=await searchPokemon(query);
+    else if(currentGame==='digimon') cards=await searchDigimon(query);
     else if(currentGame==='magic') cards=await searchMagic(query);
     else if(currentGame==='yugioh') cards=await searchYugioh(query);
     renderScannerResults(cards);
@@ -3852,6 +3858,29 @@ async function searchPokemon(query){
       game:'pokemon',
       hp:c.hp||'',
       types:(c.types||[]).join(', ')
+    };
+  });
+}
+
+async function searchDigimon(query){
+  var url='https://digimoncard.io/api-public/search.php?n='+encodeURIComponent(query)+'&series=Digimon+Card+Game&sort=name&sortdirection=asc&num=100';
+  var r=await fetch(url);
+  if(!r.ok) throw new Error('Digimon API error');
+  var d=await r.json();
+  return (Array.isArray(d)?d:[]).map(function(c){
+    var cardNum=(c.cardnumber||'').toUpperCase();
+    var imgUrl=cardNum?'https://digimoncard.io/images/cards/'+cardNum+'.jpg':null;
+    return{
+      id:c.cardnumber||c.name,
+      name:c.name||'',
+      set:(Array.isArray(c.set_name)?c.set_name[0]:c.set_name)||'',
+      number:c.cardnumber||'',
+      rarity:c.rarity||'',
+      image:imgUrl,
+      priceUSD:0,
+      game:'digimon',
+      color:c.color||'',
+      type:c.type||''
     };
   });
 }
@@ -3987,10 +4016,11 @@ function renderSetsTab(){
   // Game selector (reuse current game)
   var gameRow = document.createElement('div');
   gameRow.innerHTML = '<div class="scanner-game-label">Juego</div>'
-    +'<div class="game-selector">'
-    +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon</div></div>'
-    +'<div class="game-btn'+(currentGame==='magic'?' active':'')+'" id="sgBtn-magic" onclick="setSetsGame(&quot;magic&quot;)"><div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div><div class="game-btn-name">Magic</div></div>'
-    +'<div class="game-btn'+(currentGame==='yugioh'?' active':'')+'" id="sgBtn-yugioh" onclick="setSetsGame(&quot;yugioh&quot;)"><div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div><div class="game-btn-name">Yu-Gi-Oh</div></div>'
+    +'<div class="game-selector" style="grid-template-columns:repeat(2,1fr);">'
+    +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon</div></div>'
+    +'<div class="game-btn'+(currentGame==='digimon'?' active':'')+'" id="sgBtn-digimon" onclick="setSetsGame(&quot;digimon&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4"/><circle cx="12" cy="12" r="2"/></svg></div><div class="game-btn-name">Digimon</div></div>'
+    +'<div class="game-btn'+(currentGame==='magic'?' active':'')+'" id="sgBtn-magic" onclick="setSetsGame(&quot;magic&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div><div class="game-btn-name">Magic</div></div>'
+    +'<div class="game-btn'+(currentGame==='yugioh'?' active':'')+'" id="sgBtn-yugioh" onclick="setSetsGame(&quot;yugioh&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div><div class="game-btn-name">Yu-Gi-Oh</div></div>'
     +'</div>';
   view.appendChild(gameRow);
 
