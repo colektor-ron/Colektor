@@ -963,6 +963,18 @@ input[type="file"]{display:none;}
     </button>
   </div>
 
+  <!-- Add buttons row -->
+  <div style="display:flex;gap:8px;padding:0 0 8px 0;">
+    <button onclick="openScanner()" style="flex:1;padding:10px 12px;background:rgba(129,140,248,0.1);border:1px solid rgba(129,140,248,0.3);color:#818cf8;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      Buscar carta
+    </button>
+    <button onclick="openMusicScanner()" style="flex:1;padding:10px 12px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.3);color:#22c55e;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Buscar música
+    </button>
+  </div>
+
   <!-- Estado filter pills -->
   <div class="estado-filters" id="estadoFilters"></div>
 
@@ -1815,7 +1827,7 @@ function renderPendientes(){
       +'<div class="add-row"><button class="btn-primary" onclick="addItem()">Agregar</button>'
       +'<button class="btn-secondary" onclick="showAddP=false;renderPendientes()">Cancelar</button></div></div>';
   }else{
-    addSec.innerHTML='<button class="btn-open-add" style="width:100%;" onclick="showAddP=true;renderPendientes()">'+IC.plus(18)+' Agregar preventa</button>';
+    addSec.innerHTML='';
   }
   updateBadges();
 }
