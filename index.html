@@ -5030,12 +5030,30 @@ async function searchMusic(){
   var results = document.getElementById('musicResults');
   results.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Buscando...</div>';
   try{
-    var url = 'https://itunes.apple.com/search?term='+encodeURIComponent(query)+'&media=music&entity=album&limit=20&country=US';
-    var r = await fetch(url);
+    // Use MusicBrainz API (CORS-friendly, free)
+    var mbUrl = 'https://musicbrainz.org/ws/2/release/?query='+encodeURIComponent(query)+'&limit=20&fmt=json';
+    var r = await fetch(mbUrl, {headers:{'User-Agent':'ColeKtoR/1.0 (colektor.vercel.app)'}});
     var d = await r.json();
-    renderMusicResults(d.results||[]);
+    var releases = d.releases||[];
+    if(!releases.length){renderMusicResults([]);return;}
+    // Map to our format and fetch covers
+    var albums = releases.map(function(rel){
+      var artist = rel['artist-credit']&&rel['artist-credit'][0]?rel['artist-credit'][0].name||rel['artist-credit'][0].artist&&rel['artist-credit'][0].artist.name||'':'' ;
+      var year = rel.date?rel.date.substring(0,4):'';
+      var tracks = rel['track-count']||0;
+      return {
+        mbid: rel.id,
+        collectionName: rel.title||'',
+        artistName: artist,
+        releaseDate: year,
+        trackCount: tracks,
+        primaryGenreName: '',
+        artworkUrl100: 'https://coverartarchive.org/release/'+rel.id+'/front-250'
+      };
+    });
+    renderMusicResults(albums);
   }catch(e){
-    results.innerHTML = '<div class="scanner-empty">Error al buscar. Verifica tu conexión.</div>';
+    document.getElementById('musicResults').innerHTML = '<div class="scanner-empty">Error al buscar. Verifica tu conexión.</div>';
   }
 }
 
@@ -5059,9 +5077,10 @@ function renderMusicResults(albums){
     var year = album.releaseDate ? album.releaseDate.substring(0,4) : '';
     var tracks = album.trackCount ? album.trackCount + ' pistas' : '';
 
+    var emptyThumb = '<div class="music-result-cover-empty"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>';
     div.innerHTML = (cover
-      ? '<img class="music-result-cover" src="'+cover+'" loading="lazy"/>'
-      : '<div class="music-result-cover-empty"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>')
+      ? '<img class="music-result-cover" src="'+cover+'" loading="lazy" onerror="this.parentNode.innerHTML=\''+emptyThumb+'\'"/>'
+      : emptyThumb)
     + '<div class="music-result-info">'
     + '<div class="music-result-title">'+(album.collectionName||album.trackName||'Álbum')+'</div>'
     + '<div class="music-result-artist">'+album.artistName+'</div>'
