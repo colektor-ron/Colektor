@@ -4751,6 +4751,75 @@ function renderFolderInnerPicker(){
 }
 
 
+
+
+// ── SNAPSHOTS DE VALOR ─────────────────────────────────
+async function saveDailySnapshot(){
+  try{
+    var snapshots=(await IDB.get('valueSnapshots'))||[];
+    var today=new Date();
+    var dateKey=today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+    // Only save once per day
+    if(snapshots.length&&snapshots[snapshots.length-1].date===dateKey) return;
+    var totalVal=collection.reduce(function(s,c){return s+(c.valorActual||0);},0);
+    var count=collection.length;
+    snapshots.push({date:dateKey,value:totalVal,count:count});
+    // Keep last 90 days
+    if(snapshots.length>90) snapshots=snapshots.slice(-90);
+    await IDB.set('valueSnapshots',snapshots);
+  }catch(e){}
+}
+
+async function getValueSnapshots(){
+  try{return (await IDB.get('valueSnapshots'))||[];}catch(e){return [];}
+}
+
+// ── REFRESH PRECIOS TCG ────────────────────────────────
+async function refreshTCGPrices(){
+  var tcgCards = collection.filter(function(c){
+    return c.category==='Cartas' && c.id && typeof c.id === 'number';
+  });
+  if(!tcgCards.length){toast('No hay cartas TCG en tu colección','#f59e0b');return;}
+  
+  // Show loading toast
+  toast('Actualizando precios... ⏳','#1B6DC0');
+  
+  var updated=0;
+  // Batch: fetch prices for pokemon cards that have a set
+  var pokemonCards=tcgCards.filter(function(c){return c.set&&c.set.trim();});
+  
+  // Process in batches of 10
+  for(var i=0;i<pokemonCards.length;i++){
+    var card=pokemonCards[i];
+    // Use card name + set to find price
+    try{
+      var name=encodeURIComponent(card.name);
+      var setName=encodeURIComponent(card.set||'');
+      var r=await fetch('https://api.pokemontcg.io/v2/cards?q=name:"'+name+'" set.name:"'+setName+'"&pageSize=1');
+      var d=await r.json();
+      if(d.data&&d.data[0]&&d.data[0].tcgplayer&&d.data[0].tcgplayer.prices){
+        var prices=d.data[0].tcgplayer.prices;
+        var usd=(prices.holofoil||prices.normal||prices['1stEditionHolofoil']||prices.reverseHolofoil||{}).market||0;
+        if(usd>0){
+          var clp=clpFromUSD(usd);
+          collection=collection.map(function(c2){
+            if(c2.id===card.id) return Object.assign({},c2,{valorActual:clp,lastPriceUpdate:Date.now()});
+            return c2;
+          });
+          updated++;
+        }
+      }
+      // Small delay to respect rate limits
+      if(i%5===4) await new Promise(function(r){setTimeout(r,500);});
+    }catch(e){}
+  }
+  
+  save();
+  renderCollection();
+  renderStats();
+  toast('Precios actualizados: '+updated+' cartas ✓','#22c55e');
+}
+
 // ── NOTIFICATIONS ──────────────────────────────────────
 async function requestNotifPermission(){
   if(!('Notification' in window)) return false;
@@ -4898,7 +4967,8 @@ function catIcon(cat,size){
 }
 
 async function init(){await load();await loadCustomFolders();await loadProfile();
-  initNotifications();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
+  initNotifications();
+  saveDailySnapshot();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
 </script>
 <script>document.addEventListener("click",function(e){if(sortDropdownOpen&&!e.target.closest("#colToolbar")){sortDropdownOpen=false;var dd=document.getElementById("sortDropdown");if(dd)dd.classList.add("hidden");}});</script>
