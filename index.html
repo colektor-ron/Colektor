@@ -184,6 +184,37 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── MUSIC SCANNER ── */
+.music-result{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.15s;}
+.music-result:active{transform:scale(0.98);border-color:#22c55e;}
+.music-result-cover{width:60px;height:60px;border-radius:8px;object-fit:cover;background:#111;flex-shrink:0;border:1px solid #2a2a2a;}
+.music-result-cover-empty{width:60px;height:60px;border-radius:8px;background:#111;flex-shrink:0;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;}
+.music-result-info{flex:1;min-width:0;}
+.music-result-title{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.music-result-artist{font-size:12px;color:#1B6DC0;margin-top:2px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.music-result-meta{font-size:10px;color:#64748b;margin-top:3px;display:flex;align-items:center;gap:6px;}
+.music-result-genre{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:#22c55e;font-size:9px;font-weight:700;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+.music-result-tracks{font-size:10px;color:#555;}
+.music-format-selector{display:flex;gap:8px;margin-bottom:4px;}
+.music-format-btn{flex:1;padding:10px;background:#1e1e1e;border:1px solid #2a2a2a;border-radius:10px;color:#94a3b8;font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all 0.15s;}
+.music-format-btn.active{background:rgba(34,197,94,0.1);border-color:#22c55e;color:#22c55e;}
+.music-format-btn:active{transform:scale(0.97);}
+
+/* Music section in collection */
+.music-section{margin-bottom:20px;position:relative;z-index:1;}
+.music-album-card{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;overflow:hidden;cursor:pointer;transition:all 0.15s;position:relative;}
+.music-album-card:active{transform:scale(0.97);}
+.music-album-card.fav{border-color:rgba(245,158,11,0.4);}
+.music-album-cover{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+.music-album-cover-empty{width:100%;aspect-ratio:1;background:#111;display:flex;align-items:center;justify-content:center;}
+.music-album-info{padding:8px;}
+.music-album-title{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.music-album-artist{font-size:10px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.music-album-fav{position:absolute;top:6px;right:6px;}
+.music-format-badge{position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.75);border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;color:#22c55e;}
+.music-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+
+
 /* ── FOLDER INNER VIEW ── */
 .folder-inner-view{display:none;position:fixed;inset:0;background:#181818;z-index:350;flex-direction:column;overflow:hidden;}
 .folder-inner-view.open{display:flex;}
@@ -1387,6 +1418,41 @@ input[type="file"]{display:none;}
   </div>
 </div>
 
+
+<!-- MUSIC SCANNER -->
+<div class="scanner-modal" id="musicModal">
+  <div class="scanner-header">
+    <div class="scanner-title">Buscar Música</div>
+    <button class="scanner-close" onclick="closeMusicScanner()">Cerrar</button>
+  </div>
+  <div class="scanner-body">
+    <div>
+      <div class="scanner-game-label">Formato</div>
+      <div class="music-format-selector">
+        <div class="music-format-btn active" id="fmtBtn-vinyl" onclick="setMusicFormat('vinyl')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:3px;display:block;margin:0 auto 3px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="6" stroke-dasharray="2 3"/></svg>
+          Vinilo
+        </div>
+        <div class="music-format-btn" id="fmtBtn-cd" onclick="setMusicFormat('cd')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:3px;display:block;margin:0 auto 3px;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg>
+          CD
+        </div>
+        <div class="music-format-btn" id="fmtBtn-cassette" onclick="setMusicFormat('cassette')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:3px;display:block;margin:0 auto 3px;"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          Cassette
+        </div>
+      </div>
+    </div>
+    <div class="scanner-search-wrap">
+      <input class="scanner-search" id="musicSearch" placeholder="Artista, álbum o canción..." onkeydown="if(event.key==='Enter')searchMusic()" style="height:48px;"/>
+      <button class="scanner-search-btn" onclick="searchMusic()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+    </div>
+    <div id="musicResults"></div>
+  </div>
+</div>
+
 <input type="file" id="fileInputP" accept="image/*" onchange="handleFileP(event)"/>
 <input type="file" id="colPhotoInput" accept="image/*" onchange="handleColPhoto(event)"/>
 <input type="file" id="importFile" accept=".json" onchange="importData(event)"/>
@@ -2257,6 +2323,7 @@ function renderDetail(item){
     +'<div class="det-field"><span class="det-label">Reseña</span><textarea id="dr" placeholder="Materiales, acabados, rareza...">'+(item.review||"")+'</textarea></div>'
     +'<div class="det-field"><span class="det-label">Notas</span><input id="dnt" value="'+(item.note||"").replace(/"/g,"&quot;")+'" placeholder="Notas rápidas..."/></div>'
 
+    +'<button class="btn-presentacion" style="border-color:#22c55e;color:#22c55e;" onclick="openMusicScanner()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Agregar música</button>'
     +'<button class="btn-presentacion" onclick="openVitrina()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> Vista Vitrina</button>'
     +'<button class="btn-presentacion" onclick="startPresentation()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg> Modo Presentación</button>'
     +'<button class="btn-save" onclick="saveDetail('+item.id+')">'+IC.save(16)+' Guardar</button>'
@@ -4935,6 +5002,113 @@ function updateNotifStatus(){
     sub.textContent='Toca para activar';
     if(arrow) arrow.style.color='';
   }
+}
+
+
+// ── MUSIC SCANNER ──────────────────────────────────────
+var currentMusicFormat = 'vinyl';
+
+function openMusicScanner(){
+  document.getElementById('musicModal').classList.add('open');
+  document.getElementById('musicResults').innerHTML = '';
+  document.getElementById('musicSearch').value = '';
+  setTimeout(function(){document.getElementById('musicSearch').focus();}, 300);
+}
+function closeMusicScanner(){document.getElementById('musicModal').classList.remove('open');}
+
+function setMusicFormat(fmt){
+  currentMusicFormat = fmt;
+  ['vinyl','cd','cassette'].forEach(function(f){
+    var b = document.getElementById('fmtBtn-'+f);
+    if(b) b.classList.toggle('active', f===fmt);
+  });
+}
+
+async function searchMusic(){
+  var query = document.getElementById('musicSearch').value.trim();
+  if(!query) return;
+  var results = document.getElementById('musicResults');
+  results.innerHTML = '<div class="scanner-loading"><div class="scanner-spinner"></div>Buscando...</div>';
+  try{
+    var url = 'https://itunes.apple.com/search?term='+encodeURIComponent(query)+'&media=music&entity=album&limit=20&country=US';
+    var r = await fetch(url);
+    var d = await r.json();
+    renderMusicResults(d.results||[]);
+  }catch(e){
+    results.innerHTML = '<div class="scanner-empty">Error al buscar. Verifica tu conexión.</div>';
+  }
+}
+
+function renderMusicResults(albums){
+  var results = document.getElementById('musicResults');
+  results.innerHTML = '';
+  if(!albums.length){
+    results.innerHTML = '<div class="scanner-empty">Sin resultados. Prueba con otro nombre.</div>';
+    return;
+  }
+  var count = document.createElement('div');
+  count.style.cssText = 'font-size:11px;color:#555;margin-bottom:4px;';
+  count.textContent = albums.length + ' resultado' + (albums.length!==1?'s':'');
+  results.appendChild(count);
+
+  albums.forEach(function(album){
+    var div = document.createElement('div');div.className = 'music-result';
+    var cover = album.artworkUrl100
+      ? album.artworkUrl100.replace('100x100','300x300')
+      : null;
+    var year = album.releaseDate ? album.releaseDate.substring(0,4) : '';
+    var tracks = album.trackCount ? album.trackCount + ' pistas' : '';
+
+    div.innerHTML = (cover
+      ? '<img class="music-result-cover" src="'+cover+'" loading="lazy"/>'
+      : '<div class="music-result-cover-empty"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>')
+    + '<div class="music-result-info">'
+    + '<div class="music-result-title">'+(album.collectionName||album.trackName||'Álbum')+'</div>'
+    + '<div class="music-result-artist">'+album.artistName+'</div>'
+    + '<div class="music-result-meta">'
+    + (album.primaryGenreName?'<span class="music-result-genre">'+album.primaryGenreName+'</span>':'')
+    + (year?'<span>'+year+'</span>':'')
+    + (tracks?'<span>'+tracks+'</span>':'')
+    + '</div></div>';
+
+    div.onclick = function(){addMusicToCollection(album, cover);};
+    results.appendChild(div);
+  });
+}
+
+function addMusicToCollection(album, cover){
+  var formatLabel = {vinyl:'Vinilo',cd:'CD',cassette:'Cassette'}[currentMusicFormat]||'Música';
+  var title = album.collectionName || album.trackName || 'Álbum';
+  var artist = album.artistName || '';
+  var year = album.releaseDate ? album.releaseDate.substring(0,4) : new Date().getFullYear().toString();
+  var genre = album.primaryGenreName || '';
+  var tracks = album.trackCount || 0;
+
+  if(!categories.includes(formatLabel)) categories.push(formatLabel);
+
+  collection.push({
+    id: Date.now(),
+    name: title,
+    category: formatLabel,
+    photos: cover ? [cover] : [],
+    note: artist + (tracks?' · '+tracks+' pistas':''),
+    year: year,
+    rating: 0, review: '', favorite: false,
+    estado: 'Nuevo',
+    valorActual: 0, precioPagado: 0,
+    edicion: '',
+    tags: genre ? [genre] : [],
+    artist: artist,
+    genre: genre,
+    trackCount: tracks,
+    addedAt: Date.now()
+  });
+
+  save(); updateBadges(); closeMusicScanner();
+  switchTab('coleccion');
+  toast(title + ' agregado a tu colección! 🎵', '#22c55e');
+  launchConfetti();
+  setTimeout(function(){checkAchievements();}, 500);
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
