@@ -1954,7 +1954,8 @@ function renderCollection(){
   var nonCardItems=displayed.filter(function(c){return !CARD_CATEGORIES.includes(c.category);});
   var hasCards=cardItems.length>0;
 
-  if(hasCards&&(colCatFilter==='all'||colCatFilter==='Cartas')){
+  var hasCartasFolders=customFolders.some(function(f){return f.category==='Cartas';});
+  if((hasCards||hasCartasFolders)&&(colCatFilter==='all'||colCatFilter==='Cartas')){
     var cardsSection=document.createElement('div');cardsSection.className='cards-section';
     // Header
     var csHeader=document.createElement('div');csHeader.className='cards-section-header';
@@ -2011,6 +2012,17 @@ function renderCollection(){
       var cardsGrid=document.createElement('div');cardsGrid.className='col-grid';
       sortedCards.forEach(function(item){cardsGrid.appendChild(makeColCard(item));});
       cardsSection.appendChild(cardsGrid);
+    }
+    // Render Cartas folders
+    var cartasFolders=customFolders.filter(function(f){return f.category==='Cartas';});
+    if(cartasFolders.length){
+      var cfGrid=document.createElement('div');cfGrid.className='custom-folders-grid';
+      cartasFolders.forEach(function(folder){
+        var folderItems=cardItems.filter(function(item){return (folder.itemIds||[]).includes(item.id);});
+        var card=makeCustomFolderCard(folder,folderItems,cardItems,'#818cf8');
+        cfGrid.appendChild(card);
+      });
+      cardsSection.appendChild(cfGrid);
     }
     content.appendChild(cardsSection);
         // Update displayed to only non-card items
