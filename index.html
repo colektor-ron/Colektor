@@ -1911,9 +1911,8 @@ function makeColCard(item){
     +(item.estado&&item.estado!=="Nuevo"?'<div class="estado-badge">'+item.estado+'</div>':'')
     +'<div class="col-card-body">'
     +'<div class="col-card-name">'+item.name+'</div>'
-    +'<div class="col-card-meta"><span style="color:'+dotColor(item.category)+'">●</span> '+(item.category||"Sin cat.")+(item.year?" · "+item.year:"")+'</div>'
+    +'<div class="col-card-meta">'+(item.year||"")+'</div>'
     +'<div class="col-card-bottom">'
-    +'<div class="col-card-stars">'+starsHTML+'</div>'
     +(item.valorActual?'<div class="col-card-value">'+fmt(item.valorActual)+'</div>':'')
     +'</div></div>';
   card.onclick=function(){openDetail(item.id);};
