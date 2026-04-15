@@ -185,6 +185,38 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── CAMERA SCAN ── */
+.scan-cam-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;background:linear-gradient(135deg,#7c3aed,#1B6DC0);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;width:100%;justify-content:center;margin-bottom:10px;}
+.scan-cam-btn:active{transform:scale(0.97);opacity:0.9;}
+.scan-cam-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:600;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
+.scan-cam-modal.open{display:flex;}
+.scan-cam-title{font-size:16px;font-weight:800;margin-bottom:6px;}
+.scan-cam-sub{font-size:12px;color:#64748b;margin-bottom:20px;text-align:center;}
+.scan-cam-preview{width:100%;max-width:340px;aspect-ratio:4/3;background:#111;border-radius:16px;overflow:hidden;border:2px dashed #333;display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:16px;}
+.scan-cam-preview img{width:100%;height:100%;object-fit:contain;}
+.scan-cam-preview-empty{display:flex;flex-direction:column;align-items:center;gap:8px;color:#444;}
+.scan-cam-actions{display:flex;gap:10px;width:100%;max-width:340px;margin-bottom:16px;}
+.btn-cam-photo{flex:1;padding:12px;background:#7c3aed;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.btn-cam-photo:active{transform:scale(0.97);}
+.btn-cam-analyze{flex:1;padding:12px;background:#1B6DC0;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.15s;}
+.btn-cam-analyze:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-cam-analyze:not(:disabled):active{transform:scale(0.97);}
+.btn-cam-close2{padding:12px 16px;background:#2a2a2a;color:#94a3b8;border:none;border-radius:10px;font-size:13px;cursor:pointer;}
+.scan-results-wrap{width:100%;max-width:340px;max-height:260px;overflow-y:auto;}
+.scan-result-card{background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.scan-result-card img{width:36px;height:50px;object-fit:contain;border-radius:4px;background:#111;}
+.scan-result-card-info{flex:1;}
+.scan-result-card-name{font-size:13px;font-weight:700;}
+.scan-result-card-set{font-size:11px;color:#64748b;margin-top:2px;}
+.scan-result-card-check{width:22px;height:22px;border-radius:6px;border:2px solid #333;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s;}
+.scan-result-card-check.checked{background:#22c55e;border-color:#22c55e;}
+.scan-status{font-size:12px;color:#64748b;text-align:center;margin-bottom:10px;}
+.btn-cam-add-all{width:100%;max-width:340px;padding:13px;background:#22c55e;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;}
+.btn-cam-add-all:active{transform:scale(0.97);}
+.scan-analyzing{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;}
+.scan-analyzing-spinner{width:40px;height:40px;border:3px solid #333;border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;}
+
+
 
 .music-result{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.15s;}
 .music-result:active{transform:scale(0.98);border-color:#22c55e;}
@@ -1346,7 +1378,8 @@ input[type="file"]{display:none;}
   <div class="scanner-body">
     <div id="scannerSearchView">
       <div>
-        <div class="scanner-game-label">Juego</div>
+        <button class="scan-cam-btn" onclick="openScanCam()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> ✨ Identificar con foto</button>
+      <div class="scanner-game-label">Juego</div>
         <div class="game-selector">
           <div class="game-btn active" id="gameBtn-pokemon" onclick="setGame('pokemon')">
             <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div>
@@ -1431,6 +1464,34 @@ input[type="file"]{display:none;}
   </div>
 </div>
 
+
+
+<!-- CAMERA SCAN MODAL -->
+<div class="scan-cam-modal" id="scanCamModal">
+  <div class="scan-cam-title">📸 Escanear cartas con IA</div>
+  <div class="scan-cam-sub" id="scanCamSub">Toma una foto de tus cartas y la IA las identificará automáticamente</div>
+  <div class="scan-cam-preview" id="scanCamPreview">
+    <div class="scan-cam-preview-empty" id="scanCamEmpty">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#444" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <span style="font-size:12px;color:#444;">Sin foto</span>
+    </div>
+    <img id="scanCamImg" style="display:none;"/>
+  </div>
+  <div class="scan-cam-actions">
+    <button class="btn-cam-photo" onclick="triggerCamInput()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Foto
+    </button>
+    <button class="btn-cam-analyze" id="btnAnalyze" disabled onclick="analyzeCardPhoto()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Identificar
+    </button>
+    <button class="btn-cam-close2" onclick="closeScanCam()">✕</button>
+  </div>
+  <div class="scan-results-wrap" id="scanCamResults"></div>
+  <button class="btn-cam-add-all" id="btnAddAllCards" style="display:none;" onclick="addAllScannedCards()">✓ Agregar cartas seleccionadas</button>
+  <input type="file" id="camFileInput" accept="image/*" capture="environment" style="display:none;" onchange="onCamFileSelected(event)"/>
+</div>
 
 <input type="file" id="fileInputP" accept="image/*" onchange="handleFileP(event)"/>
 <input type="file" id="colPhotoInput" accept="image/*" onchange="handleColPhoto(event)"/>
@@ -4053,12 +4114,26 @@ function renderSetsTab(){
 
   // Game selector (reuse current game)
   var gameRow = document.createElement('div');
-  gameRow.innerHTML = '<div class="scanner-game-label">Juego</div>'
-    +'<div class="game-selector">'
-    +'<div class="game-btn'+(currentGame==='pokemon'?' active':'')+'" id="sgBtn-pokemon" onclick="setSetsGame(&quot;pokemon&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><circle cx="12" cy="12" r="3"/><path d="M12 2a10 10 0 0 1 10 10"/></svg></div><div class="game-btn-name">Pokémon</div></div>'
-    +'<div class="game-btn'+(currentGame==='magic'?' active':'')+'" id="sgBtn-magic" onclick="setSetsGame(&quot;magic&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 9 18 21 6 21 2 9"/><line x1="12" y1="2" x2="12" y2="21"/><line x1="2" y1="9" x2="22" y2="9"/></svg></div><div class="game-btn-name">Magic</div></div>'
-    +'<div class="game-btn'+(currentGame==='yugioh'?' active':'')+'" id="sgBtn-yugioh" onclick="setSetsGame(&quot;yugioh&quot;)"><div class="game-btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div><div class="game-btn-name">Yu-Gi-Oh</div></div>'
-    +'</div>';
+  var scanBtn=document.createElement('button');
+    scanBtn.className='scan-cam-btn';
+    scanBtn.onclick=function(){openScanCam();};
+    scanBtn.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg> ✨ Identificar con foto';
+    gameRow.appendChild(scanBtn);
+    var gameLabel=document.createElement('div');
+    gameLabel.className='scanner-game-label';
+    gameLabel.textContent='Juego';
+    gameRow.appendChild(gameLabel);
+    var gameSelector=document.createElement('div');
+    gameSelector.className='game-selector';
+    ['pokemon','magic','yugioh'].forEach(function(g){
+      var gb=document.createElement('div');
+      gb.className='game-btn'+(currentGame===g?' active':'');
+      gb.id='sgBtn-'+g;
+      gb.onclick=(function(gm){return function(){setSetsGame(gm);};})(g);
+      gb.innerHTML=IC.gameIcon(g)+'<div class="game-btn-name">'+(g==='pokemon'?'Pokémon':g==='magic'?'Magic':'Yu-Gi-Oh!')+'</div>';
+      gameSelector.appendChild(gb);
+    });
+    gameRow.appendChild(gameSelector)
   view.appendChild(gameRow);
 
   // Set search bar
@@ -5010,6 +5085,171 @@ function updateNotifStatus(){
 }
 
 
+
+
+// ── CAMERA CARD SCAN ──────────────────────────────────
+var scanCamBase64 = null;
+var scannedCards = [];
+
+function openScanCam(){document.getElementById('scanCamModal').classList.add('open');}
+function closeScanCam(){
+  document.getElementById('scanCamModal').classList.remove('open');
+  scanCamBase64=null;scannedCards=[];
+  document.getElementById('scanCamResults').innerHTML='';
+  document.getElementById('btnAddAllCards').style.display='none';
+  document.getElementById('btnAnalyze').disabled=true;
+  document.getElementById('scanCamImg').style.display='none';
+  document.getElementById('scanCamEmpty').style.display='flex';
+  document.getElementById('scanCamSub').textContent='Toma una foto de tus cartas y la IA las identificará automáticamente';
+}
+function triggerCamInput(){document.getElementById('camFileInput').click();}
+
+function onCamFileSelected(e){
+  var file=e.target.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    scanCamBase64=ev.target.result.split(',')[1];
+    var img=document.getElementById('scanCamImg');
+    img.src=ev.target.result;img.style.display='block';
+    document.getElementById('scanCamEmpty').style.display='none';
+    document.getElementById('btnAnalyze').disabled=false;
+    document.getElementById('scanCamResults').innerHTML='';
+    document.getElementById('btnAddAllCards').style.display='none';
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+async function analyzeCardPhoto(){
+  if(!scanCamBase64) return;
+  var btn=document.getElementById('btnAnalyze');
+  btn.disabled=true;
+  document.getElementById('scanCamSub').textContent='Analizando imagen...';
+  document.getElementById('scanCamResults').innerHTML='<div class="scan-analyzing"><div class="scan-analyzing-spinner"></div><div style="font-size:13px;color:#64748b;">Identificando cartas...</div></div>';
+
+  try{
+    var resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{
+          role:'user',
+          content:[
+            {type:'image',source:{type:'base64',media_type:'image/jpeg',data:scanCamBase64}},
+            {type:'text',text:'Look at this image and identify every Pokémon TCG card you can see. For each card return ONLY a JSON array like: [{"name":"Charizard","set":"Base Set","number":"4"},{"name":"Pikachu","set":"Jungle","number":"60"}]. Include the exact Pokémon name in English. If you cannot identify a card clearly, skip it. Return ONLY the JSON array, no other text.'}
+          ]
+        }]
+      })
+    });
+
+    var data=await resp.json();
+    var text=data.content&&data.content[0]?data.content[0].text:'';
+    var clean=text.replace(/```json|```/g,'').trim();
+    var identified=JSON.parse(clean);
+
+    if(!Array.isArray(identified)||identified.length===0){
+      document.getElementById('scanCamResults').innerHTML='<div class="scanner-empty">No se identificaron cartas. Intenta con mejor iluminación.</div>';
+      document.getElementById('scanCamSub').textContent='Sin resultados';
+      btn.disabled=false;return;
+    }
+
+    document.getElementById('scanCamSub').textContent='Buscando en base de datos...';
+
+    // Search each identified card on pokemontcg.io
+    scannedCards=[];
+    for(var i=0;i<identified.length;i++){
+      var card=identified[i];
+      try{
+        var q='name:"'+card.name+'"'+(card.set?' set.name:"'+card.set+'"':'');
+        var r=await fetch('https://api.pokemontcg.io/v2/cards?q='+encodeURIComponent(q)+'&pageSize=1');
+        var d=await r.json();
+        var match=(d.data&&d.data[0])||null;
+        scannedCards.push({
+          identified:card,
+          match:match,
+          selected:!!match
+        });
+      }catch(e){
+        scannedCards.push({identified:card,match:null,selected:false});
+      }
+    }
+
+    renderScannedResults();
+    btn.disabled=false;
+  }catch(err){
+    document.getElementById('scanCamResults').innerHTML='<div class="scanner-empty">Error al analizar: '+err.message+'</div>';
+    document.getElementById('scanCamSub').textContent='Error';
+    btn.disabled=false;
+  }
+}
+
+function renderScannedResults(){
+  var wrap=document.getElementById('scanCamResults');
+  wrap.innerHTML='';
+  var found=scannedCards.filter(function(c){return c.match;}).length;
+  document.getElementById('scanCamSub').textContent=scannedCards.length+' carta'+(scannedCards.length!==1?'s':'')+' identificada'+(scannedCards.length!==1?'s':'')+' · '+found+' encontrada'+(found!==1?'s':'');
+
+  scannedCards.forEach(function(item,idx){
+    var div=document.createElement('div');
+    div.className='scan-result-card';
+    var img=item.match&&item.match.images?(item.match.images.small||''):'';
+    var name=item.match?item.match.name:item.identified.name;
+    var set=item.match&&item.match.set?item.match.set.name:(item.identified.set||'No encontrada');
+    div.innerHTML=(img?'<img src="'+img+'" />':'<div style="width:36px;height:50px;background:#222;border-radius:4px;display:flex;align-items:center;justify-content:center;">'+IC.grid(16)+'</div>')
+      +'<div class="scan-result-card-info"><div class="scan-result-card-name">'+name+'</div><div class="scan-result-card-set">'+set+'</div></div>';
+    var check=document.createElement('div');
+    check.className='scan-result-card-check'+(item.selected&&item.match?' checked':'');
+    check.innerHTML=item.selected&&item.match?'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':'';
+    if(item.match){
+      check.onclick=(function(i,c){return function(){
+        scannedCards[i].selected=!scannedCards[i].selected;
+        renderScannedResults();
+      };})(idx,check);
+    } else {
+      check.style.opacity='0.3';check.style.cursor='default';
+    }
+    div.appendChild(check);
+    wrap.appendChild(div);
+  });
+
+  var addable=scannedCards.filter(function(c){return c.selected&&c.match;}).length;
+  var btn=document.getElementById('btnAddAllCards');
+  if(addable>0){
+    btn.style.display='block';
+    btn.textContent='✓ Agregar '+addable+' carta'+(addable!==1?'s':('')+' a la colección');
+  } else {
+    btn.style.display='none';
+  }
+}
+
+async function addAllScannedCards(){
+  var toAdd=scannedCards.filter(function(c){return c.selected&&c.match;});
+  toAdd.forEach(function(item){
+    var c=item.match;
+    var clp=clpFromUSD((c.tcgplayer&&c.tcgplayer.prices)?((c.tcgplayer.prices.holofoil||c.tcgplayer.prices.normal||c.tcgplayer.prices.reverseHolofoil||{}).market||0):0);
+    collection.push({
+      id:Date.now()+Math.random(),
+      name:c.name,category:'Cartas',
+      photos:c.images?[c.images.large||c.images.small]:[],
+      note:(c.rarity||'')+(c.number?' · #'+c.number:''),
+      year:new Date().getFullYear().toString(),
+      rating:0,review:'',favorite:false,
+      estado:'Nuevo',valorActual:clp||0,precioPagado:clp||0,
+      edicion:c.number||'',
+      tags:c.rarity?[c.rarity]:[],
+      set:c.set?c.set.name:'',
+      setId:c.set?c.set.id:'',
+      setLogo:c.set&&c.set.images?c.set.images.logo||'':'',
+      game:'pokemon',addedAt:new Date().toISOString()
+    });
+  });
+  await save();updateBadges();checkAchievements();
+  toast(toAdd.length+' carta'+(toAdd.length!==1?'s':'')+' agregada'+(toAdd.length!==1?'s':'')+' a tu colección! 🎴','#22c55e');
+  closeScanCam();
+  closeScanner();
+}
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
 
