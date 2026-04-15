@@ -1361,7 +1361,7 @@ input[type="file"]{display:none;}
             <div class="game-btn-name">Yu-Gi-Oh</div>
           </div>
           <div class="game-btn" id="gameBtn-pokemon-jp" onclick="setGame('pokemon-jp')">
-            <div class="game-btn-icon" style="font-size:20px;line-height:1;">🇯🇵</div>
+            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#fff"/><circle cx="12" cy="12" r="6" fill="#BC002D"/></svg></div>
             <div class="game-btn-name">Pokémon JP</div>
           </div>
         </div>
@@ -3908,50 +3908,28 @@ async function searchCards(){
 
 
 async function searchPokemonJP(query){
-  // TCGdex supports Japanese sets - search by name
-  try{
-    var url='https://api.tcgdex.net/v2/ja/cards?name='+encodeURIComponent(query);
-    var r=await fetch(url);
-    if(!r.ok) throw new Error('TCGdex error');
-    var data=await r.json();
-    if(!Array.isArray(data)) data=[data];
-    return data.slice(0,60).map(function(c){
-      return{
-        id:'jp-'+(c.id||Math.random()),
-        name:c.name||(c.localId||''),
-        nameEN:c.name||'',
-        set:c.set?(c.set.name||c.set.id||''):'',
-        number:c.localId||'',
-        rarity:c.rarity||'',
-        image:c.image?(c.image+'/high.webp'):'',
-        setLogo:'',
-        game:'pokemon-jp',
-        price:0,
-        category:'Cartas'
-      };
-    });
-  }catch(e){
-    // Fallback: search in English endpoint with JP sets
-    var url2='https://api.tcgdex.net/v2/en/cards?name='+encodeURIComponent(query);
-    var r2=await fetch(url2);
-    if(!r2.ok) return [];
-    var data2=await r2.json();
-    if(!Array.isArray(data2)) data2=[data2];
-    return data2.slice(0,60).map(function(c){
-      return{
-        id:'jp-'+(c.id||Math.random()),
-        name:c.name||'',
-        set:c.set?(c.set.name||c.set.id||''):'',
-        number:c.localId||'',
-        rarity:c.rarity||'',
-        image:c.image?(c.image+'/high.webp'):'',
-        setLogo:'',
-        game:'pokemon-jp',
-        price:0,
-        category:'Cartas'
-      };
-    });
-  }
+  // TCGdex: ?name=query uses laxist (contains) match by default
+  // Image URL = card.image + '/high.webp'
+  var url='https://api.tcgdex.net/v2/ja/cards?name='+encodeURIComponent(query);
+  var r=await fetch(url);
+  if(!r.ok) throw new Error('TCGdex '+r.status);
+  var data=await r.json();
+  if(!Array.isArray(data)||data.length===0) return [];
+  return data.slice(0,80).map(function(c){
+    var img=c.image?(c.image+'/high.webp'):'';
+    return{
+      id:'jp-'+c.id,
+      name:c.name||c.localId||'?',
+      set:c.set?(c.set.name||c.set.id||''):'',
+      number:c.localId||'',
+      rarity:'',
+      image:img,
+      setLogo:'',
+      game:'pokemon-jp',
+      price:0,
+      category:'Cartas'
+    };
+  });
 }
 
 async function loadJPSets(){
@@ -3959,14 +3937,15 @@ async function loadJPSets(){
   container.innerHTML='<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando sets japoneses...</div>';
   try{
     var r=await fetch('https://api.tcgdex.net/v2/ja/sets');
-    if(!r.ok) throw new Error();
+    if(!r.ok) throw new Error('TCGdex '+r.status);
     var sets=await r.json();
+    if(!Array.isArray(sets)||sets.length===0) throw new Error('Sin sets');
     sets=sets.sort(function(a,b){
       return (b.releaseDate||'').localeCompare(a.releaseDate||'');
     });
     renderJPSetsList(sets);
   }catch(e){
-    container.innerHTML='<div class="scanner-empty">Error cargando sets japoneses.</div>';
+    container.innerHTML='<div class="scanner-empty">Error cargando sets: '+e.message+'</div>';
   }
 }
 
@@ -3998,24 +3977,25 @@ async function importJPSet(setId, setName){
   var btn=event.target;
   btn.textContent='Cargando...';btn.disabled=true;
   try{
+    // Fetch full set with all cards
     var r=await fetch('https://api.tcgdex.net/v2/ja/sets/'+setId);
-    if(!r.ok) throw new Error();
+    if(!r.ok) throw new Error('TCGdex '+r.status);
     var setData=await r.json();
     var cards=setData.cards||[];
+    if(cards.length===0){toast('Set sin cartas disponibles','#f59e0b');btn.textContent='Sin cartas';return;}
+    var setLogo=setData.logo?(setData.logo+'.webp'):'';
     var imported=0;
     for(var i=0;i<cards.length;i++){
       var c=cards[i];
-      // Fetch individual card for image
-      var img='';
-      if(c.image) img=c.image+'/high.webp';
-      var item={
-        id:Date.now()+'-'+i,
+      var img=c.image?(c.image+'/high.webp'):'';
+      collection.push({
+        id:'jp-'+setId+'-'+c.localId+'-'+Date.now()+i,
         name:c.name||c.localId||'Carta JP',
         category:'Cartas',
         game:'pokemon-jp',
         set:setName,
         setId:setId,
-        setLogo:'',
+        setLogo:setLogo,
         number:c.localId||'',
         rarity:c.rarity||'',
         photos:img?[img]:[],
@@ -4025,18 +4005,17 @@ async function importJPSet(setId, setName){
         precioPagado:0,
         favorite:false,
         addedAt:new Date().toISOString()
-      };
-      collection.push(item);
+      });
       imported++;
     }
     await save();
     updateBadges();
     checkAchievements();
-    btn.textContent='✓ Importado';
-    toast(imported+' cartas JP de '+setName+' agregadas!','#818cf8');
+    btn.textContent='✓ '+imported+' cartas';
+    toast(imported+' cartas JP de '+setName+' importadas! 🎴','#818cf8');
   }catch(e){
     btn.textContent='Error';btn.disabled=false;
-    toast('Error importando set','#ef4444');
+    toast('Error: '+e.message,'#ef4444');
   }
 }
 
@@ -4129,7 +4108,7 @@ function renderScannerResults(cards){
       ?'<img class="scanner-result-img" src="'+card.image+'" loading="lazy"/>'
       :'<div class="scanner-result-img-empty">'+IC.grid(20)+'</div>';
     var clp=clpFromUSD(card.priceUSD);
-    var gameLabel={pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[card.game]||'';
+    var gameLabel={pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!','pokemon-jp':'Pokémon JP 🇯🇵'}[card.game]||'';
     div.innerHTML=imgHTML
       +'<div class="scanner-result-info">'
       +'<div class="scanner-result-name">'+card.name+'</div>'
