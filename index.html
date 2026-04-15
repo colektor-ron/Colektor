@@ -1360,10 +1360,6 @@ input[type="file"]{display:none;}
             <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20L12 2z"/><circle cx="12" cy="14" r="3"/><line x1="12" y1="8" x2="12" y2="10"/></svg></div>
             <div class="game-btn-name">Yu-Gi-Oh</div>
           </div>
-          <div class="game-btn" id="gameBtn-pokemon-jp" onclick="setGame('pokemon-jp')">
-            <div class="game-btn-icon"><svg width="24" height="24" viewBox="0 0 24 24"><rect width="24" height="24" rx="4" fill="#fff"/><circle cx="12" cy="12" r="6" fill="#BC002D"/></svg></div>
-            <div class="game-btn-name">Pokémon JP</div>
-          </div>
         </div>
       </div>
       <div class="scanner-search-wrap">
@@ -3874,14 +3870,13 @@ function closeScanner(){document.getElementById('scannerModal').classList.remove
 
 function setGame(game){
   currentGame=game;
-  ['pokemon','magic','yugioh','pokemon-jp'].forEach(function(g){
+  ['pokemon','magic','yugioh'].forEach(function(g){
     var btn=document.getElementById('gameBtn-'+g);
     if(btn)btn.classList.toggle('active',g===game);
   });
   document.getElementById('scannerResults').innerHTML='';
   var placeholders={
     pokemon:'Ej: Charizard, Pikachu, Mewtwo...',
-    'pokemon-jp':'Ej: リザードン, ピカチュウ, ミュウツー...',
     magic:'Ej: Black Lotus, Lightning Bolt...',
     yugioh:'Ej: Blue-Eyes White Dragon...'
   };
@@ -3897,7 +3892,6 @@ async function searchCards(){
   try{
     var cards=[];
     if(currentGame==='pokemon') cards=await searchPokemon(query);
-    else if(currentGame==='pokemon-jp') cards=await searchPokemonJP(query);
     else if(currentGame==='magic') cards=await searchMagic(query);
     else if(currentGame==='yugioh') cards=await searchYugioh(query);
     renderScannerResults(cards);
@@ -3907,112 +3901,6 @@ async function searchCards(){
 }
 
 
-async function searchPokemonJP(query){
-  // TCGdex: ?name=query uses laxist (contains) match by default
-  // Image URL = card.image + '/high.webp'
-  var url='https://api.tcgdex.net/v2/ja/cards?name='+encodeURIComponent(query);
-  var r=await fetch(url);
-  if(!r.ok) throw new Error('TCGdex '+r.status);
-  var data=await r.json();
-  if(!Array.isArray(data)||data.length===0) return [];
-  return data.slice(0,80).map(function(c){
-    var img=c.image?(c.image+'/high.webp'):'';
-    return{
-      id:'jp-'+c.id,
-      name:c.name||c.localId||'?',
-      set:c.set?(c.set.name||c.set.id||''):'',
-      number:c.localId||'',
-      rarity:'',
-      image:img,
-      setLogo:'',
-      game:'pokemon-jp',
-      price:0,
-      category:'Cartas'
-    };
-  });
-}
-
-async function loadJPSets(){
-  var container=document.getElementById('setsListContainer');
-  container.innerHTML='<div class="scanner-loading"><div class="scanner-spinner"></div>Cargando sets...</div>';
-  try{
-    // Use pokemontcg.io sets sorted by release date
-    var r=await fetch('https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate&pageSize=250');
-    if(!r.ok) throw new Error('Error '+r.status);
-    var d=await r.json();
-    var sets=d.data||[];
-    renderJPSetsList(sets);
-  }catch(e){
-    container.innerHTML='<div class="scanner-empty">Error: '+e.message+'</div>';
-  }
-}
-
-function renderJPSetsList(sets){
-  var container=document.getElementById('setsListContainer');
-  container.innerHTML='';
-  sets.forEach(function(s){
-    var row=document.createElement('div');
-    row.className='set-row';
-    var logo=(s.images&&s.images.logo)||'';
-    var logoEl=logo?('<img src="'+logo+'" style="height:28px;max-width:70px;object-fit:contain;">'):'<span style="font-size:18px">&#x1F1EF;&#x1F1F5;</span>';
-    var name=s.name||s.id||'';
-    var date=s.releaseDate||'';
-    var count=s.printedTotal||s.total||0;
-    row.innerHTML='<div style="display:flex;align-items:center;gap:12px;flex:1;">'+logoEl
-      +'<div><div style="font-size:13px;font-weight:600;">'+name+'</div>'
-      +'<div style="font-size:11px;color:#64748b;">'+date+(count?' · '+count+' cartas':'')+'</div></div></div>';
-    var btn=document.createElement('button');
-    btn.style.cssText='padding:6px 14px;background:#1B6DC0;color:#fff;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;';
-    btn.textContent='Importar';
-    btn.onclick=function(){importJPSet(s.id,name,logo);};
-    row.appendChild(btn);
-    container.appendChild(row);
-  });
-}
-
-async function importJPSet(setId, setName, setLogo){
-  var btn=event.target;
-  btn.textContent='Cargando...';btn.disabled=true;
-  try{
-    var r=await fetch('https://api.pokemontcg.io/v2/cards?q=set.id:'+encodeURIComponent(setId)+'&pageSize=500');
-    if(!r.ok) throw new Error('Error '+r.status);
-    var d=await r.json();
-    var cards=d.data||[];
-    if(!cards.length){toast('Set sin cartas disponibles','#f59e0b');btn.textContent='Vacío';return;}
-    var imported=0;
-    cards.forEach(function(c){
-      var clp=clpFromUSD((c.tcgplayer&&c.tcgplayer.prices)?((c.tcgplayer.prices.holofoil||c.tcgplayer.prices.normal||c.tcgplayer.prices.reverseHolofoil||{}).market||0):0);
-      collection.push({
-        id:Date.now()+'-jp-'+c.id,
-        name:c.name||'Carta',
-        category:'Cartas',
-        photos:c.images?[c.images.large||c.images.small||'']:[],
-        note:(c.rarity||'')+(c.number?' · #'+c.number:''),
-        year:new Date().getFullYear().toString(),
-        rating:0,review:'',favorite:false,
-        estado:'Nuevo',
-        valorActual:clp||0,
-        precioPagado:clp||0,
-        edicion:c.number||'',
-        tags:['Japonés','Pokémon JP'].concat(c.rarity?[c.rarity]:[]),
-        set:setName,
-        setId:setId,
-        setLogo:setLogo||'',
-        game:'pokemon-jp',
-        addedAt:new Date().toISOString()
-      });
-      imported++;
-    });
-    await save();
-    updateBadges();
-    checkAchievements();
-    btn.textContent='✓ '+imported;
-    toast(imported+' cartas JP de '+setName+' importadas! 🎴','#818cf8');
-  }catch(e){
-    btn.textContent='Error';btn.disabled=false;
-    toast('Error: '+e.message,'#ef4444');
-  }
-}
 
 async function searchPokemon(query){
   var url='https://api.pokemontcg.io/v2/cards?q=name:"'+encodeURIComponent(query)+'"&pageSize=250&orderBy=-set.releaseDate';
@@ -4103,7 +3991,7 @@ function renderScannerResults(cards){
       ?'<img class="scanner-result-img" src="'+card.image+'" loading="lazy"/>'
       :'<div class="scanner-result-img-empty">'+IC.grid(20)+'</div>';
     var clp=clpFromUSD(card.priceUSD);
-    var gameLabel={pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!','pokemon-jp':'Pokémon JP 🇯🇵'}[card.game]||'';
+    var gameLabel={pokemon:'Pokémon TCG',magic:'Magic: The Gathering',yugioh:'Yu-Gi-Oh!'}[card.game]||'';
     div.innerHTML=imgHTML
       +'<div class="scanner-result-info">'
       +'<div class="scanner-result-name">'+card.name+'</div>'
@@ -4133,7 +4021,7 @@ function addCardFromScanner(card){
     valorActual:clp||0,
     precioPagado:clp||0,
     edicion:card.number||'',
-    tags:(card.game==='pokemon-jp'?['Japonés','Pokémon JP']:[]).concat(card.rarity?[card.rarity]:[]),
+    tags:card.rarity?[card.rarity]:[],
     set:card.set||'',
     setLogo:card.setLogo||null,
     addedAt:Date.now()
@@ -4214,7 +4102,7 @@ async function loadSetsData(){
 
 function setSetsGame(game){
   currentGame = game;
-  ['pokemon','magic','yugioh','pokemon-jp'].forEach(function(g){
+  ['pokemon','magic','yugioh'].forEach(function(g){
     // Update both search tab and sets tab game buttons
     var b1 = document.getElementById('gameBtn-'+g);
     var b2 = document.getElementById('sgBtn-'+g);
