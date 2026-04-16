@@ -185,6 +185,29 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── PENDIENTES: GRID & SECTIONS ── */
+.pend-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 10px;}
+.pend-view-toggle{display:flex;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:3px;gap:2px;}
+.pend-view-btn{background:transparent;border:none;color:#64748b;padding:6px 10px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s ease;}
+.pend-view-btn:active{transform:scale(0.92);}
+.pend-view-btn.active{background:#1B6DC0;color:#fff;}
+.pend-section{margin-bottom:18px;}
+.pend-section-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:0 2px;}
+.pend-section-header .hdr-line{flex:1;height:1px;}
+.pend-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.pend-grid-card{position:relative;background:#2a2a2a;border:1px solid #333;border-radius:14px;overflow:hidden;cursor:pointer;aspect-ratio:0.85;display:flex;flex-direction:column;transition:transform 0.12s ease,opacity 0.12s ease;}
+.pend-grid-card:active{transform:scale(0.97);opacity:0.85;}
+.pend-grid-card.acquired{background:rgba(34,197,94,0.08);border-color:#22c55e;opacity:0.8;}
+.pend-grid-img{flex:1;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#3a3a3a;}
+.pend-grid-img img{width:100%;height:100%;object-fit:cover;}
+.pend-grid-body{padding:8px;}
+.pend-grid-name{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pend-grid-price{font-size:10px;color:#1B6DC0;margin-top:2px;font-weight:600;}
+.pend-grid-card.acquired .pend-grid-price{color:#22c55e;}
+.pend-grid-badge{position:absolute;top:6px;right:6px;background:#22c55e;color:#fff;border-radius:99px;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.pend-grid-dot{position:absolute;top:6px;left:6px;width:8px;height:8px;border-radius:50%;}
+
+
 /* ── FAB PENDIENTES ── */
 .fab-add{position:fixed;bottom:90px;right:16px;width:52px;height:52px;border-radius:50%;background:#1B6DC0;color:#fff;border:none;box-shadow:0 4px 20px rgba(27,109,192,0.5);display:flex;align-items:center;justify-content:center;z-index:200;cursor:pointer;transition:transform 0.12s ease,opacity 0.12s ease;}
 .fab-add:active{transform:scale(0.92);}
@@ -891,6 +914,17 @@ input[type="file"]{display:none;}
   <div class="filter-row" id="pStatusFilters"></div>
   <div class="filter-row2" id="pCatFilters"></div>
   <div id="pNewCatForm"></div>
+  <div class="pend-toolbar">
+    <div style="font-size:12px;color:#64748b;" id="pItemCount">—</div>
+    <div class="pend-view-toggle">
+      <button class="pend-view-btn" id="pViewList" onclick="setPendView('list')" title="Lista">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+      <button class="pend-view-btn" id="pViewGrid" onclick="setPendView('grid')" title="Cuadrícula">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </button>
+    </div>
+  </div>
   <div class="item-list" id="pItemList"></div>
   <div id="pAddSection"></div>
   <div class="hint">Toca un ítem para ver opciones · Toca el precio para marcar como adquirido</div>
@@ -1740,6 +1774,9 @@ function renderPendientes(){
     return sOk&&cOk;
   });
   var list=document.getElementById("pItemList");list.innerHTML="";
+  setTimeout(updatePendViewToggle, 0);
+  var countEl = document.getElementById('pItemCount');
+  if(countEl){ countEl.textContent = displayed.length + ' ítem' + (displayed.length!==1?'s':''); }
   if(!displayed.length){
     var emptyDiv=document.createElement('div');
     emptyDiv.className='empty-state';
@@ -1758,57 +1795,7 @@ function renderPendientes(){
     if(btnEmpty){btnEmpty.addEventListener('click',function(){showAddP=true;renderPendientes();});}
   }
 
-  displayed.forEach(function(item){
-    var dc=dotColor(item.category);
-    var expanded=expandedId===item.id;
-    var wrap=document.createElement("div");wrap.className="item-card";
-    wrap.style.background=item.acquired?"rgba(34,197,94,0.08)":"#2a2a2a";
-    wrap.style.border="1px solid "+(item.acquired?"#22c55e":"#333");
-    wrap.style.opacity=item.acquired?"0.8":"1";
-    var catOpts=FIXED_CATS.map(function(c){return '<option value="'+c+'"'+(c===item.category?' selected':'')+'>'+c+'</option>';}).join("");
-    var thumbHTML=item.photo
-      ?'<img class="item-thumb" src="'+item.photo+'"/>'
-      :'<div class="item-thumb-empty">'+IC.camera(20)+'</div>';
-    var expHTML="";
-    if(expanded){
-      expHTML='<div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:10px;">'
-        +'<div><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Nombre</div>'
-        +'<input id="en-'+item.id+'" value="'+item.name.replace(/"/g,"&quot;")+'" style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:7px 10px;font-size:13px;outline:none;"/></div>'
-        +'<div><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Notas</div>'
-        +'<input id="nt-'+item.id+'" value="'+(item.note||"").replace(/"/g,"&quot;")+'" placeholder="Ej: edición limitada, llega mayo..." style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:7px 10px;font-size:13px;outline:none;"/></div>'
-        +'<button onclick="saveEditP('+item.id+')" style="width:100%;padding:8px;background:#1B6DC0;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">'+IC.save(14)+' Guardar cambios</button>'
-        +'<div style="border-top:1px solid #2a2a2a;"></div>'
-        +'<div style="display:flex;gap:8px;">'
-        +'<div style="flex:1;"><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Foto</div>'
-        +'<div style="display:flex;flex-direction:column;gap:6px;">'
-        +'<button onclick="triggerUploadP('+item.id+')" style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:13px;font-weight:500;cursor:pointer;">'+(item.photo?"Cambiar foto":"Agregar foto")+'</button>'
-        +(item.photo?'<button onclick="removePhotoP('+item.id+')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;color:#ef4444;padding:8px 12px;font-size:13px;font-weight:500;cursor:pointer;">Quitar foto</button>':'')
-        +'</div></div>'
-        +'<div style="flex:1;"><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Categoría</div>'
-        +'<select onchange="changeCatP('+item.id+',this.value)" style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:7px 8px;font-size:12px;outline:none;cursor:pointer;">'+catOpts+'</select></div></div>'
-        +(item.photo?'<img src="'+item.photo+'" onclick="openModal(\''+item.photo+'\')" style="width:100%;max-height:160px;object-fit:contain;border-radius:10px;border:1px solid #3a3a3a;cursor:zoom-in;"/>':'')
-        +(item.acquired?'<button onclick="moveToCollection('+item.id+')" class="btn-move-col">'+IC.move(16)+' Mover a Mi Colección</button>':'')
-        +'<button onclick="toggleExpand('+item.id+')" style="width:100%;padding:7px;background:#2a2a2a;color:#64748b;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Cerrar</button></div>';
-    }
-    wrap.innerHTML='<div class="item-main">'
-      +thumbHTML
-      +'<div class="item-check '+(item.acquired?"done":"")+'">'+( item.acquired?IC.check(12):"")+'</div>'
-      +'<div class="item-info">'
-      +'<div class="item-name '+(item.acquired?"done":"")+'">'+item.name+'</div>'
-      +'<div class="item-cat"><span style="color:'+dc+'">●</span> '+(item.category||"Sin categoría")+'</div>'
-      +(item.note?'<div class="item-note">'+item.note+'</div>':'')
-      +'</div>'
-      +'<div class="item-price" style="color:'+(item.acquired?"#22c55e":"#1B6DC0")+'">'+fmt(item.price)+'</div>'
-      +'<button class="item-del" data-del="'+item.id+'">✕</button></div>'+expHTML;
-    wrap.querySelector(".item-main").onclick=function(e){
-      if(e.target.closest("[data-del]")){if(!confirm("¿Eliminar \""+item.name+"\"?"))return;pendientes=pendientes.filter(function(x){return x.id!==item.id;});if(expandedId===item.id)expandedId=null;save();renderPendientes();return;}
-      if(e.target.closest(".item-thumb-empty")){triggerUploadP(item.id);return;}
-      if(e.target.closest(".item-thumb")){openModal(item.photo);return;}
-      if(e.target.closest(".item-price")||e.target.closest(".item-check")){pendientes=pendientes.map(function(x){return x.id===item.id?Object.assign({},x,{acquired:!x.acquired}):x;});save();renderPendientes();return;}
-      toggleExpand(item.id);
-    };
-    list.appendChild(wrap);
-  });
+  renderPendientesItems(displayed, list);
 
   // Add section
   var addSec=document.getElementById("pAddSection");
@@ -5042,6 +5029,160 @@ function updateFab(){
   } else {
     fab.classList.remove('hidden');
   }
+}
+
+
+function renderPendListItem(item, list){
+    var dc=dotColor(item.category);
+    var expanded=expandedId===item.id;
+    var wrap=document.createElement("div");wrap.className="item-card";
+    wrap.style.background=item.acquired?"rgba(34,197,94,0.08)":"#2a2a2a";
+    wrap.style.border="1px solid "+(item.acquired?"#22c55e":"#333");
+    wrap.style.opacity=item.acquired?"0.8":"1";
+    var catOpts=FIXED_CATS.map(function(c){return '<option value="'+c+'"'+(c===item.category?' selected':'')+'>'+c+'</option>';}).join("");
+    var thumbHTML=item.photo
+      ?'<img class="item-thumb" src="'+item.photo+'"/>'
+      :'<div class="item-thumb-empty">'+IC.camera(20)+'</div>';
+    var expHTML="";
+    if(expanded){
+      expHTML='<div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:10px;">'
+        +'<div><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Nombre</div>'
+        +'<input id="en-'+item.id+'" value="'+item.name.replace(/"/g,"&quot;")+'" style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:7px 10px;font-size:13px;outline:none;"/></div>'
+        +'<div><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Notas</div>'
+        +'<input id="nt-'+item.id+'" value="'+(item.note||"").replace(/"/g,"&quot;")+'" placeholder="Ej: edición limitada, llega mayo..." style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:7px 10px;font-size:13px;outline:none;"/></div>'
+        +'<button onclick="saveEditP('+item.id+')" style="width:100%;padding:8px;background:#1B6DC0;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;">'+IC.save(14)+' Guardar cambios</button>'
+        +'<div style="border-top:1px solid #2a2a2a;"></div>'
+        +'<div style="display:flex;gap:8px;">'
+        +'<div style="flex:1;"><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Foto</div>'
+        +'<div style="display:flex;flex-direction:column;gap:6px;">'
+        +'<button onclick="triggerUploadP('+item.id+')" style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:8px 12px;font-size:13px;font-weight:500;cursor:pointer;">'+(item.photo?"Cambiar foto":"Agregar foto")+'</button>'
+        +(item.photo?'<button onclick="removePhotoP('+item.id+')" style="width:100%;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;color:#ef4444;padding:8px 12px;font-size:13px;font-weight:500;cursor:pointer;">Quitar foto</button>':'')
+        +'</div></div>'
+        +'<div style="flex:1;"><div style="font-size:10px;color:#64748b;margin-bottom:4px;">Categoría</div>'
+        +'<select onchange="changeCatP('+item.id+',this.value)" style="width:100%;background:#1e1e1e;border:1px solid #3a3a3a;border-radius:8px;color:#e2e8f0;padding:7px 8px;font-size:12px;outline:none;cursor:pointer;">'+catOpts+'</select></div></div>'
+        +(item.photo?'<img src="'+item.photo+'" onclick="openModal(\''+item.photo+'\')" style="width:100%;max-height:160px;object-fit:contain;border-radius:10px;border:1px solid #3a3a3a;cursor:zoom-in;"/>':'')
+        +(item.acquired?'<button onclick="moveToCollection('+item.id+')" class="btn-move-col">'+IC.move(16)+' Mover a Mi Colección</button>':'')
+        +'<button onclick="toggleExpand('+item.id+')" style="width:100%;padding:7px;background:#2a2a2a;color:#64748b;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">Cerrar</button></div>';
+    }
+    wrap.innerHTML='<div class="item-main">'
+      +thumbHTML
+      +'<div class="item-check '+(item.acquired?"done":"")+'">'+( item.acquired?IC.check(12):"")+'</div>'
+      +'<div class="item-info">'
+      +'<div class="item-name '+(item.acquired?"done":"")+'">'+item.name+'</div>'
+      +'<div class="item-cat"><span style="color:'+dc+'">●</span> '+(item.category||"Sin categoría")+'</div>'
+      +(item.note?'<div class="item-note">'+item.note+'</div>':'')
+      +'</div>'
+      +'<div class="item-price" style="color:'+(item.acquired?"#22c55e":"#1B6DC0")+'">'+fmt(item.price)+'</div>'
+      +'<button class="item-del" data-del="'+item.id+'">✕</button></div>'+expHTML;
+    wrap.querySelector(".item-main").onclick=function(e){
+      if(e.target.closest("[data-del]")){if(!confirm("¿Eliminar \""+item.name+"\"?"))return;pendientes=pendientes.filter(function(x){return x.id!==item.id;});if(expandedId===item.id)expandedId=null;save();renderPendientes();return;}
+      if(e.target.closest(".item-thumb-empty")){triggerUploadP(item.id);return;}
+      if(e.target.closest(".item-thumb")){openModal(item.photo);return;}
+      if(e.target.closest(".item-price")||e.target.closest(".item-check")){pendientes=pendientes.map(function(x){return x.id===item.id?Object.assign({},x,{acquired:!x.acquired}):x;});save();renderPendientes();return;}
+      toggleExpand(item.id);
+    };
+    list.appendChild(wrap);
+  }
+
+// ── PENDIENTES: VIEW MODE & SECTIONS ─────────────────
+var pendViewMode = localStorage.getItem('pendViewMode') || 'list';
+
+function setPendView(mode){
+  pendViewMode = mode;
+  localStorage.setItem('pendViewMode', mode);
+  renderPendientes();
+}
+
+function updatePendViewToggle(){
+  var btnList = document.getElementById('pViewList');
+  var btnGrid = document.getElementById('pViewGrid');
+  if(!btnList || !btnGrid) return;
+  btnList.classList.toggle('active', pendViewMode === 'list');
+  btnGrid.classList.toggle('active', pendViewMode === 'grid');
+}
+
+// Category metadata matching collection style
+function getPendCategoryMeta(cat){
+  if(cat === 'Cartas') return {color:'#818cf8', bg:'rgba(129,140,248,0.08)', icon:'🃏'};
+  if(cat === 'Figuras') return {color:'#22c55e', bg:'rgba(34,197,94,0.08)', icon:'🏆'};
+  if(cat === 'Gaming') return {color:'#06b6d4', bg:'rgba(6,182,212,0.08)', icon:'🎮'};
+  return {color:'#94a3b8', bg:'rgba(148,163,184,0.08)', icon:'📦'};
+}
+
+function makePendGridCard(item){
+  var dc = dotColor(item.category);
+  var card = document.createElement('div');
+  card.className = 'pend-grid-card' + (item.acquired ? ' acquired' : '');
+  var thumb = item.photo 
+    ? '<img src="'+item.photo+'"/>' 
+    : IC.camera(32);
+  card.innerHTML = 
+    '<div class="pend-grid-dot" style="background:'+dc+';"></div>'
+    + (item.acquired ? '<div class="pend-grid-badge">✓</div>' : '')
+    + '<div class="pend-grid-img">'+thumb+'</div>'
+    + '<div class="pend-grid-body">'
+    + '<div class="pend-grid-name">'+item.name+'</div>'
+    + (item.price ? '<div class="pend-grid-price">'+fmt(item.price)+'</div>' : '')
+    + '</div>';
+  card.onclick = function(){ toggleExpand(item.id); };
+  return card;
+}
+
+function renderPendientesItems(displayed, list){
+  // Group by category if we have multiple categories represented
+  var catsInUse = {};
+  displayed.forEach(function(it){
+    var c = it.category || 'Otros';
+    if(!catsInUse[c]) catsInUse[c] = [];
+    catsInUse[c].push(it);
+  });
+  var catKeys = Object.keys(catsInUse);
+  var useSections = catKeys.length > 1;
+  
+  // Order: Cartas, Figuras, Gaming, Otros
+  var order = ['Cartas','Figuras','Gaming','Otros'];
+  catKeys.sort(function(a,b){
+    var ia = order.indexOf(a), ib = order.indexOf(b);
+    if(ia === -1) ia = 99;
+    if(ib === -1) ib = 99;
+    return ia - ib;
+  });
+  
+  if(!useSections){
+    // No sections needed - just render items
+    if(pendViewMode === 'grid'){
+      var grid = document.createElement('div');
+      grid.className = 'pend-grid';
+      displayed.forEach(function(item){ grid.appendChild(makePendGridCard(item)); });
+      list.appendChild(grid);
+    } else {
+      displayed.forEach(function(item){ renderPendListItem(item, list); });
+    }
+    return;
+  }
+  
+  // Render each section
+  catKeys.forEach(function(cat){
+    var items = catsInUse[cat];
+    var meta = getPendCategoryMeta(cat);
+    var section = document.createElement('div');
+    section.className = 'pend-section';
+    var header = document.createElement('div');
+    header.className = 'pend-section-header';
+    header.style.color = meta.color;
+    header.innerHTML = '<span>'+meta.icon+'</span><span>'+cat+' ('+items.length+')</span><span class="hdr-line" style="background:'+meta.bg+';"></span>';
+    section.appendChild(header);
+    
+    if(pendViewMode === 'grid'){
+      var grid = document.createElement('div');
+      grid.className = 'pend-grid';
+      items.forEach(function(item){ grid.appendChild(makePendGridCard(item)); });
+      section.appendChild(grid);
+    } else {
+      items.forEach(function(item){ renderPendListItem(item, section); });
+    }
+    list.appendChild(section);
+  });
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
