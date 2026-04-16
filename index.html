@@ -571,7 +571,7 @@ input[type="file"]{display:none;}
 .badge-card{background:#2a2a2a;border-radius:12px;padding:12px 8px;text-align:center;border:1px solid #333;}
 .badge-card.unlocked{border-color:#f59e0b;background:rgba(245,158,11,0.06);}
 .badge-icon{width:28px;height:28px;margin:0 auto 6px;opacity:0.15;transition:opacity 0.3s;display:flex;align-items:center;justify-content:center;color:#e2e8f0;}
-.badge-card.unlocked .badge-icon{opacity:1;color:#f59e0b;}
+.badge-card.unlocked .badge-icon{opacity:1 !important;color:#f59e0b;}
 .badge-name{font-size:10px;font-weight:700;color:#555;}
 .badge-card.unlocked .badge-name{color:#f59e0b;}
 .badge-desc{font-size:9px;color:#444;margin-top:2px;line-height:1.4;}
@@ -1698,7 +1698,7 @@ function removeTag(id,tag){
 // RENDER PENDIENTES
 // ══════════════════════════════════════════════════════
 function renderPendientes(){
-  updateFab();
+  setTimeout(function(){updateFab();},0);
   var acquired=pendientes.filter(function(f){return f.acquired;});
   var totalAll=pendientes.reduce(function(s,f){return s+(f.price||0);},0);
   var totalPaid=acquired.reduce(function(s,f){return s+(f.price||0);},0);
@@ -3452,7 +3452,7 @@ function renderBadges(){
   ACHIEVEMENTS.forEach(function(ach){
     var unlocked=unlockedAchievements.indexOf(ach.id)>=0;
     var card=document.createElement('div');card.className='badge-card'+(unlocked?' unlocked':'');
-    card.innerHTML='<span class="badge-icon">'+ach.icon+'</span><div class="badge-name">'+ach.title+'</div><div class="badge-desc">'+ach.desc+'</div>';
+    card.innerHTML='<div class="badge-icon">'+ach.icon+'</div><div class="badge-name">'+ach.title+'</div><div class="badge-desc">'+ach.desc+'</div>';
     grid.appendChild(card);
   });
   container.innerHTML='';container.appendChild(grid);
