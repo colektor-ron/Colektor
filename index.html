@@ -5103,10 +5103,14 @@ function updatePendViewToggle(){
 
 // Category metadata matching collection style
 function getPendCategoryMeta(cat){
-  if(cat === 'Cartas') return {color:'#818cf8', bg:'rgba(129,140,248,0.08)', icon:'🃏'};
-  if(cat === 'Figuras') return {color:'#22c55e', bg:'rgba(34,197,94,0.08)', icon:'🏆'};
-  if(cat === 'Gaming') return {color:'#06b6d4', bg:'rgba(6,182,212,0.08)', icon:'🎮'};
-  return {color:'#94a3b8', bg:'rgba(148,163,184,0.08)', icon:'📦'};
+  var cartasIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="16" rx="2"/><path d="M8 5V3.5a1.5 1.5 0 0 1 1.5-1.5h9A1.5 1.5 0 0 1 20 3.5v13"/></svg>';
+  var figurasIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8 14v7m8-7v7M5 21h14"/></svg>';
+  var gamingIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>';
+  var otrosIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
+  if(cat === 'Cartas') return {color:'#818cf8', bg:'rgba(129,140,248,0.08)', icon:cartasIcon};
+  if(cat === 'Figuras') return {color:'#22c55e', bg:'rgba(34,197,94,0.08)', icon:figurasIcon};
+  if(cat === 'Gaming') return {color:'#06b6d4', bg:'rgba(6,182,212,0.08)', icon:gamingIcon};
+  return {color:'#94a3b8', bg:'rgba(148,163,184,0.08)', icon:otrosIcon};
 }
 
 function makePendGridCard(item){
@@ -5170,7 +5174,7 @@ function renderPendientesItems(displayed, list){
     var header = document.createElement('div');
     header.className = 'pend-section-header';
     header.style.color = meta.color;
-    header.innerHTML = '<span>'+meta.icon+'</span><span>'+cat+' ('+items.length+')</span><span class="hdr-line" style="background:'+meta.bg+';"></span>';
+    header.innerHTML = '<span style="display:inline-flex;align-items:center;">'+meta.icon+'</span><span>'+cat+' ('+items.length+')</span><span class="hdr-line" style="background:'+meta.bg+';"></span>';
     section.appendChild(header);
     
     if(pendViewMode === 'grid'){
