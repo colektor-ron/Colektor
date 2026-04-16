@@ -1505,7 +1505,7 @@ const IDB={
 
 const DOT=["#1B6DC0","#ef4444","#818cf8","#22c55e","#eab308","#06b6d4","#ec4899","#a78bfa"];
 const ESTADOS=["Nuevo","Abierto","En vitrina","Dañado"];
-const FIXED_CATS=["Cartas","Figuras","Gaming","Cómics","Música","Otros"];
+const FIXED_CATS=["Cartas","Figuras","Gaming","Modelismo","Cómics","Música","Otros"];
 
 let pendientes=[],categories=[],collection=[],trades=[],ownedCards={};
 let pStatusFilter="all",pCatFilter="all",colCatFilter="all",tradeFilter="all";
@@ -1542,7 +1542,7 @@ function save(){
 
 function fmt(n){if(!n&&n!==0)return'—';return"$"+Number(n).toLocaleString("es-CL");}
 function dotColor(cat){
-  var explicit={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Cómics":"#f97316","Música":"#ec4899","Otros":"#94a3b8"};
+  var explicit={"Cartas":"#818cf8","Figuras":"#22c55e","Gaming":"#06b6d4","Modelismo":"#eab308","Cómics":"#f97316","Música":"#ec4899","Otros":"#94a3b8"};
   if(explicit[cat])return explicit[cat];
   var i=categories.indexOf(cat);return i>=0?DOT[i%DOT.length]:"#555";
 }
@@ -2081,19 +2081,21 @@ function renderCollection(){
 
   var figureItems=nonCardItems.filter(function(c){return matchesCat(c,FIGURE_CATS);});
   var gamingItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&matchesCat(c,GAMING_CATS);});
-  var otherItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&!matchesCat(c,GAMING_CATS)&&c.category!=='Cómics'&&c.category!=='Música';});
+  var otherItems=nonCardItems.filter(function(c){return !matchesCat(c,FIGURE_CATS)&&!matchesCat(c,GAMING_CATS)&&c.category!=='Cómics'&&c.category!=='Música'&&c.category!=='Modelismo';});
   displayed=otherItems;
 
   // Split non-card items into categories
   var comicsItems=nonCardItems.filter(function(c){return c.category==='Cómics';});
   var musicaItems=nonCardItems.filter(function(c){return c.category==='Música';});
+  var modelismoItems=nonCardItems.filter(function(c){return c.category==='Modelismo';});
 
   var catRenderMap = [
-    {key:'Figuras', items:figureItems, color:'#22c55e'},
-    {key:'Gaming',  items:gamingItems, color:'#06b6d4'},
-    {key:'Cómics',  items:comicsItems, color:'#f97316'},
-    {key:'Música',  items:musicaItems, color:'#ec4899'},
-    {key:'Otros',   items:otherItems,  color:'#94a3b8'}
+    {key:'Figuras',   items:figureItems,    color:'#22c55e'},
+    {key:'Gaming',    items:gamingItems,    color:'#06b6d4'},
+    {key:'Modelismo', items:modelismoItems, color:'#eab308'},
+    {key:'Cómics',    items:comicsItems,    color:'#f97316'},
+    {key:'Música',    items:musicaItems,    color:'#ec4899'},
+    {key:'Otros',     items:otherItems,     color:'#94a3b8'}
   ];
   if(colCatFilter==='all'){
     catRenderMap.forEach(function(m){
@@ -2111,7 +2113,7 @@ function renderCollection(){
   }
 
 
-  if(!displayed.length&&!hasCards&&!figureItems.length&&!gamingItems.length&&!comicsItems.length&&!musicaItems.length){
+  if(!displayed.length&&!hasCards&&!figureItems.length&&!gamingItems.length&&!comicsItems.length&&!musicaItems.length&&!modelismoItems.length){
     hint.textContent='Sin ítems aquí';
   }
 }
@@ -4485,6 +4487,7 @@ function renderCustomFolders(catItems, category, color, content){
     Gaming:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="3"/><line x1="8" y1="12" x2="12" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><circle cx="16" cy="11" r="0.5" fill="'+color+'"/><circle cx="18" cy="13" r="0.5" fill="'+color+'"/></svg>',
     "Cómics":'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
     "Música":'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+    Modelismo:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',
     Otros:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="'+color+'" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/></svg>'
   };
   var title=document.createElement('div');title.className='custom-folders-title';
@@ -5105,11 +5108,17 @@ function updatePendViewToggle(){
 function getPendCategoryMeta(cat){
   var cartasIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="13" height="16" rx="2"/><path d="M8 5V3.5a1.5 1.5 0 0 1 1.5-1.5h9A1.5 1.5 0 0 1 20 3.5v13"/></svg>';
   var figurasIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M8 14v7m8-7v7M5 21h14"/></svg>';
-  var gamingIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/></svg>';
-  var otrosIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>';
+  var gamingIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="3"/><line x1="8" y1="12" x2="12" y2="12"/><line x1="10" y1="10" x2="10" y2="14"/><circle cx="16" cy="11" r="0.5" fill="currentColor"/><circle cx="18" cy="13" r="0.5" fill="currentColor"/></svg>';
+  var modelismoIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>';
+  var comicsIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+  var musicaIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+  var otrosIcon = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/></svg>';
   if(cat === 'Cartas') return {color:'#818cf8', bg:'rgba(129,140,248,0.08)', icon:cartasIcon};
   if(cat === 'Figuras') return {color:'#22c55e', bg:'rgba(34,197,94,0.08)', icon:figurasIcon};
   if(cat === 'Gaming') return {color:'#06b6d4', bg:'rgba(6,182,212,0.08)', icon:gamingIcon};
+  if(cat === 'Modelismo') return {color:'#eab308', bg:'rgba(234,179,8,0.08)', icon:modelismoIcon};
+  if(cat === 'Cómics') return {color:'#f97316', bg:'rgba(249,115,22,0.08)', icon:comicsIcon};
+  if(cat === 'Música') return {color:'#ec4899', bg:'rgba(236,72,153,0.08)', icon:musicaIcon};
   return {color:'#94a3b8', bg:'rgba(148,163,184,0.08)', icon:otrosIcon};
 }
 
