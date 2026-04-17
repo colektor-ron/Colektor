@@ -5264,21 +5264,7 @@ function renderPendientesItems(displayed, list){
     return ia - ib;
   });
   
-  // Decide if we use sections (multiple categories or we have folders)
-  var hasFolders = pendFolders.length > 0;
-  var useSections = catKeys.length > 1 || hasFolders;
-  
-  if(!useSections){
-    if(pendViewMode === 'grid'){
-      var grid = document.createElement('div');
-      grid.className = 'pend-grid';
-      displayed.forEach(function(item){ grid.appendChild(makePendGridCard(item)); });
-      list.appendChild(grid);
-    } else {
-      displayed.forEach(function(item){ renderPendListItem(item, list); });
-    }
-    return;
-  }
+  // Always render sections so folder buttons are visible
   
   // Render each section with folders + loose items
   catKeys.forEach(function(cat){
