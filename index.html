@@ -185,6 +185,47 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+/* ── PENDIENTES: SUBCARPETAS ── */
+.pend-folders-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+.pend-folder-card{background:#2a2a2a;border:1px solid #333;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;aspect-ratio:1.7;display:flex;flex-direction:column;transition:transform 0.12s ease,opacity 0.12s ease;}
+.pend-folder-card:active{transform:scale(0.97);opacity:0.85;}
+.pend-folder-cover{flex:1;background:#1a1a1a;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#3a3a3a;position:relative;}
+.pend-folder-cover img{width:100%;height:100%;object-fit:cover;}
+.pend-folder-cover-tint{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.6) 0%,transparent 60%);}
+.pend-folder-body{padding:8px 10px;}
+.pend-folder-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pend-folder-count{font-size:10px;color:#64748b;margin-top:1px;}
+.pend-folder-menu{position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.5);border:none;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);}
+.btn-new-pfolder{background:rgba(27,109,192,0.1);border:1px solid rgba(27,109,192,0.3);color:#1B6DC0;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.12s;}
+.btn-new-pfolder:active{transform:scale(0.95);}
+
+/* Folder detail view */
+.pfolder-detail{position:fixed;inset:0;background:#0f0f0f;z-index:400;display:none;flex-direction:column;overflow-y:auto;padding-bottom:40px;}
+.pfolder-detail.open{display:flex;}
+.pfolder-detail-header{padding:54px 16px 12px;background:linear-gradient(to bottom,#1a1a1a,transparent);position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;}
+.pfolder-back{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.08);color:#e2e8f0;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;}
+.pfolder-detail-title{font-size:18px;font-weight:800;flex:1;}
+.pfolder-detail-count{font-size:11px;color:#64748b;margin-top:2px;font-weight:500;}
+.pfolder-actions{display:flex;gap:6px;}
+.pfolder-action-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:#94a3b8;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;}
+.pfolder-action-btn.danger{color:#ef4444;border-color:rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);}
+.pfolder-content{padding:0 12px;}
+
+/* Folder modal */
+.pfolder-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.pfolder-modal.open{display:flex;}
+.pfolder-modal-box{background:#1e1e1e;border:1px solid #333;border-radius:16px;width:100%;max-width:360px;padding:20px;}
+.pfolder-modal-title{font-size:16px;font-weight:800;margin-bottom:16px;}
+.pfolder-modal-label{font-size:11px;color:#64748b;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+.pfolder-modal-input{width:100%;background:#0f0f0f;border:1px solid #333;border-radius:8px;padding:9px 12px;color:#e2e8f0;font-size:14px;outline:none;margin-bottom:14px;box-sizing:border-box;}
+.pfolder-modal-cover{width:100%;aspect-ratio:1.7;border:2px dashed #333;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px;cursor:pointer;margin-bottom:14px;overflow:hidden;background:#0f0f0f;}
+.pfolder-modal-cover img{width:100%;height:100%;object-fit:cover;}
+.pfolder-modal-actions{display:flex;gap:8px;margin-top:8px;}
+.pfolder-btn-save{flex:1;background:#1B6DC0;color:#fff;border:none;border-radius:10px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;transition:transform 0.12s;}
+.pfolder-btn-save:active{transform:scale(0.97);opacity:0.9;}
+.pfolder-btn-cancel{background:#2a2a2a;color:#94a3b8;border:none;border-radius:10px;padding:11px 16px;font-size:14px;cursor:pointer;}
+
+
 /* ── PENDIENTES: GRID & SECTIONS ── */
 .pend-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 10px;}
 .pend-view-toggle{display:flex;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:3px;gap:2px;}
@@ -1474,6 +1515,59 @@ input[type="file"]{display:none;}
   </div>
 </div>
 
+
+
+<!-- PENDIENTES FOLDER MODAL -->
+<div class="pfolder-modal" id="pfolderModal" onclick="handlePfolderModalClick(event)">
+  <div class="pfolder-modal-box">
+    <div class="pfolder-modal-title" id="pfolderModalTitle">Nueva carpeta</div>
+    <div class="pfolder-modal-label">Foto de portada</div>
+    <div class="pfolder-modal-cover" id="pfolderModalCover" onclick="pfolderPickCover()">
+      <span id="pfolderCoverPlaceholder">+ Agregar foto</span>
+      <img id="pfolderCoverImg" style="display:none;"/>
+    </div>
+    <div class="pfolder-modal-label">Nombre de la carpeta</div>
+    <input class="pfolder-modal-input" id="pfolderNameInput" placeholder="Ej: Dragon Ball, Marvel..."/>
+    <div class="pfolder-modal-label">Categoría</div>
+    <select class="pfolder-modal-input" id="pfolderCatSelect">
+      <option>Figuras</option>
+      <option>Cartas</option>
+      <option>Gaming</option>
+      <option>Modelismo</option>
+      <option>Cómics</option>
+      <option>Música</option>
+      <option>Otros</option>
+    </select>
+    <div class="pfolder-modal-actions">
+      <button class="pfolder-btn-cancel" onclick="closePfolderModal()">Cancelar</button>
+      <button class="pfolder-btn-save" onclick="savePfolder()">Guardar</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="pfolderCoverFile" accept="image/*" style="display:none;"/>
+
+<!-- PENDIENTES FOLDER DETAIL -->
+<div class="pfolder-detail" id="pfolderDetail">
+  <div class="pfolder-detail-header">
+    <button class="pfolder-back" onclick="closePfolderDetail()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Atrás
+    </button>
+    <div style="flex:1;">
+      <div class="pfolder-detail-title" id="pfolderDetailTitle">—</div>
+      <div class="pfolder-detail-count" id="pfolderDetailCount">0 ítems</div>
+    </div>
+    <div class="pfolder-actions">
+      <button class="pfolder-action-btn" onclick="editCurrentPfolder()" title="Editar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+      <button class="pfolder-action-btn danger" onclick="deleteCurrentPfolder()" title="Eliminar">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="pfolder-content" id="pfolderDetailContent"></div>
+</div>
 
 <input type="file" id="fileInputP" accept="image/*" onchange="handleFileP(event)"/>
 <input type="file" id="colPhotoInput" accept="image/*" onchange="handleColPhoto(event)"/>
@@ -5142,18 +5236,27 @@ function makePendGridCard(item){
 }
 
 function renderPendientesItems(displayed, list){
-  // Group by category if we have multiple categories represented
+  // Group by category
   var catsInUse = {};
   displayed.forEach(function(it){
     var c = it.category || 'Otros';
     if(!catsInUse[c]) catsInUse[c] = [];
     catsInUse[c].push(it);
   });
-  var catKeys = Object.keys(catsInUse);
-  var useSections = catKeys.length > 1;
   
-  // Order: Cartas, Figuras, Gaming, Otros
-  var order = ['Cartas','Figuras','Gaming','Otros'];
+  // Include categories that have folders even if no loose items right now
+  pendFolders.forEach(function(f){
+    if(!catsInUse[f.category]) catsInUse[f.category] = [];
+  });
+  
+  var catKeys = Object.keys(catsInUse);
+  // Filter by pCatFilter if not 'all'
+  if(pCatFilter !== 'all'){
+    catKeys = catKeys.filter(function(k){return k===pCatFilter;});
+  }
+  
+  // Order: Cartas, Figuras, Gaming, Modelismo, Cómics, Música, Otros
+  var order = ['Cartas','Figuras','Gaming','Modelismo','Cómics','Música','Otros'];
   catKeys.sort(function(a,b){
     var ia = order.indexOf(a), ib = order.indexOf(b);
     if(ia === -1) ia = 99;
@@ -5161,8 +5264,11 @@ function renderPendientesItems(displayed, list){
     return ia - ib;
   });
   
+  // Decide if we use sections (multiple categories or we have folders)
+  var hasFolders = pendFolders.length > 0;
+  var useSections = catKeys.length > 1 || hasFolders;
+  
   if(!useSections){
-    // No sections needed - just render items
     if(pendViewMode === 'grid'){
       var grid = document.createElement('div');
       grid.className = 'pend-grid';
@@ -5174,28 +5280,284 @@ function renderPendientesItems(displayed, list){
     return;
   }
   
-  // Render each section
+  // Render each section with folders + loose items
   catKeys.forEach(function(cat){
-    var items = catsInUse[cat];
+    var catItems = catsInUse[cat] || [];
+    var catFolders = pendFolders.filter(function(f){return f.category===cat;});
+    if(!catItems.length && !catFolders.length) return;
+    
     var meta = getPendCategoryMeta(cat);
     var section = document.createElement('div');
     section.className = 'pend-section';
+    
+    // Header with "+ Carpeta" button
     var header = document.createElement('div');
     header.className = 'pend-section-header';
     header.style.color = meta.color;
-    header.innerHTML = '<span style="display:inline-flex;align-items:center;">'+meta.icon+'</span><span>'+cat+' ('+items.length+')</span><span class="hdr-line" style="background:'+meta.bg+';"></span>';
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    header.style.gap = '8px';
+    header.innerHTML = '<span style="display:inline-flex;align-items:center;">'+meta.icon+'</span><span>'+cat+' ('+catItems.length+')</span><span class="hdr-line" style="flex:1;height:1px;background:'+meta.bg+';"></span>';
+    var addFolderBtn = document.createElement('button');
+    addFolderBtn.className = 'btn-new-pfolder';
+    addFolderBtn.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Carpeta';
+    addFolderBtn.onclick = function(e){e.stopPropagation();openNewPfolderModal(cat);};
+    header.appendChild(addFolderBtn);
     section.appendChild(header);
     
-    if(pendViewMode === 'grid'){
-      var grid = document.createElement('div');
-      grid.className = 'pend-grid';
-      items.forEach(function(item){ grid.appendChild(makePendGridCard(item)); });
-      section.appendChild(grid);
-    } else {
-      items.forEach(function(item){ renderPendListItem(item, section); });
+    // Folders row
+    if(catFolders.length){
+      var foldersRow = document.createElement('div');
+      foldersRow.className = 'pend-folders-row';
+      catFolders.forEach(function(f){ foldersRow.appendChild(makePfolderCard(f)); });
+      section.appendChild(foldersRow);
     }
+    
+    // Show items NOT in any folder for this category
+    var folderItemIds = [];
+    catFolders.forEach(function(f){(f.itemIds||[]).forEach(function(id){folderItemIds.push(id);});});
+    var looseItems = catItems.filter(function(it){return !folderItemIds.includes(it.id);});
+    
+    if(looseItems.length){
+      if(pendViewMode === 'grid'){
+        var grid = document.createElement('div');
+        grid.className = 'pend-grid';
+        looseItems.forEach(function(item){ grid.appendChild(makePendGridCard(item)); });
+        section.appendChild(grid);
+      } else {
+        looseItems.forEach(function(item){ renderPendListItem(item, section); });
+      }
+    }
+    
     list.appendChild(section);
   });
+}
+
+
+// ── PENDIENTES: SUBCARPETAS ──────────────────────────
+var pendFolders = []; // [{id, name, category, cover, itemIds, addedAt}]
+var editingPfolderId = null;
+var pfolderCoverTemp = null;
+var currentPfolderId = null;
+
+async function loadPendFolders(){
+  try{var f=await IDB.get('pendFolders');if(f)pendFolders=f;}catch(e){}
+}
+function savePendFolders(){IDB.set('pendFolders',pendFolders).catch(function(){});}
+
+function openNewPfolderModal(cat){
+  editingPfolderId = null;
+  pfolderCoverTemp = null;
+  document.getElementById('pfolderModalTitle').textContent = 'Nueva carpeta';
+  document.getElementById('pfolderNameInput').value = '';
+  document.getElementById('pfolderCatSelect').value = cat || 'Figuras';
+  document.getElementById('pfolderCoverImg').style.display='none';
+  document.getElementById('pfolderCoverImg').src='';
+  document.getElementById('pfolderCoverPlaceholder').style.display='block';
+  document.getElementById('pfolderModal').classList.add('open');
+}
+
+function openEditPfolderModal(folder){
+  editingPfolderId = folder.id;
+  pfolderCoverTemp = folder.cover || null;
+  document.getElementById('pfolderModalTitle').textContent = 'Editar carpeta';
+  document.getElementById('pfolderNameInput').value = folder.name;
+  document.getElementById('pfolderCatSelect').value = folder.category;
+  if(folder.cover){
+    document.getElementById('pfolderCoverImg').src = folder.cover;
+    document.getElementById('pfolderCoverImg').style.display='block';
+    document.getElementById('pfolderCoverPlaceholder').style.display='none';
+  }
+  document.getElementById('pfolderModal').classList.add('open');
+}
+
+function closePfolderModal(){document.getElementById('pfolderModal').classList.remove('open');}
+function handlePfolderModalClick(e){if(e.target===document.getElementById('pfolderModal'))closePfolderModal();}
+
+function pfolderPickCover(){document.getElementById('pfolderCoverFile').click();}
+
+document.addEventListener('DOMContentLoaded',function(){
+  var input=document.getElementById('pfolderCoverFile');
+  if(input){
+    input.addEventListener('change',function(e){
+      var file=e.target.files[0];if(!file)return;
+      var reader=new FileReader();
+      reader.onload=function(evt){
+        pfolderCoverTemp=evt.target.result;
+        document.getElementById('pfolderCoverImg').src=pfolderCoverTemp;
+        document.getElementById('pfolderCoverImg').style.display='block';
+        document.getElementById('pfolderCoverPlaceholder').style.display='none';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+});
+
+function savePfolder(){
+  var name=document.getElementById('pfolderNameInput').value.trim();
+  var cat=document.getElementById('pfolderCatSelect').value;
+  if(!name){toast('Ponle un nombre a la carpeta','#ef4444');return;}
+  if(editingPfolderId){
+    pendFolders=pendFolders.map(function(f){
+      return f.id===editingPfolderId?Object.assign({},f,{name:name,category:cat,cover:pfolderCoverTemp||f.cover}):f;
+    });
+    toast('Carpeta actualizada!');
+  } else {
+    pendFolders.push({
+      id:Date.now()+'_'+Math.random().toString(36).substr(2,5),
+      name:name,category:cat,cover:pfolderCoverTemp||null,itemIds:[],addedAt:Date.now()
+    });
+    toast('Carpeta creada!');
+  }
+  savePendFolders();
+  closePfolderModal();
+  renderPendientes();
+}
+
+function togglePfolderItem(folderId, itemId){
+  pendFolders=pendFolders.map(function(f){
+    if(f.id!==folderId)return f;
+    var ids=f.itemIds||[];
+    if(ids.includes(itemId)) ids=ids.filter(function(i){return i!==itemId;});
+    else ids=ids.concat([itemId]);
+    return Object.assign({},f,{itemIds:ids});
+  });
+  savePendFolders();
+  if(currentPfolderId===folderId) renderPfolderDetail();
+}
+
+function openPfolderDetail(folderId){
+  currentPfolderId=folderId;
+  document.getElementById('pfolderDetail').classList.add('open');
+  renderPfolderDetail();
+}
+
+function closePfolderDetail(){
+  document.getElementById('pfolderDetail').classList.remove('open');
+  currentPfolderId=null;
+  renderPendientes();
+}
+
+function renderPfolderDetail(){
+  var folder=pendFolders.find(function(f){return f.id===currentPfolderId;});
+  if(!folder){closePfolderDetail();return;}
+  document.getElementById('pfolderDetailTitle').textContent=folder.name;
+  var items=pendientes.filter(function(it){return (folder.itemIds||[]).includes(it.id);});
+  document.getElementById('pfolderDetailCount').textContent=items.length+' ítem'+(items.length!==1?'s':'')+' · '+folder.category;
+  
+  var content=document.getElementById('pfolderDetailContent');
+  content.innerHTML='';
+  
+  // Picker button
+  var pickerBtn=document.createElement('button');
+  pickerBtn.style.cssText='width:100%;padding:11px;background:rgba(27,109,192,0.1);border:1px dashed rgba(27,109,192,0.4);border-radius:10px;color:#1B6DC0;font-size:13px;font-weight:600;margin:12px 0;cursor:pointer;';
+  pickerBtn.innerHTML='+ Gestionar ítems de esta carpeta';
+  pickerBtn.onclick=function(){openPfolderPicker();};
+  content.appendChild(pickerBtn);
+  
+  if(!items.length){
+    var empty=document.createElement('div');
+    empty.style.cssText='text-align:center;padding:40px 20px;color:#555;';
+    empty.innerHTML='<div style="font-size:48px;margin-bottom:8px;opacity:0.3;">📁</div><div style="font-size:13px;">Carpeta vacía</div><div style="font-size:11px;margin-top:4px;">Toca el botón de arriba para agregar ítems</div>';
+    content.appendChild(empty);
+    return;
+  }
+  
+  if(pendViewMode==='grid'){
+    var grid=document.createElement('div');grid.className='pend-grid';
+    items.forEach(function(item){grid.appendChild(makePendGridCard(item));});
+    content.appendChild(grid);
+  } else {
+    items.forEach(function(item){renderPendListItem(item,content);});
+  }
+}
+
+function editCurrentPfolder(){
+  var folder=pendFolders.find(function(f){return f.id===currentPfolderId;});
+  if(folder) openEditPfolderModal(folder);
+}
+
+function deleteCurrentPfolder(){
+  if(!confirm('¿Eliminar esta carpeta? Los ítems NO se eliminarán, solo salen de la carpeta.'))return;
+  pendFolders=pendFolders.filter(function(f){return f.id!==currentPfolderId;});
+  savePendFolders();
+  closePfolderDetail();
+  toast('Carpeta eliminada');
+}
+
+function openPfolderPicker(){
+  var folder=pendFolders.find(function(f){return f.id===currentPfolderId;});
+  if(!folder)return;
+  // Items available: same category as folder, not in other folders of same category
+  var sameCat=pendientes.filter(function(it){return it.category===folder.category;});
+  var otherFolderIds=[];
+  pendFolders.forEach(function(f){
+    if(f.id!==folder.id&&f.category===folder.category){
+      (f.itemIds||[]).forEach(function(id){otherFolderIds.push(id);});
+    }
+  });
+  var available=sameCat.filter(function(it){return !otherFolderIds.includes(it.id);});
+  
+  var content=document.getElementById('pfolderDetailContent');
+  content.innerHTML='';
+  
+  var header=document.createElement('div');
+  header.style.cssText='padding:12px 0;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+  header.innerHTML='<div><div style="font-size:13px;font-weight:700;">Selecciona ítems</div><div style="font-size:11px;color:#64748b;margin-top:2px;">Toca para agregar o quitar</div></div>';
+  var doneBtn=document.createElement('button');
+  doneBtn.style.cssText='background:#1B6DC0;color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;';
+  doneBtn.textContent='Listo';
+  doneBtn.onclick=function(){renderPfolderDetail();};
+  header.appendChild(doneBtn);
+  content.appendChild(header);
+  
+  if(!available.length){
+    var empty=document.createElement('div');
+    empty.style.cssText='text-align:center;padding:40px 20px;color:#555;font-size:13px;';
+    empty.textContent='No hay ítems disponibles en la categoría '+folder.category+'. Todos están en otras carpetas o no tienes aún.';
+    content.appendChild(empty);
+    return;
+  }
+  
+  var list=document.createElement('div');
+  list.style.cssText='display:flex;flex-direction:column;gap:6px;margin-bottom:20px;';
+  available.forEach(function(item){
+    var inFolder=(folder.itemIds||[]).includes(item.id);
+    var row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 12px;background:'+(inFolder?'rgba(27,109,192,0.12)':'#2a2a2a')+';border:1px solid '+(inFolder?'#1B6DC0':'#333')+';border-radius:10px;cursor:pointer;transition:all 0.12s;';
+    var thumb=item.photo?'<img src="'+item.photo+'" style="width:36px;height:36px;object-fit:cover;border-radius:7px;flex-shrink:0;"/>':'<div style="width:36px;height:36px;background:#1a1a1a;border-radius:7px;display:flex;align-items:center;justify-content:center;color:#3a3a3a;flex-shrink:0;">'+IC.camera(16)+'</div>';
+    row.innerHTML=thumb+'<div style="flex:1;overflow:hidden;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+item.name+'</div>'+(item.price?'<div style="font-size:11px;color:#1B6DC0;margin-top:1px;">'+fmt(item.price)+'</div>':'')+'</div><div style="width:22px;height:22px;border-radius:50%;border:2px solid '+(inFolder?'#1B6DC0':'#555')+';background:'+(inFolder?'#1B6DC0':'transparent')+';display:flex;align-items:center;justify-content:center;flex-shrink:0;">'+(inFolder?'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':'')+'</div>';
+    row.onclick=function(){togglePfolderItem(folder.id,item.id);openPfolderPicker();};
+    list.appendChild(row);
+  });
+  content.appendChild(list);
+}
+
+function makePfolderCard(folder){
+  var items=pendientes.filter(function(it){return (folder.itemIds||[]).includes(it.id);});
+  var card=document.createElement('div');
+  card.className='pend-folder-card';
+  var coverHTML;
+  if(folder.cover){
+    coverHTML='<img src="'+folder.cover+'"/><div class="pend-folder-cover-tint"></div>';
+  } else if(items.length){
+    var withPhotos=items.filter(function(i){return i.photo;}).slice(0,4);
+    if(withPhotos.length){
+      coverHTML='<div style="width:100%;height:100%;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#333;">';
+      for(var i=0;i<4;i++){
+        if(withPhotos[i]) coverHTML+='<div style="background:url('+withPhotos[i].photo+') center/cover #1a1a1a;"></div>';
+        else coverHTML+='<div style="background:#1a1a1a;"></div>';
+      }
+      coverHTML+='</div><div class="pend-folder-cover-tint"></div>';
+    } else {
+      coverHTML=IC.grid(32);
+    }
+  } else {
+    coverHTML='<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+  }
+  card.innerHTML='<div class="pend-folder-cover">'+coverHTML+'</div><div class="pend-folder-body"><div class="pend-folder-name">'+folder.name+'</div><div class="pend-folder-count">'+items.length+' ítem'+(items.length!==1?'s':'')+'</div></div>';
+  card.onclick=function(){openPfolderDetail(folder.id);};
+  return card;
 }
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
@@ -5222,7 +5584,7 @@ function catIcon(cat,size){
   return d[k]||d['Otros'];
 }
 
-async function init(){await load();await loadCustomFolders();await loadProfile();
+async function init(){await load();await loadCustomFolders();await loadPendFolders();await loadProfile();
   initNotifications();
   saveDailySnapshot();await loadThemes();await loadAchievements();applyProfile();applyThemes();renderPendientes();updateBadges();checkAchievements();checkOnboarding();doSilentBackup();startAutoBackup();listenForUpdates();checkAutoBackupOnStart();}
 init();
