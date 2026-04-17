@@ -185,6 +185,30 @@ button{cursor:pointer;border:none;border-radius:8px;font-weight:600;}
 .toast.show{opacity:1;}
 input[type="file"]{display:none;}
 
+
+/* ── TOGGLE SWITCH ── */
+.exp-toggle{width:38px;height:22px;border-radius:99px;background:#2a2a2a;border:1px solid #333;position:relative;transition:background 0.2s;flex-shrink:0;}
+.exp-toggle.on{background:#1B6DC0;border-color:#1B6DC0;}
+.exp-toggle-dot{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#94a3b8;transition:all 0.25s cubic-bezier(0.34,1.56,0.64,1);}
+.exp-toggle.on .exp-toggle-dot{left:18px;background:#fff;}
+
+/* ── TRANSICIONES DE PESTAÑAS ── */
+.page{animation:pageEnter 0.28s cubic-bezier(0.25,0.46,0.45,0.94);}
+@keyframes pageEnter{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.page.fade-out{animation:pageExit 0.15s ease-out forwards;}
+@keyframes pageExit{
+  from{opacity:1;transform:translateY(0);}
+  to{opacity:0;transform:translateY(-4px);}
+}
+
+/* ── MINI-TOAST (para sonido toggle) ── */
+.sound-mini{position:fixed;bottom:95px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e1e1e;border:1px solid #2a2a2a;color:#e2e8f0;padding:8px 14px;border-radius:99px;font-size:12px;font-weight:600;z-index:9991;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1);display:flex;align-items:center;gap:6px;box-shadow:0 4px 16px rgba(0,0,0,0.4);}
+.sound-mini.show{transform:translateX(-50%) translateY(0);}
+
+
 /* ── PENDIENTES: SUBCARPETAS ── */
 .pend-folders-row{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
 .pend-folder-card{background:#2a2a2a;border:1px solid #333;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;aspect-ratio:1.7;display:flex;flex-direction:column;transition:transform 0.12s ease,opacity 0.12s ease;}
@@ -1127,6 +1151,20 @@ input[type="file"]{display:none;}
   </div>
 
   <div class="set-section">
+    <div class="set-title">Experiencia</div>
+    <div class="set-row" id="soundRow" onclick="toggleSound();updateExpToggles();">
+      <div class="set-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+      <div class="set-text"><div class="set-label">Sonidos</div><div class="set-sub" id="soundSub">Efectos suaves al interactuar</div></div>
+      <div class="exp-toggle" id="soundToggle"><div class="exp-toggle-dot"></div></div>
+    </div>
+    <div class="set-row" id="hapticRow" onclick="toggleHaptic();updateExpToggles();">
+      <div class="set-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+      <div class="set-text"><div class="set-label">Vibración</div><div class="set-sub" id="hapticSub">Feedback al tocar botones</div></div>
+      <div class="exp-toggle" id="hapticToggle"><div class="exp-toggle-dot"></div></div>
+    </div>
+  </div>
+
+  <div class="set-section">
     <div class="set-title">Datos</div>
     <div class="set-row" onclick="exportData()">
       <div class="set-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
@@ -1652,13 +1690,24 @@ function updateBadges(){
 }
 
 function switchTab(tab){
+  // Haptic + sound feedback for tab change
+  haptic('light');
+  playTone(550, 0.05, 'sine', 0.05);
+  
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById('page-'+tab).classList.add('active');
+  var page = document.getElementById('page-'+tab);
+  page.classList.add('active');
+  // Retrigger the entrance animation
+  page.style.animation = 'none';
+  page.offsetHeight; // force reflow
+  page.style.animation = '';
   document.getElementById('tab-'+tab).classList.add('active');
+  if(typeof currentTab !== 'undefined') currentTab = tab;
+  if(typeof updateFab === 'function') updateFab();
   if(tab==='coleccion')renderCollection();
   if(tab==='intercambios')renderTrades();
-  if(tab==='ajustes'){applyProfile();}
+  if(tab==='ajustes'){applyProfile();updateExpToggles();}
   if(tab==='estadisticas')renderStats();
 }
 
@@ -5545,6 +5594,133 @@ function makePfolderCard(folder){
   card.onclick=function(){openPfolderDetail(folder.id);};
   return card;
 }
+
+
+
+function updateExpToggles(){
+  var st = document.getElementById('soundToggle');
+  var ht = document.getElementById('hapticToggle');
+  if(st) st.classList.toggle('on', soundEnabled);
+  if(ht) ht.classList.toggle('on', hapticEnabled);
+  var ss = document.getElementById('soundSub');
+  var hs = document.getElementById('hapticSub');
+  if(ss) ss.textContent = soundEnabled ? 'Activados' : 'Desactivados';
+  if(hs) hs.textContent = hapticEnabled ? 'Activada' : 'Desactivada';
+}
+
+// ── HAPTIC + SOUND + TRANSITIONS ─────────────────────
+
+// Sound preferences (saved in localStorage)
+var soundEnabled = localStorage.getItem('soundEnabled') !== 'false'; // default ON
+var hapticEnabled = localStorage.getItem('hapticEnabled') !== 'false'; // default ON
+
+// ── HAPTIC FEEDBACK ──
+// Uses Vibration API (works on Android) + fallback that triggers iOS haptics through UI
+function haptic(intensity){
+  if(!hapticEnabled) return;
+  intensity = intensity || 'light';
+  try{
+    if(navigator.vibrate){
+      if(intensity === 'light') navigator.vibrate(8);
+      else if(intensity === 'medium') navigator.vibrate(15);
+      else if(intensity === 'heavy') navigator.vibrate([20,10,20]);
+      else if(intensity === 'success') navigator.vibrate([10,30,10]);
+    }
+  }catch(e){}
+}
+
+// ── SOUND SYSTEM ──
+// Uses Web Audio API — lightweight synthesized sounds, no files
+var audioCtx = null;
+function getAudio(){
+  if(!audioCtx){
+    try{audioCtx = new (window.AudioContext || window.webkitAudioContext)();}catch(e){return null;}
+  }
+  return audioCtx;
+}
+
+function playTone(freq, duration, type, vol){
+  if(!soundEnabled) return;
+  var ctx = getAudio();
+  if(!ctx) return;
+  try{
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol||0.08, ctx.currentTime + 0.005);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  }catch(e){}
+}
+
+function soundTap(){ playTone(440, 0.04, 'sine', 0.04); }
+function soundPop(){ playTone(660, 0.06, 'triangle', 0.06); }
+function soundSuccess(){
+  playTone(523, 0.08, 'sine', 0.07);
+  setTimeout(function(){ playTone(784, 0.12, 'sine', 0.07); }, 60);
+}
+function soundError(){ playTone(200, 0.15, 'sawtooth', 0.04); }
+function soundAchievement(){
+  playTone(523, 0.1, 'sine', 0.08);
+  setTimeout(function(){ playTone(659, 0.1, 'sine', 0.08); }, 80);
+  setTimeout(function(){ playTone(784, 0.15, 'sine', 0.08); }, 160);
+  setTimeout(function(){ playTone(1047, 0.25, 'sine', 0.08); }, 240);
+}
+
+// ── COMBINED FEEDBACK (haptic + sound) ──
+function fb(type){
+  if(type === 'tap'){ haptic('light'); soundTap(); }
+  else if(type === 'pop'){ haptic('light'); soundPop(); }
+  else if(type === 'success'){ haptic('success'); soundSuccess(); }
+  else if(type === 'error'){ haptic('heavy'); soundError(); }
+  else if(type === 'achievement'){ haptic('success'); soundAchievement(); }
+  else { haptic('light'); }
+}
+
+// ── TOGGLE SETTINGS ──
+function toggleSound(){
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('soundEnabled', soundEnabled);
+  if(soundEnabled) { soundPop(); }
+  showMiniToast(soundEnabled ? '🔊 Sonidos activados' : '🔇 Sonidos silenciados');
+}
+
+function toggleHaptic(){
+  hapticEnabled = !hapticEnabled;
+  localStorage.setItem('hapticEnabled', hapticEnabled);
+  if(hapticEnabled) haptic('medium');
+  showMiniToast(hapticEnabled ? '📳 Vibración activada' : '🚫 Vibración desactivada');
+}
+
+function showMiniToast(msg){
+  var el = document.getElementById('soundMini');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'soundMini';
+    el.className = 'sound-mini';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(window._miniToast);
+  window._miniToast = setTimeout(function(){ el.classList.remove('show'); }, 1800);
+}
+
+// ── GLOBAL BUTTON TAP LISTENER ──
+// Plays tap feedback on ALL button presses (single delegated listener)
+document.addEventListener('click', function(e){
+  var btn = e.target.closest('button');
+  if(!btn) return;
+  // Skip specific buttons we want to handle separately
+  if(btn.classList.contains('tab-btn')) return; // tabs have their own sound
+  if(btn.dataset.noFeedback === 'true') return;
+  fb('tap');
+}, true);
 
 if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(function(){});
 
