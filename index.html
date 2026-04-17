@@ -193,15 +193,10 @@ input[type="file"]{display:none;}
 .exp-toggle.on .exp-toggle-dot{left:18px;background:#fff;}
 
 /* ── TRANSICIONES DE PESTAÑAS ── */
-.page{animation:pageEnter 0.28s cubic-bezier(0.25,0.46,0.45,0.94);}
+.page.active{animation:pageEnter 0.28s cubic-bezier(0.25,0.46,0.45,0.94);}
 @keyframes pageEnter{
   from{opacity:0;transform:translateY(8px);}
   to{opacity:1;transform:translateY(0);}
-}
-.page.fade-out{animation:pageExit 0.15s ease-out forwards;}
-@keyframes pageExit{
-  from{opacity:1;transform:translateY(0);}
-  to{opacity:0;transform:translateY(-4px);}
 }
 
 /* ── MINI-TOAST (para sonido toggle) ── */
@@ -1698,10 +1693,6 @@ function switchTab(tab){
   document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
   var page = document.getElementById('page-'+tab);
   page.classList.add('active');
-  // Retrigger the entrance animation
-  page.style.animation = 'none';
-  page.offsetHeight; // force reflow
-  page.style.animation = '';
   document.getElementById('tab-'+tab).classList.add('active');
   if(typeof currentTab !== 'undefined') currentTab = tab;
   if(typeof updateFab === 'function') updateFab();
@@ -5697,6 +5688,7 @@ function toggleHaptic(){
   showMiniToast(hapticEnabled ? '📳 Vibración activada' : '🚫 Vibración desactivada');
 }
 
+var _miniToastTimer = null;
 function showMiniToast(msg){
   var el = document.getElementById('soundMini');
   if(!el){
@@ -5706,9 +5698,16 @@ function showMiniToast(msg){
     document.body.appendChild(el);
   }
   el.textContent = msg;
+  // Reset animation - remove then re-add
+  el.classList.remove('show');
+  // Force reflow to restart transition
+  void el.offsetWidth;
   el.classList.add('show');
-  clearTimeout(window._miniToast);
-  window._miniToast = setTimeout(function(){ el.classList.remove('show'); }, 1800);
+  if(_miniToastTimer) clearTimeout(_miniToastTimer);
+  _miniToastTimer = setTimeout(function(){ 
+    el.classList.remove('show'); 
+    _miniToastTimer = null;
+  }, 1800);
 }
 
 // ── GLOBAL BUTTON TAP LISTENER ──
